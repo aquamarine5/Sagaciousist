@@ -2,6 +2,8 @@
 import { marked } from 'marked';
 import { ref } from 'vue';
 
+const props=defineProps(["isloading"])
+
 var sentenceStatus = [
     'lyricful_before_read',
     'lyricful_reading',
@@ -16,7 +18,7 @@ var isTTSServiceWorking = false
 var lyricful_data = ref([])
 var pending_ttslist = []
 var pending_addSentenceList = []
-const ADD_SENTENCE_DURATION = 700
+const ADD_SENTENCE_DURATION = 500
 
 function builtinAddSentence() {
     lyricful_data.value.push(pending_addSentenceList[0])

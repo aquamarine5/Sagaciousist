@@ -5,22 +5,24 @@ import ModelColumn from './ModelColumn.vue';
 import { ref } from 'vue';
 import LyricfulResponse from './LyricfulResponse.vue';
 import { ContentLoader } from 'vue-content-loader';
+import debounce from 'lodash.debounce';
 
-var status=ref('idle')
+var status = ref('idle')
 
 </script>
 
 <template>
     <div class="main_container">
-        <ModelColumn ref="model"/>
+        <ModelColumn ref="model" />
         <div class="app_container">
             <div style="margin-bottom: 6px;">
                 输入文字：
             </div>
             <ElInput :rows="6" v-model="inputText" type="textarea" placeholder="输入文字..." />
             <div class="container_btn_send">
-                <ElButton v-wave class="btn_send" :type="status=='idle'?'primary':'danger'" @click="onsend">
-                    {{ status=='idle'?'发送':'停止' }}
+                <ElButton v-wave class="btn_send" :type="status == 'idle' ? 'primary' : 'danger'" 
+                    @click="debounce(onsend,200)">
+                    {{ status == 'idle' ? '发送' : '停止' }}
                 </ElButton>
             </div>
             <div class="result_tips">
@@ -32,12 +34,12 @@ var status=ref('idle')
                 </Transition>
             </div>
             <div class="result_container">
-                
-                <LyricfulResponse ref="lyricful" @renderFinish="renderFinish"/>
+
+                <LyricfulResponse ref="lyricful" :isloading="isloading" />
                 <ContentLoader viewBox="0 0 250 110" v-if="isloading">
                     <rect x="0" y="0" rx="3" ry="3" width="250" height="10" />
-                    <rect x="5" y="20" rx="3" ry="3" width="220" height="10" />
-                    <rect x="10" y="40" rx="3" ry="3" width="170" height="10" />
+                    <rect x="0" y="20" rx="3" ry="3" width="220" height="10" />
+                    <rect x="0" y="40" rx="3" ry="3" width="170" height="10" />
                 </ContentLoader>
             </div>
         </div>
@@ -51,7 +53,7 @@ const splitPatterns = ['，', '。', '：', '；', '！', '？',
 const showPendingTips = ref(false)
 var responseStatus = undefined
 var onmou = false
-var isloading=ref(false)
+var isloading = ref(false)
 
 const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
 export default {
@@ -63,17 +65,25 @@ export default {
     },
     data() {
         return {
-            renderFinish:()=>{
-                isloading=false
+            renderFinish: () => {
+                isloading = false
             },
             onsend: async () => {
-                if(status=='running'){
-                    this.$refs.lyricful.ttsStop()
-                    status=='idle'
+                if(inputText.value==''){
+                    ElNotification({
+                        type:'warning',
+                        title:"内容不能为空！",
+                        message:"内容不能为空！"
+                    })
                     return
                 }
-                isloading.value=true
-                status='running'
+                if (status == 'running') {
+                    this.$refs.lyricful.ttsStop()
+                    status == 'idle'
+                    return
+                }
+                isloading.value = true
+                status = 'running'
                 responseStatus = true
                 this.$refs.lyricful.clearAllLyrics()
                 speechSynthesis.cancel()
@@ -84,22 +94,22 @@ export default {
                 }, 1000)
                 const response = await ollama.generate({
                     model: 'llama3.1',
-                    prompt: "除非提前指明，否则请使用中文回答。请不要使用Markdown的列表、*号来进行分条列点输出，这是前提，你不用对上述要求进行回复，只需要回答这个句号之后的内容。"+inputText.value,
+                    prompt: "除非提前指明，否则请使用中文回答。请不要使用Markdown的列表、*号来进行分条列点输出，这是前提，你不用对上述要求进行回复，只需要回答这个句号之后的内容。" + inputText.value,
                     stream: true
                 })
                 var lastSentence = ''
                 for await (const part of response) {
                     for (let index = 0; index < part.response.length; index++) {
                         const char = part.response[index];
-                        lastSentence+=char
-                        if(status=='idle'){
-                            this.$refs.lyricful.addSentence(lastSentence,false)
+                        lastSentence += char
+                        if (status == 'idle') {
+                            this.$refs.lyricful.addSentence(lastSentence, false)
                             break
                         }
-                        if ((char == '.'||char==':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])){
+                        if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
                             continue
                         }
-                        if(char=='.' && lastSentence[lastSentence.length-2]==".")
+                        if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
                             continue
                         if (splitPatterns.indexOf(char) != -1) {
                             this.$refs.lyricful.addSentence(lastSentence)
@@ -107,11 +117,12 @@ export default {
                         }
                     }
                 }
+                isloading.value = false
                 setTimeout(function () {
                     responseStatus = false
                     showPendingTips.value = false
                 }, 100)
-                status='idle'
+                status = 'idle'
             },
             lyricfulResponse: undefined
         }
@@ -123,12 +134,13 @@ export default {
 </script>
 
 <style>
-.app_container{
+.app_container {
     width: 100%;
     display: flex;
     flex-direction: column;
 }
-.main_container{
+
+.main_container {
     display: flex;
     width: 100%;
 }
@@ -157,16 +169,17 @@ code {
 .container_btn_send {
     display: grid;
 }
-.result_tips{
+
+.result_tips {
     align-items: center;
     display: flex;
-    color:gray;
+    color: gray;
     font-weight: 400;
     font-size: small;
 }
+
 .btn_send {
     margin-top: 6px;
     justify-self: end;
 }
-
 </style>

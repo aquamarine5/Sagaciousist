@@ -6,7 +6,6 @@ import VWave from 'v-wave'
 
 const app = createApp(App)
 
-
 app.use(ElementPlus)
 app.use(VWave)
 app.mount('#app')
