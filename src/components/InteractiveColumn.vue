@@ -1,6 +1,6 @@
 <script setup>
 import { ElButton, ElInput, ElNotification } from 'element-plus';
-import { Ollama } from 'ollama';
+import { Ollama } from 'ollama/src/browser';
 import ModelColumn from './ModelColumn.vue';
 import { ref } from 'vue';
 import LyricfulResponse from './LyricfulResponse.vue';
