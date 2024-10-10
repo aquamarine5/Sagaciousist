@@ -1,9 +1,28 @@
 <script setup>
+import cryptoJs from 'crypto-js';
 import { marked } from 'marked';
+import PCMPlayer from 'pcm-player';
 import { ref } from 'vue';
 
-const props=defineProps(["isloading"])
 
+const xfyunConfig = {
+    hostUrl: "wss://tts-api.xfyun.cn/v2/tts",
+    host: "tts-api.xfyun.cn",
+    appid: "994de8da",
+    apiSecret: "Y2UwNTc2MjJlMDVjYmZmNGFkYWQwNWU1",
+    apiKey: "20b03e7490607b93caaa96eb56650e92",
+    uri: "/v2/tts",
+}
+
+const pcmPlayer = new PCMPlayer({
+    sampleRate: 16000,
+    inputCodec: "Int16",
+    onended: (node, event) => {
+
+    }
+})
+
+const props = defineProps(["isloading"])
 var sentenceStatus = [
     'lyricful_before_read',
     'lyricful_reading',
@@ -19,6 +38,76 @@ var lyricful_data = ref([])
 var pending_ttslist = []
 var pending_addSentenceList = []
 const ADD_SENTENCE_DURATION = 500
+
+function _ttsDecode(audio, speechData) {
+    pcmPlayer.feed(new Uint8Array(audio))
+    pcmPlayer.continue().then(() => {
+        pending_ttslist.shift()
+        speechData.status.value=2
+        if(pending_ttslist.length==0){
+            isTTSServiceWorking=false
+        }
+    })
+}
+
+function _ttsSend(speechData) { 
+    function getAuthStr(date) {
+        let signatureOrigin = `host: ${xfyunConfig.host}\ndate: ${date}\nGET ${xfyunConfig.uri} HTTP/1.1`
+        let signatureSha = cryptoJs.HmacSHA256(signatureOrigin, xfyunConfig.apiSecret)
+        let signature = cryptoJs.enc.Base64.stringify(signatureSha)
+        let authorizationOrigin = `api_key="${xfyunConfig.apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`
+        let authStr = cryptoJs.enc.Base64.stringify(cryptoJs.enc.Utf8.parse(authorizationOrigin))
+        return authStr
+    }
+    let date = (new Date().toUTCString())
+    const wssUrl = xfyunConfig.hostUrl + "?authorization=" + getAuthStr(date) + "&date=" + date + "&host=" + xfyunConfig.host
+    let ws = new WebSocket(wssUrl)
+
+    ws.on("open", () => {
+        console.log("websocket connect!")
+    })
+
+    ws.on('close', () => {
+        console.warn('connect close!')
+    })
+
+    ws.on('error', (err) => {
+        console.error("websocket connect err: " + err)
+    })
+
+    ws.on('message', (data, err) => {
+        console.log("websocket message.")
+        if (err) {
+            console.error(err)
+            return
+        }
+        let res = JSON.parse(data)
+        if (res.code != 0) {
+            console.error(res.code.toString() + " " + res.message)
+            ws.close()
+            return
+        }
+        if (res.code == 0 && res.data.status == 2) {
+            ws.close()
+        }
+        _ttsDecode(data.audio,speechData)
+    })
+    ws.send(JSON.stringify({
+        "common": {
+            "app_id": xfyunConfig.appid
+        },
+        "business": {
+            "aue": "raw",
+            "auf": "audio/L16;rate=16000",
+            "vcn": "xiaoyan",
+            "tte": "UTF8"
+        },
+        "data": {
+            "text": Buffer.from(speechData.content).toString('base64'),
+            "status": 2
+        }
+    }))
+}
 
 function builtinAddSentence() {
     lyricful_data.value.push(pending_addSentenceList[0])
@@ -47,13 +136,13 @@ function addSentence(text, tts = true) {
     if (ct - lastTimeout <= ADD_SENTENCE_DURATION) {
         pending_addSentenceList.push(lyricSentence)
         console.log(1)
-        if(pending_addSentenceList.length<=1)
+        if (pending_addSentenceList.length <= 1)
             setTimeout(builtinAddSentence, ct - lastTimeout)
     } else {
         if (pending_addSentenceList.length != 0) {
             pending_addSentenceList.push(lyricSentence)
             console.log(2)
-            if(pending_addSentenceList.length<=1)
+            if (pending_addSentenceList.length <= 1)
                 setTimeout(builtinAddSentence, ADD_SENTENCE_DURATION)
         } else {
             lyricful_data.value.push(lyricSentence)
@@ -88,6 +177,10 @@ function ttsSpeak(speechData) {
     }
     speechUtterance.rate = 1.5
     speechSynthesis.speak(speechUtterance)
+}
+function _ttsSpeak(speechData) {
+    speechData.status.value = 1
+    _ttsSend(speechData.content)
 }
 function ttsStop() {
     speechSynthesis.cancel()
