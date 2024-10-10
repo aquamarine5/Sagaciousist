@@ -1,5 +1,5 @@
 <script setup>
-import { ElButton, ElInput, ElNotification } from 'element-plus';
+import { ElButton, ElIcon, ElInput, ElNotification } from 'element-plus';
 import { Ollama } from 'ollama/src/browser';
 import ModelColumn from './ModelColumn.vue';
 import { ref } from 'vue';
@@ -8,8 +8,6 @@ import { ContentLoader } from 'vue-content-loader';
 import { CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue';
 
 
-var status = ref('idle')
-var isReady = ref(false)
 </script>
 
 <template>
@@ -17,12 +15,12 @@ var isReady = ref(false)
         <ModelColumn ref="model" />
         <div class="app_container">
             <div class="result_container">
-                <LyricfulResponse ref="lyricful" :isloading="isloading" />
                 <ContentLoader viewBox="0 0 250 60" v-if="isloading">
                     <rect x="0" y="0" rx="3" ry="3" width="170" height="10" />
                     <rect x="0" y="20" rx="3" ry="3" width="220" height="10" />
                     <rect x="0" y="40" rx="3" ry="3" width="250" height="10" />
                 </ContentLoader>
+                <LyricfulResponse ref="lyricful" :isloading="isloading" />
             </div>
             <div class="result_tips" v-if="isReady">
                 <Transition name="fade">
@@ -33,20 +31,24 @@ var isReady = ref(false)
             </div>
             <div class="input_container">
                 <ElInput :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputText" type="textarea"
-                    placeholder="输入文字..." />
+                    placeholder="输入文字..." class="input_el" ref="elInput" />
                 <div class="container_btn_send">
-                    <ElButton v-wave class="btn_send" :type="status == 'idle' ? 'primary' : 'danger'" @click="onsend"
-                        circle :icon="status == 'idle' ? CircleCheckFilled : CircleCloseFilled">
+                    <ElButton v-wave class="btn_send" :type="isRunning ? 'danger' : 'primary'" @click="onsend" circle>
+                        <ElIcon>
+                            <CircleCloseFilled v-if="isRunning" />
+                            <CircleCheckFilled v-else />
+                        </ElIcon>
                     </ElButton>
                 </div>
             </div>
-
-
         </div>
     </div>
 </template>
 
 <script>
+
+const isRunning = ref(false)
+const isReady = ref(false)
 const inputText = ref('')
 const splitPatterns = ['，', '。', '：', '；', '！', '？',
     ',', '.', ':', ';', '!', '?']
@@ -66,7 +68,6 @@ export default {
             model: 'llama3.1',
             prompt: "除非提前指明，否则请使用中文回答。请不要使用Markdown的列表、*号来进行分条列点输出，这是前提，你不用对上述要求进行回复，只需要回答这个句号之后的内容。你好！",
         }).then(response => {
-            console.log(1)
             let lastSentence = ''
             for (let index = 0; index < response.response.length; index++) {
                 const element = response.response[index];
@@ -84,13 +85,7 @@ export default {
             renderFinish: () => {
                 isloading = false
             },
-            onsendAfterInterpret: async () => {
-                this.$refs.lyricful.ttsStop()
-                status = 'idle'
-                await onsend()
-            },
             onsend: async () => {
-                console.log("clicked")
                 if (inputText.value == '') {
                     ElNotification({
                         type: 'warning',
@@ -99,13 +94,13 @@ export default {
                     })
                     return
                 }
-                if (status == 'running') {
+                if (isRunning.value) {
                     this.$refs.lyricful.ttsStop()
-                    status == 'idle'
+                    isRunning.value = false
                     return
                 }
                 isloading.value = true
-                status = 'running'
+                isRunning.value = true
                 responseStatus = true
                 this.$refs.lyricful.clearAllLyrics()
                 speechSynthesis.cancel()
@@ -124,7 +119,7 @@ export default {
                     for (let index = 0; index < part.response.length; index++) {
                         const char = part.response[index];
                         lastSentence += char
-                        if (status == 'idle') {
+                        if (!isRunning.value) {
                             this.$refs.lyricful.addSentence(lastSentence, false)
                             break
                         }
@@ -138,13 +133,16 @@ export default {
                             lastSentence = ''
                         }
                     }
+                    if (!isRunning.value) {
+                        break
+                    }
                 }
                 isloading.value = false
                 setTimeout(function () {
                     responseStatus = false
                     showPendingTips.value = false
                 }, 100)
-                status = 'idle'
+                isRunning.value = false
             },
             lyricfulResponse: undefined
         }
@@ -154,7 +152,48 @@ export default {
     }
 }
 </script>
+<style scoped>
+@keyframes textarea_focusIn {
+    0% {
+        background-position: 0% 50%;
+    }
 
+    100% {
+        background-position: 90% 50%;
+    }
+}
+
+@keyframes textarea_focusOut {
+    0% {
+        background-position: 90% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+:deep(.el-textarea__inner) {
+    animation-fill-mode: forwards;
+    animation: textarea_focusOut .5s cubic-bezier(0.85, 0.01, 0.58, 1);
+    border: 4px solid transparent;
+    border-radius: 16px;
+    background-clip: padding-box, border-box;
+    background-origin: padding-box, border-box;
+    background-size: 200%;
+    background-position: 0% 50%;
+    background-image: linear-gradient(to right, #fff, #fff), linear-gradient(to right, #c3cfe2 0%, #e0e1e2 40%, #e0c3fc 50%, #8ec5fc 100%);
+}
+
+:deep(.is-focus) {
+    animation: textarea_focusIn .5s cubic-bezier(0.85, 0.01, 0.58, 1);
+    animation-fill-mode: forwards;
+}
+
+:deep(.input_el_focusOut) {
+    animation-fill-mode: forwards;
+    animation: textarea_focusOut .5s ease-in-out;
+}
+</style>
 <style>
 .input_container {
     display: flex;
@@ -209,5 +248,6 @@ code {
 .btn_send {
     margin-left: 12px;
     justify-self: end;
+    transition: background-color .2s ease-in-out;
 }
 </style>
