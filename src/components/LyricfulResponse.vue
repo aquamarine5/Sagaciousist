@@ -14,14 +14,6 @@ const xfyunConfig = {
     uri: "/v2/tts",
 }
 
-const pcmPlayer = new PCMPlayer({
-    sampleRate: 16000,
-    inputCodec: "Int16",
-    onended: (node, event) => {
-
-    }
-})
-
 const props = defineProps(["isloading"])
 var sentenceStatus = [
     'lyricful_before_read',
@@ -40,17 +32,32 @@ var pending_addSentenceList = []
 const ADD_SENTENCE_DURATION = 500
 
 function _ttsDecode(audio, speechData) {
-    pcmPlayer.feed(new Uint8Array(audio))
+
+    const pcmPlayer = new PCMPlayer({
+        channels: 1,
+        flushTime: 1000,
+        sampleRate: 16000,
+        inputCodec: "Int16",
+        onended: (node, event) => {
+            console.log(2)
+        },
+    })
+    pcmPlayer.feed(new Uint8Array(audio).buffer)
     pcmPlayer.continue().then(() => {
+        console.log(3)
         pending_ttslist.shift()
-        speechData.status.value=2
-        if(pending_ttslist.length==0){
-            isTTSServiceWorking=false
+        console.log(speechData)
+        speechData.status.value = 2
+        if (pending_ttslist.length == 0) {
+            isTTSServiceWorking = false
+        }
+        else {
+            ttsSpeak(pending_ttslist[0])
         }
     })
 }
 
-function _ttsSend(speechData) { 
+function _ttsSend(speechData) {
     function getAuthStr(date) {
         let signatureOrigin = `host: ${xfyunConfig.host}\ndate: ${date}\nGET ${xfyunConfig.uri} HTTP/1.1`
         let signatureSha = cryptoJs.HmacSHA256(signatureOrigin, xfyunConfig.apiSecret)
@@ -62,26 +69,42 @@ function _ttsSend(speechData) {
     let date = (new Date().toUTCString())
     const wssUrl = xfyunConfig.hostUrl + "?authorization=" + getAuthStr(date) + "&date=" + date + "&host=" + xfyunConfig.host
     let ws = new WebSocket(wssUrl)
-
-    ws.on("open", () => {
+    console.log(ws)
+    ws.onopen = () => {
         console.log("websocket connect!")
-    })
+        ws.send(JSON.stringify({
+            "common": {
+                "app_id": xfyunConfig.appid
+            },
+            "business": {
+                "aue": "raw",
+                "auf": "audio/L16;rate=16000",
+                "vcn": "xiaoyan",
+                "tte": "UTF8"
+            },
+            "data": {
+                "text": cryptoJs.enc.Base64.stringify(cryptoJs.enc.Utf8.parse(speechData.content)),
+                "status": 2
+            }
+        }))
+    }
 
-    ws.on('close', () => {
+    ws.onclose = () => {
         console.warn('connect close!')
-    })
+    }
 
-    ws.on('error', (err) => {
+    ws.onerror = (err) => {
         console.error("websocket connect err: " + err)
-    })
+    }
 
-    ws.on('message', (data, err) => {
+    ws.onmessage = (data, err) => {
         console.log("websocket message.")
         if (err) {
             console.error(err)
             return
         }
-        let res = JSON.parse(data)
+        let res = JSON.parse(data.data)
+        if (res.data.status == 1) return
         if (res.code != 0) {
             console.error(res.code.toString() + " " + res.message)
             ws.close()
@@ -90,23 +113,9 @@ function _ttsSend(speechData) {
         if (res.code == 0 && res.data.status == 2) {
             ws.close()
         }
-        _ttsDecode(data.audio,speechData)
-    })
-    ws.send(JSON.stringify({
-        "common": {
-            "app_id": xfyunConfig.appid
-        },
-        "business": {
-            "aue": "raw",
-            "auf": "audio/L16;rate=16000",
-            "vcn": "xiaoyan",
-            "tte": "UTF8"
-        },
-        "data": {
-            "text": Buffer.from(speechData.content).toString('base64'),
-            "status": 2
-        }
-    }))
+        _ttsDecode(data.audio, speechData)
+    }
+
 }
 
 function builtinAddSentence() {
@@ -161,7 +170,7 @@ function ttsStart() {
     isTTSServiceWorking = true
     ttsSpeak(pending_ttslist[0])
 }
-function ttsSpeak(speechData) {
+function _ttsSpeak(speechData) {
     let speechUtterance = new SpeechSynthesisUtterance(speechData.content)
     speechData.status.value = 1
     speechUtterance.onend = event => {
@@ -178,9 +187,9 @@ function ttsSpeak(speechData) {
     speechUtterance.rate = 1.5
     speechSynthesis.speak(speechUtterance)
 }
-function _ttsSpeak(speechData) {
+function ttsSpeak(speechData) {
     speechData.status.value = 1
-    _ttsSend(speechData.content)
+    _ttsSend(speechData)
 }
 function ttsStop() {
     speechSynthesis.cancel()
