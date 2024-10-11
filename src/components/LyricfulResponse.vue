@@ -32,7 +32,77 @@ var pending_addSentenceList = []
 const ADD_SENTENCE_DURATION = 500
 
 function _ttsDecode(audio, speechData) {
+    function encodeWAV(pcmData, sampleRate = 8000, numChannels = 1) {
+        const buffer = new ArrayBuffer(44 + pcmData.length * 2); // WAV 头 + PCM 数据
+        const view = new DataView(buffer);
 
+        // 写入 WAV 文件头
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        // RIFF chunk descriptor
+        writeString(view, 0, 'RIFF');
+        view.setUint32(4, 36 + pcmData.length * 2, true); // 文件大小 - 8 字节
+        writeString(view, 8, 'WAVE');
+
+        // FMT sub-chunk
+        writeString(view, 12, 'fmt ');
+        view.setUint32(16, 16, true); // Subchunk1Size（16 for PCM）
+        view.setUint16(20, 1, true);  // AudioFormat（1 for PCM）
+        view.setUint16(22, numChannels, true); // 通道数
+        view.setUint32(24, sampleRate, true);  // 采样率
+        view.setUint32(28, sampleRate * numChannels * 2, true); // ByteRate
+        view.setUint16(32, numChannels * 2, true); // BlockAlign
+        view.setUint16(34, 16, true); // 每个样本的位数（16 bits）
+
+        // data sub-chunk
+        writeString(view, 36, 'data');
+        view.setUint32(40, pcmData.length * 2, true); // PCM 数据大小
+
+        // 写入 PCM 数据
+        let offset = 44;
+        for (let i = 0; i < pcmData.length; i++) {
+            view.setInt16(offset, pcmData[i] * 0x7FFF, true); // PCM 范围: [-1, 1]
+            offset += 2;
+        }
+
+        return buffer;
+    }
+    const audioCtx = new window.AudioContext()
+    const binaryStr = atob(audio)
+    let bytes = new Uint8Array(binaryStr.length)
+    for (let index = 0; index < binaryStr.length; index++) {
+        bytes[index] = binaryStr.charCodeAt(index);
+    }
+    let audioBuffer=audioCtx.createBuffer(1,binaryStr.length,16000)
+
+    audioCtx.decodeAudioData(encodeWAV(new Int16Array(bytes.buffer)), (buffer) => {
+        let source = audioCtx.createBufferSource()
+        source.buffer = buffer
+        source.connect(audioCtx.destination)
+        source.onended = () => {
+            console.log("play end")
+            pending_ttslist.shift()
+            console.log(speechData)
+            speechData.status.value = 2
+            if (pending_ttslist.length == 0) {
+                isTTSServiceWorking = false
+            }
+            else {
+                ttsSpeak(pending_ttslist[0])
+            }
+        }
+        source.start(0)
+    })
+}
+
+/**
+ * @deprecated
+ */
+function __ttsDecode(audio, speechData) {
     const pcmPlayer = new PCMPlayer({
         channels: 1,
         flushTime: 1000,
@@ -57,6 +127,7 @@ function _ttsDecode(audio, speechData) {
     })
 }
 
+
 function _ttsSend(speechData) {
     function getAuthStr(date) {
         let signatureOrigin = `host: ${xfyunConfig.host}\ndate: ${date}\nGET ${xfyunConfig.uri} HTTP/1.1`
@@ -78,7 +149,7 @@ function _ttsSend(speechData) {
             },
             "business": {
                 "aue": "raw",
-                "auf": "audio/L16;rate=16000",
+                "auf": "audio/L16;rate=8000",
                 "vcn": "xiaoyan",
                 "tte": "UTF8"
             },
@@ -104,7 +175,8 @@ function _ttsSend(speechData) {
             return
         }
         let res = JSON.parse(data.data)
-        if (res.data.status == 1) return
+        console.log(res)
+        //if (res.data.status == 1) return
         if (res.code != 0) {
             console.error(res.code.toString() + " " + res.message)
             ws.close()
@@ -113,7 +185,7 @@ function _ttsSend(speechData) {
         if (res.code == 0 && res.data.status == 2) {
             ws.close()
         }
-        _ttsDecode(data.audio, speechData)
+        _ttsDecode(res.data.audio, speechData)
     }
 
 }
