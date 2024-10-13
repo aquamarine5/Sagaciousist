@@ -31,7 +31,7 @@ import { CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue';
             </div>
             <div class="input_container">
                 <ElInput :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputText" type="textarea"
-                    placeholder="输入文字..." class="input_el" ref="elInput" />
+                    placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
                 <div class="container_btn_send">
                     <ElButton v-wave class="btn_send" :type="isRunning ? 'danger' : 'primary'" @click="onsend" circle>
                         <ElIcon>
@@ -50,8 +50,8 @@ import { CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue';
 const isRunning = ref(false)
 const isReady = ref(false)
 const inputText = ref('')
-const splitPatterns = ['，', '。', '：', '；', '！', '？',
-    ',', '.', ':', ';', '!', '?']
+const splitPatterns = ['。']//['，', '。', '：', '；', '！', '？',
+    //',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
 var responseStatus = undefined
 var onmou = false
