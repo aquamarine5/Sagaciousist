@@ -30,8 +30,44 @@ var lyricful_data = ref([])
 var pending_ttslist = []
 var pending_addSentenceList = []
 const ADD_SENTENCE_DURATION = 500
-
 function _ttsDecode(audio, speechData) {
+    // 将 Base64 字符串解码为 ArrayBuffer
+    function base64ToArrayBuffer(base64) {
+        const binaryString = window.atob(base64); // 解码 Base64 字符串
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer; // 返回 ArrayBuffer
+    }
+
+    // 播放 PCM 音频
+    function playPcm(base64PcmData, sampleRate = 44100) {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const pcmArrayBuffer = base64ToArrayBuffer(base64PcmData);
+
+        // 假设 PCM 数据为 16 位有符号整数（Int16），需要转换为 Web Audio 使用的浮点格式
+        const pcmData = new Int16Array(pcmArrayBuffer); // 从 ArrayBuffer 中读取 PCM 数据
+        const audioBuffer = audioContext.createBuffer(1, pcmData.length, sampleRate); // 创建 AudioBuffer
+        const channelData = audioBuffer.getChannelData(0);
+
+        // 将 16 位 PCM 数据归一化到 [-1, 1] 范围
+        for (let i = 0; i < pcmData.length; i++) {
+            channelData[i] = pcmData[i] / 32768; // 16位整数最大值为 32768
+        }
+
+        // 创建 AudioBufferSourceNode 并播放
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContext.destination);
+        source.start();
+    }
+    playPcm(audio,16000)
+}
+
+
+function ___ttsDecode(audio, speechData) {
     function encodeWAV(pcmData, sampleRate = 8000, numChannels = 1) {
         const buffer = new ArrayBuffer(44 + pcmData.length * 2); // WAV 头 + PCM 数据
         const view = new DataView(buffer);
@@ -77,7 +113,7 @@ function _ttsDecode(audio, speechData) {
     for (let index = 0; index < binaryStr.length; index++) {
         bytes[index] = binaryStr.charCodeAt(index);
     }
-    let audioBuffer=audioCtx.createBuffer(1,binaryStr.length,16000)
+    let audioBuffer = audioCtx.createBuffer(1, binaryStr.length, 16000)
 
     audioCtx.decodeAudioData(encodeWAV(new Int16Array(bytes.buffer)), (buffer) => {
         let source = audioCtx.createBufferSource()
@@ -149,7 +185,7 @@ function _ttsSend(speechData) {
             },
             "business": {
                 "aue": "raw",
-                "auf": "audio/L16;rate=8000",
+                "auf": "audio/L16;rate=16000",
                 "vcn": "xiaoyan",
                 "tte": "UTF8"
             },
