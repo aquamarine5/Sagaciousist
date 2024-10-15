@@ -1,12 +1,41 @@
 import cryptoJs from 'crypto-js';
 
 const audioContext = new (window.AudioContext)();
-var pending_ttslist=[]
+var pending_ttslist = []
 
-export default {
-    lyricCurrectIndex:0,
-    isTTSEnabled:true,
-    ttsDecode: (audio, speechData) => {
+export default class SpeechController {
+    constructor(refsentence) {
+        this.refsentence = refsentence
+        this.lyricCurrectIndex = 0
+        this.isTTSEnabled = true
+        this.isTTSReading = false
+    }
+    ttsNext() {
+        if (pending_ttslist[0].pending_audiodata[0].status == 2) {
+            pending_ttslist[0].speechData.status.value = 2
+            pending_ttslist.shift()
+            if (pending_ttslist.length > 0 && pending_ttslist[0].pending_audiodata.length > 0) {
+                pending_ttslist[0].speechData.status.value = 1
+                this.isTTSReading = true
+                this.ttsDecode(pending_ttslist[0].pending_audiodata[0].audio)
+            } else {
+                this.isTTSReading = false
+            }
+        } else {
+            pending_ttslist[0].pending_audiodata.shift()
+            if (pending_ttslist[0].pending_audiodata.length > 0) {
+                this.isTTSReading = true
+                this.ttsDecode(pending_ttslist[0].pending_audiodata[0].audio)
+            } else {
+                this.isTTSReading = false
+            }
+        }
+    }
+    ttsRead() {
+        if (isTTSReading) return;
+        this.ttsNext()
+    }
+    ttsDecode(audio) {
         function base64ToArrayBuffer(base64) {
             const binaryString = window.atob(base64);
             const len = binaryString.length;
@@ -16,8 +45,7 @@ export default {
             }
             return bytes.buffer;
         }
-        function playPcm(base64PcmData, sampleRate = 44100) {
-
+        function playPcm(base64PcmData, sampleRate = 44100,endedcallback) {
             const pcmArrayBuffer = base64ToArrayBuffer(base64PcmData);
             const pcmData = new Int16Array(pcmArrayBuffer);
             const audioBuffer = audioContext.createBuffer(1, pcmData.length, sampleRate); // 创建 AudioBuffer
@@ -28,22 +56,13 @@ export default {
             }
             const source = audioContext.createBufferSource();
             source.buffer = audioBuffer;
-            source.onended = () => {
-                pending_ttslist.shift()
-                speechData.status.value = 2
-                if (pending_ttslist.length == 0) {
-                    isTTSServiceWorking = false
-                }
-                else {
-                    ttsSpeak(pending_ttslist[0])
-                }
-            }
+            source.onended = endedcallback
             source.connect(audioContext.destination);
             source.start();
         }
-        playPcm(audio, 16000)
-    },
-    ttsSend: (speechData) => {
+        playPcm(audio, 16000, this.ttsNext)
+    }
+    ttsSend(speechData) {
         function getAuthStr(date) {
             let signatureOrigin = `host: ${xfyunConfig.host}\ndate: ${date}\nGET ${xfyunConfig.uri} HTTP/1.1`
             let signatureSha = cryptoJs.HmacSHA256(signatureOrigin, xfyunConfig.apiSecret)
@@ -82,7 +101,8 @@ export default {
         ws.onerror = (err) => {
             console.error("websocket connect err: " + err)
         }
-        let ced=-1
+        let previousCed = 0
+        let ced = -1
         ws.onmessage = (data, err) => {
             console.log("websocket message.")
             if (err) {
@@ -91,87 +111,66 @@ export default {
             }
             let res = JSON.parse(data.data)
             console.log(res)
-            
+
             if (res.code != 0) {
                 console.error(res.code.toString() + " " + res.message)
                 ws.close()
                 return
             }
             if (res.data.status == 1) {
-                if(res.data.ced!=ced){
-                    ced=res.data.ced
+                if (res.data.ced != ced) {
+                    let rs=this.refsentence.value
+                    let text=speechData.content.substring(previousCed / 3, ced / 3)
+                    if(ced==-1){
+                        rs[res.data.ced]=[{
+                            status:1,
+                            text:text
+                        }]
+                    }else{
+                        rs[res.data.ced].push({
+                            status:1,
+                            text:text
+                        })
+                    }
+                    ced = res.data.ced
+                    pending_ttslist.push({
+                        "ced": ced,
+                        "content": text,
+                        pending_audiodata: [{
+                            "audio": res.data.audio,
+                            "status": 1
+                        }]
+                    })
+                    previousCed = ced
+                    
+                    ttsRead()
+                } else {
+                    pending_ttslist[ced].pending_audiodata.push({
+                        "audio": res.data.audio,
+                        "status": 1
+                    })
+                    ttsRead()
                 }
             }
             if (res.code == 0 && res.data.status == 2) {
+                pending_ttslist[ced].pending_audiodata.push({
+                    "audio": res.data.audio,
+                    "status": 2
+                })
+                ttsRead()
                 ws.close()
             }
-            ttsDecode(res.data.audio, speechData)
         }
 
-    },
-
-    builtinAddSentence: () => {
-        lyricful_data.value.push(pending_addSentenceList[0])
-        pending_ttslist.push(pending_addSentenceList[0])
-        if (pending_addSentenceList[0].istts) {
-            if (!isTTSServiceWorking) {
-                ttsStart()
-            }
-        }
-        lastTimeout = new Date().getTime()
-        pending_addSentenceList.shift()
-        if (pending_addSentenceList.length > 0)
-            setTimeout(builtinAddSentence, ADD_SENTENCE_DURATION)
-    },
-    addSentence:(text,tts=true)=>{
+    }
+    addSentence(text) {
         console.log(text)
         this.ttsSend({
             content: text,
             index: lyricCurrectIndex,
             status: ref(isTTSEnabled ? 0 : 2),
-            istts: tts
+            istts: this.isTTSEnabled
         })
-    },
-    _addSentence: (text, tts = true) => {
-        console.log(text)
-        let lyricSentence = {
-            content: text,
-            index: lyricCurrectIndex,
-            status: ref(isTTSEnabled ? 0 : 2),
-            istts: tts
-        }
         lyricCurrectIndex += 1
-        var ct = new Date().getTime()
-        if (ct - lastTimeout <= ADD_SENTENCE_DURATION) {
-            pending_addSentenceList.push(lyricSentence)
-            console.log(1)
-            if (pending_addSentenceList.length <= 1)
-                setTimeout(builtinAddSentence, ct - lastTimeout)
-        } else {
-            if (pending_addSentenceList.length != 0) {
-                pending_addSentenceList.push(lyricSentence)
-                console.log(2)
-                if (pending_addSentenceList.length <= 1)
-                    setTimeout(builtinAddSentence, ADD_SENTENCE_DURATION)
-            } else {
-                lyricful_data.value.push(lyricSentence)
-                pending_ttslist.push(lyricSentence)
-                if (tts) {
-                    if (!isTTSServiceWorking) {
-                        ttsStart()
-                    }
-                }
-                lastTimeout = new Date().getTime()
-            }
-        }
-        return lyricCurrectIndex - 1
-    },
-    ttsStart: () => {
-        isTTSServiceWorking = true
-        ttsSpeak(pending_ttslist[0])
-    },
-    ttsSpeak: (speechData) => {
-        speechData.status.value = 1
-        ttsSend(speechData)
     }
 }
