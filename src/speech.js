@@ -1,5 +1,14 @@
 import cryptoJs from 'crypto-js';
+import { ref } from 'vue';
 
+const xfyunConfig = {
+    hostUrl: "wss://tts-api.xfyun.cn/v2/tts",
+    host: "tts-api.xfyun.cn",
+    appid: "994de8da",
+    apiSecret: "Y2UwNTc2MjJlMDVjYmZmNGFkYWQwNWU1",
+    apiKey: "20b03e7490607b93caaa96eb56650e92",
+    uri: "/v2/tts",
+}
 const audioContext = new (window.AudioContext)();
 var pending_ttslist = []
 
@@ -11,11 +20,13 @@ export default class SpeechController {
         this.isTTSReading = false
     }
     ttsNext() {
+        console.log(pending_ttslist)
         if (pending_ttslist[0].pending_audiodata[0].status == 2) {
-            pending_ttslist[0].speechData.status.value = 2
+            this.refsentence.value[pending_ttslist[0].ced].status.value=2
             pending_ttslist.shift()
             if (pending_ttslist.length > 0 && pending_ttslist[0].pending_audiodata.length > 0) {
-                pending_ttslist[0].speechData.status.value = 1
+            
+                this.refsentence.value[pending_ttslist[0].ced].status.value=1
                 this.isTTSReading = true
                 this.ttsDecode(pending_ttslist[0].pending_audiodata[0].audio)
             } else {
@@ -32,8 +43,11 @@ export default class SpeechController {
         }
     }
     ttsRead() {
-        if (isTTSReading) return;
-        this.ttsNext()
+        if (this.isTTSReading) return;
+        this.isTTSReading=true;
+        if(pending_ttslist.length>0 && pending_ttslist[0].pending_audiodata.length>0){
+            this.ttsDecode(pending_ttslist[0].pending_audiodata[0].audio)
+        }
     }
     ttsDecode(audio) {
         function base64ToArrayBuffer(base64) {
@@ -45,7 +59,7 @@ export default class SpeechController {
             }
             return bytes.buffer;
         }
-        function playPcm(base64PcmData, sampleRate = 44100,endedcallback) {
+        function playPcm(base64PcmData, sampleRate = 44100, endedcallback) {
             const pcmArrayBuffer = base64ToArrayBuffer(base64PcmData);
             const pcmData = new Int16Array(pcmArrayBuffer);
             const audioBuffer = audioContext.createBuffer(1, pcmData.length, sampleRate); // 创建 AudioBuffer
@@ -119,17 +133,18 @@ export default class SpeechController {
             }
             if (res.data.status == 1) {
                 if (res.data.ced != ced) {
-                    let rs=this.refsentence.value
-                    let text=speechData.content.substring(previousCed / 3, ced / 3)
-                    if(ced==-1){
-                        rs[res.data.ced]=[{
-                            status:1,
-                            text:text
+                    let rs = this.refsentence.value
+                    console.log(speechData)
+                    let text = speechData.content.substring(previousCed / 3, res.data.ced / 3)
+                    if (ced == -1) {
+                        rs[res.data.ced] = [{
+                            status: ref(1),
+                            text: text
                         }]
-                    }else{
+                    } else {
                         rs[res.data.ced].push({
-                            status:1,
-                            text:text
+                            status: ref(1),
+                            text: text
                         })
                     }
                     ced = res.data.ced
@@ -141,15 +156,16 @@ export default class SpeechController {
                             "status": 1
                         }]
                     })
-                    previousCed = ced
                     
-                    ttsRead()
+                    previousCed = ced
+
+                    this.ttsRead()
                 } else {
                     pending_ttslist[ced].pending_audiodata.push({
                         "audio": res.data.audio,
                         "status": 1
                     })
-                    ttsRead()
+                    this.ttsRead()
                 }
             }
             if (res.code == 0 && res.data.status == 2) {
@@ -157,9 +173,10 @@ export default class SpeechController {
                     "audio": res.data.audio,
                     "status": 2
                 })
-                ttsRead()
+                this.ttsRead()
                 ws.close()
             }
+            console.log(this.refsentence.value)
         }
 
     }
@@ -167,10 +184,8 @@ export default class SpeechController {
         console.log(text)
         this.ttsSend({
             content: text,
-            index: lyricCurrectIndex,
-            status: ref(isTTSEnabled ? 0 : 2),
+            status: ref(this.isTTSEnabled ? 0 : 2),
             istts: this.isTTSEnabled
         })
-        lyricCurrectIndex += 1
     }
 }

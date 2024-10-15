@@ -14,7 +14,12 @@ var lyricful_data = ref({})
 const speech=new SpeechController(lyricful_data)
 
 function addSentence(text){
+    console.log(text)
     speech.addSentence(text)
+}
+
+function clearAllLyrics(){
+    lyricful_data.value={}
 }
 
 /**
@@ -24,6 +29,7 @@ function switchTTSStatus(istts){
     speech.isTTSEnabled=istts
 }
 defineExpose({
+    clearAllLyrics,
     addSentence,
     switchTTSStatus
 })
@@ -31,10 +37,13 @@ defineExpose({
 
 <template>
     <div class="lyricful_container">
-        <div class="lyricful_sentence" v-for="(ced,sentence) in lyricful_data"
+        <div class="lyricful_sentence" v-for="(sentence,ced) in lyricful_data"
             :id="ced">
-            <div :class="'lyricful_part ' + sentenceStatus[sentence.status]" v-for="textpart in sentence">
-                <div v-html="marked(textpart)">
+            <div>
+                {{ ced }}
+                </div>  <div>{{ sentence }}</div>
+            <div :class="'lyricful_part ' + sentenceStatus[textpart.status]" v-for="textpart in sentence">
+                <div v-html="marked(textpart.text)">
                 </div>
             </div>
         </div>
