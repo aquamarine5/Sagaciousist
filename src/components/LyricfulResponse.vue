@@ -39,13 +39,9 @@ defineExpose({
     <div class="lyricful_container">
         <div class="lyricful_sentence" v-for="(sentence,ced) in lyricful_data"
             :id="ced">
-            <div>
-                {{ ced }}
-                </div>  <div>{{ sentence }}</div>
-            <div :class="'lyricful_part ' + sentenceStatus[textpart.status]" v-for="textpart in sentence">
-                <div v-html="marked(textpart.text)">
-                </div>
-            </div>
+            <span :class="'lyricful_part ' + sentenceStatus[textpart.status]" v-for="textpart in sentence">
+                {{ textpart.text }}
+            </span>
         </div>
     </div>
 </template>
@@ -71,6 +67,7 @@ defineExpose({
 .lyricful_sentence {
     animation: fadeIn .3s ease-in-out;
     transition: color .4s ease-in-out;
+    margin-block: 4px;
 }
 
 .lyricful_reading {

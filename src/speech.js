@@ -9,7 +9,6 @@ const xfyunConfig = {
     apiKey: "20b03e7490607b93caaa96eb56650e92",
     uri: "/v2/tts",
 }
-const audioContext = new (window.AudioContext)();
 var pending_ttslist = []
 
 export default class SpeechController {
@@ -18,34 +17,46 @@ export default class SpeechController {
         this.lyricCurrectIndex = 0
         this.isTTSEnabled = true
         this.isTTSReading = false
+        this._audioCtx=undefined
+    }
+    get audioContext(){
+        if(this._audioCtx==undefined){
+            this._audioCtx=new window.AudioContext()
+        }
+        return this._audioCtx
     }
     ttsNext() {
         console.log(pending_ttslist)
         if (pending_ttslist[0].pending_audiodata[0].status == 2) {
-            this.refsentence.value[pending_ttslist[0].ced].status.value=2
+            this.refsentence.value[pending_ttslist[0].ced].status.value = 2
             pending_ttslist.shift()
             if (pending_ttslist.length > 0 && pending_ttslist[0].pending_audiodata.length > 0) {
-            
-                this.refsentence.value[pending_ttslist[0].ced].status.value=1
+
+                this.refsentence.value[pending_ttslist[0].ced].status.value = 1
                 this.isTTSReading = true
                 this.ttsDecode(pending_ttslist[0].pending_audiodata[0].audio)
+                console.log(1)
             } else {
                 this.isTTSReading = false
+                console.log(2)
             }
         } else {
             pending_ttslist[0].pending_audiodata.shift()
             if (pending_ttslist[0].pending_audiodata.length > 0) {
                 this.isTTSReading = true
+                console.log(this.ttsDecode)
                 this.ttsDecode(pending_ttslist[0].pending_audiodata[0].audio)
+                console.log(3)
             } else {
                 this.isTTSReading = false
+                console.log(4)
             }
         }
     }
     ttsRead() {
         if (this.isTTSReading) return;
-        this.isTTSReading=true;
-        if(pending_ttslist.length>0 && pending_ttslist[0].pending_audiodata.length>0){
+        this.isTTSReading = true;
+        if (pending_ttslist.length > 0 && pending_ttslist[0].pending_audiodata.length > 0) {
             this.ttsDecode(pending_ttslist[0].pending_audiodata[0].audio)
         }
     }
@@ -59,7 +70,7 @@ export default class SpeechController {
             }
             return bytes.buffer;
         }
-        function playPcm(base64PcmData, sampleRate = 44100, endedcallback) {
+        function playPcm(base64PcmData, sampleRate = 44100, endedcallback,audioContext) {
             const pcmArrayBuffer = base64ToArrayBuffer(base64PcmData);
             const pcmData = new Int16Array(pcmArrayBuffer);
             const audioBuffer = audioContext.createBuffer(1, pcmData.length, sampleRate); // 创建 AudioBuffer
@@ -74,7 +85,7 @@ export default class SpeechController {
             source.connect(audioContext.destination);
             source.start();
         }
-        playPcm(audio, 16000, this.ttsNext)
+        playPcm(audio, 16000, this.ttsNext,this.audioContext)
     }
     ttsSend(speechData) {
         function getAuthStr(date) {
@@ -89,6 +100,7 @@ export default class SpeechController {
         const wssUrl = xfyunConfig.hostUrl + "?authorization=" + getAuthStr(date) + "&date=" + date + "&host=" + xfyunConfig.host
         let ws = new WebSocket(wssUrl)
         console.log(ws)
+        this.lyricCurrectIndex += 1;
         ws.onopen = () => {
             console.log("websocket connect!")
             ws.send(JSON.stringify({
@@ -117,6 +129,8 @@ export default class SpeechController {
         }
         let previousCed = 0
         let ced = -1
+        
+        var ttsnode = undefined
         ws.onmessage = (data, err) => {
             console.log("websocket message.")
             if (err) {
@@ -131,18 +145,18 @@ export default class SpeechController {
                 ws.close()
                 return
             }
+
+            let text = speechData.content.substring(previousCed / 3, res.data.ced / 3)
             if (res.data.status == 1) {
                 if (res.data.ced != ced) {
                     let rs = this.refsentence.value
-                    console.log(speechData)
-                    let text = speechData.content.substring(previousCed / 3, res.data.ced / 3)
                     if (ced == -1) {
-                        rs[res.data.ced] = [{
+                        rs[this.lyricCurrectIndex] = [{
                             status: ref(1),
                             text: text
                         }]
                     } else {
-                        rs[res.data.ced].push({
+                        rs[this.lyricCurrectIndex].push({
                             status: ref(1),
                             text: text
                         })
@@ -156,12 +170,12 @@ export default class SpeechController {
                             "status": 1
                         }]
                     })
-                    
+                    ttsnode = pending_ttslist[pending_ttslist.length - 1]
                     previousCed = ced
-
+                    console.log(ttsnode)
                     this.ttsRead()
                 } else {
-                    pending_ttslist[ced].pending_audiodata.push({
+                    ttsnode.pending_audiodata.push({
                         "audio": res.data.audio,
                         "status": 1
                     })
@@ -169,19 +183,29 @@ export default class SpeechController {
                 }
             }
             if (res.code == 0 && res.data.status == 2) {
-                pending_ttslist[ced].pending_audiodata.push({
-                    "audio": res.data.audio,
-                    "status": 2
-                })
+                if (ttsnode == undefined) {
+                    pending_ttslist.push({
+                        "ced": ced,
+                        "content": text,
+                        pending_audiodata: [{
+                            "audio": res.data.audio,
+                            "status": 1
+                        }]
+                    })
+                    ttsnode = pending_ttslist[pending_ttslist.length - 1]
+                } else {
+                    ttsnode.pending_audiodata.push({
+                        "audio": res.data.audio,
+                        "status": 2
+                    })
+                }
                 this.ttsRead()
                 ws.close()
             }
-            console.log(this.refsentence.value)
         }
 
     }
     addSentence(text) {
-        console.log(text)
         this.ttsSend({
             content: text,
             status: ref(this.isTTSEnabled ? 0 : 2),

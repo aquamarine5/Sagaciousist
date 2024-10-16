@@ -63,6 +63,7 @@ export default {
         LyricfulResponse
     },
     created() {
+        return
         onmou = true
         ollama.generate({
             model: 'llama3.1',
