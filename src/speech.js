@@ -81,7 +81,6 @@ export default class SpeechController {
             if (pending_ttslist.length > 0 && pending_ttslist[0].pending_audiodata.length > 0) {
                 self.refsentence.value[pending_ttslist[0].index].status = 1
                 self.isTTSReading = true
-
                 console.log(1)
                 self.ttsDecode(pending_ttslist[0].pending_audiodata[0].audio)
             } else {
