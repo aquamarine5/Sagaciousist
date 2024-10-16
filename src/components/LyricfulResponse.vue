@@ -1,6 +1,5 @@
 <script setup>
 import SpeechController from '@/speech';
-import { marked } from 'marked';
 import { ref } from 'vue';
 
 const props = defineProps(["isloading"])
