@@ -11,9 +11,6 @@ const xfyunConfig = {
 }
 var pending_ttslist = []
 
-function deepCopy(data){
-    return JSON.parse(JSON.stringify(data))
-}
 
 export default class SpeechController {
     /**
@@ -25,7 +22,24 @@ export default class SpeechController {
         this.isTTSEnabled = true
         this.isTTSReading = false
         this._audioCtx = undefined
+        this._textEncoder = undefined
+
+        this._textDecoder = undefined
     }
+    get textDecoder() {
+        if (this._textDecoder == undefined) {
+            this._textDecoder = new TextDecoder()
+        }
+        return this._textDecoder
+    }
+
+    get textEncoder() {
+        if (this._textEncoder == undefined) {
+            this._textEncoder = new TextEncoder()
+        }
+        return this._textEncoder
+    }
+    
     get audioContext() {
         if (this._audioCtx == undefined) {
             this._audioCtx = new window.AudioContext()
@@ -33,6 +47,10 @@ export default class SpeechController {
         return this._audioCtx
     }
 
+    /**
+     * Built-in method. You should not call this method most times.
+     * @param {string} audio audio by base64 string
+     */
     ttsDecode(audio) {
         function base64ToArrayBuffer(base64) {
             const binaryString = window.atob(base64);
@@ -43,7 +61,7 @@ export default class SpeechController {
             }
             return bytes.buffer;
         }
-        function playPcm(base64PcmData, sampleRate = 44100, endedcallback, audioContext,self) {
+        function playPcm(base64PcmData, sampleRate = 44100, endedcallback, audioContext, self) {
             const pcmArrayBuffer = base64ToArrayBuffer(base64PcmData);
             const pcmData = new Int16Array(pcmArrayBuffer);
             const audioBuffer = audioContext.createBuffer(1, pcmData.length, sampleRate); // 创建 AudioBuffer
@@ -54,28 +72,25 @@ export default class SpeechController {
             }
             const source = audioContext.createBufferSource();
             source.buffer = audioBuffer;
-            source.onended = ()=>{
+            source.onended = () => {
                 endedcallback(self)
             }
             source.connect(audioContext.destination);
             source.start();
         }
-        playPcm(audio, 16000, this.ttsNext, this.audioContext,this)
+        playPcm(audio, 16000, this.ttsNext, this.audioContext, this)
     }
+
     /**
      * @param {SpeechController} self 
      */
     ttsNext(self) {
-        console.log("pending_ttslist: ", JSON.parse(JSON.stringify(pending_ttslist)))
-        console.log("audiodata: ", JSON.parse(JSON.stringify(pending_ttslist[0].pending_audiodata)))
-        console.log(self)
         if (pending_ttslist[0].pending_audiodata[0].status == 2 ||
             (pending_ttslist[0].pending_audiodata.length == 1 &&
                 pending_ttslist.length > 1 &&
                 pending_ttslist[1].pending_audiodata.length > 0
             )
         ) {
-            console.log(deepCopy(self.refsentence.value))
             self.refsentence.value[pending_ttslist[0].index].status = 2
             pending_ttslist.shift()
             if (pending_ttslist.length > 0 && pending_ttslist[0].pending_audiodata.length > 0) {
@@ -99,6 +114,7 @@ export default class SpeechController {
             }
         }
     }
+
     ttsRead() {
         if (this.isTTSReading) return;
         this.isTTSReading = true;
@@ -106,6 +122,7 @@ export default class SpeechController {
             this.ttsDecode(pending_ttslist[0].pending_audiodata[0].audio)
         }
     }
+
     ttsSend(speechData) {
         function getAuthStr(date) {
             let signatureOrigin = `host: ${xfyunConfig.host}\ndate: ${date}\nGET ${xfyunConfig.uri} HTTP/1.1`
@@ -148,7 +165,6 @@ export default class SpeechController {
         }
         let previousCed = 0
         let ced = -1
-
         var ttsnode = undefined
         ws.onmessage = (data, err) => {
 
@@ -163,8 +179,7 @@ export default class SpeechController {
                 ws.close()
                 return
             }
-
-            let text = speechData.content.substring(previousCed / 3, res.data.ced / 3)
+            let text = this.textDecoder.decode(this.textEncoder.encode(speechData.content).subarray(previousCed, res.data.ced))
             if (res.data.status == 1) {
                 if (res.data.ced != ced) {
                     let rs = this.refsentence.value
@@ -181,7 +196,7 @@ export default class SpeechController {
                     }
                     ced = res.data.ced
                     pending_ttslist.push({
-                        "index":this.lyricCurrectIndex,
+                        "index": this.lyricCurrectIndex,
                         "ced": ced,
                         "content": text,
                         pending_audiodata: [{
@@ -204,7 +219,7 @@ export default class SpeechController {
             if (res.code == 0 && res.data.status == 2) {
                 if (ttsnode == undefined) {
                     pending_ttslist.push({
-                        "index":this.lyricCurrectIndex,
+                        "index": this.lyricCurrectIndex,
                         "ced": ced,
                         "content": text,
                         pending_audiodata: [{
@@ -223,7 +238,6 @@ export default class SpeechController {
                 ws.close()
             }
         }
-
     }
     addSentence(text) {
         this.ttsSend({
