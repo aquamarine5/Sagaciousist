@@ -31,7 +31,7 @@ import { CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue';
             </div>
             <div class="input_container">
                 <ElInput :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputText" type="textarea"
-                    placeholder="输入文字..." class="input_el" ref="elInput" />
+                    placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
                 <div class="container_btn_send">
                     <ElButton v-wave class="btn_send" :type="isRunning ? 'danger' : 'primary'" @click="onsend" circle>
                         <ElIcon>
@@ -50,8 +50,8 @@ import { CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue';
 const isRunning = ref(false)
 const isReady = ref(false)
 const inputText = ref('')
-const splitPatterns = ['，', '。', '：', '；', '！', '？',
-    ',', '.', ':', ';', '!', '?']
+const splitPatterns = ['。']//['，', '。', '：', '；', '！', '？',
+    //',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
 var responseStatus = undefined
 var onmou = false
@@ -63,6 +63,7 @@ export default {
         LyricfulResponse
     },
     created() {
+        return
         onmou = true
         ollama.generate({
             model: 'llama3.1',
@@ -174,18 +175,18 @@ export default {
 }
 :deep(.el-textarea__inner) {
     animation-fill-mode: forwards;
-    animation: textarea_focusOut .5s cubic-bezier(0.85, 0.01, 0.58, 1);
+    animation: textarea_focusOut .3s cubic-bezier(0.85, 0.01, 0.58, 1);
     border: 4px solid transparent;
     border-radius: 16px;
     background-clip: padding-box, border-box;
     background-origin: padding-box, border-box;
     background-size: 200%;
     background-position: 0% 50%;
-    background-image: linear-gradient(to right, #fff, #fff), linear-gradient(to right, #c3cfe2 0%, #e0e1e2 40%, #e0c3fc 50%, #8ec5fc 100%);
+    background-image: linear-gradient(to right, #fff, #fff), linear-gradient(135deg, #c3cfe2 0%, #e0e1e2 40%, #e0c3fc 55%, #8ec5fc 100%);
 }
 
 :deep(.is-focus) {
-    animation: textarea_focusIn .5s cubic-bezier(0.85, 0.01, 0.58, 1);
+    animation: textarea_focusIn .3s cubic-bezier(0.85, 0.01, 0.58, 1);
     animation-fill-mode: forwards;
 }
 
