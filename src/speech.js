@@ -39,7 +39,7 @@ export default class SpeechController {
         }
         return this._textEncoder
     }
-    
+
     get audioContext() {
         if (this._audioCtx == undefined) {
             this._audioCtx = new window.AudioContext()
@@ -64,7 +64,7 @@ export default class SpeechController {
         function playPcm(base64PcmData, sampleRate = 44100, endedcallback, audioContext, self) {
             const pcmArrayBuffer = base64ToArrayBuffer(base64PcmData);
             const pcmData = new Int16Array(pcmArrayBuffer);
-            const audioBuffer = audioContext.createBuffer(1, pcmData.length, sampleRate); // 创建 AudioBuffer
+            const audioBuffer = audioContext.createBuffer(1, pcmData.length, sampleRate);
             const channelData = audioBuffer.getChannelData(0);
 
             for (let i = 0; i < pcmData.length; i++) {
@@ -128,12 +128,14 @@ export default class SpeechController {
             let signatureOrigin = `host: ${xfyunConfig.host}\ndate: ${date}\nGET ${xfyunConfig.uri} HTTP/1.1`
             let signatureSha = cryptoJs.HmacSHA256(signatureOrigin, xfyunConfig.apiSecret)
             let signature = cryptoJs.enc.Base64.stringify(signatureSha)
-            let authorizationOrigin = `api_key="${xfyunConfig.apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`
+            let authorizationOrigin = 
+                `api_key="${xfyunConfig.apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`
             let authStr = cryptoJs.enc.Base64.stringify(cryptoJs.enc.Utf8.parse(authorizationOrigin))
             return authStr
         }
         let date = (new Date().toUTCString())
-        const wssUrl = xfyunConfig.hostUrl + "?authorization=" + getAuthStr(date) + "&date=" + date + "&host=" + xfyunConfig.host
+        const wssUrl = xfyunConfig.hostUrl + "?authorization=" 
+            + getAuthStr(date) + "&date=" + date + "&host=" + xfyunConfig.host
         let ws = new WebSocket(wssUrl)
         console.log(ws)
         this.lyricCurrectIndex += 1;
@@ -167,7 +169,6 @@ export default class SpeechController {
         let ced = -1
         var ttsnode = undefined
         ws.onmessage = (data, err) => {
-
             if (err) {
                 console.error(err)
                 return
@@ -239,6 +240,7 @@ export default class SpeechController {
             }
         }
     }
+
     addSentence(text) {
         this.ttsSend({
             content: text,
