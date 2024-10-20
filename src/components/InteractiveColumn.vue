@@ -50,7 +50,7 @@ import { CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue';
 const isRunning = ref(false)
 const isReady = ref(false)
 const inputText = ref('')
-const splitPatterns = ['。']//['，', '。', '：', '；', '！', '？',
+const splitPatterns = ['。',"！","？"]//['，', '。', '：', '；', '！', '？',
     //',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
 var responseStatus = undefined

@@ -184,7 +184,8 @@ export default class SpeechController {
             if (res.data.status == 1) {
                 if (res.data.ced != ced) {
                     let rs = this.refsentence.value
-                    if (ced == -1) {
+
+                    if (rs[this.lyricCurrectIndex]==undefined) {
                         rs[this.lyricCurrectIndex] = [{
                             status: ref(1),
                             text: text
