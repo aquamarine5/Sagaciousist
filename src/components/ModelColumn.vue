@@ -34,7 +34,7 @@ export default {
     mounted() {
         const scene = new Scene()
         const camera = new PerspectiveCamera()
-        camera.position.set(0, 4.5, 3)
+        camera.position.set(0, 3, 3)
         const renderer = new WebGLRenderer({
             antialias: true,
             alpha: true
@@ -48,13 +48,14 @@ export default {
         }
         renderer.setAnimationLoop(animate);
         const loader = new GLTFLoader()
-        loader.load("src\\assets\\models\\human.glb", gltf => {
+        loader.load("src\\assets\\models\\sugardontstop.glb", gltf => {
             console.log(gltf)
             this.obj3d = gltf.scene
             var mixer = new AnimationMixer(gltf.scene);
             this.animateMixer=mixer
             gltf.scene.rotateY(0.3)
-            gltf.scene.scale.set(3, 3, 3)
+            gltf.scene.scale.set(2.5, 2.5, 2.5)
+            //gltf.scene.scale.set(3, 3, 3)
             this.idleAction = this.animateMixer.clipAction(gltf.animations[0]);
             scene.add(gltf.scene)
             this.idleAction.loop = LoopRepeat

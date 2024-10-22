@@ -19,6 +19,7 @@ function addSentence(text){
 
 function clearAllLyrics(){
     lyricful_data.value={}
+    speech.ttsClear()
 }
 
 /**
@@ -55,12 +56,13 @@ defineExpose({
         opacity: 1;
     }
 }
-
+.lyricful_part{
+    font-size: large;
+}
 .lyricful_container {
-    max-height: 300px;
+    padding-bottom: 15px;
     overflow-y: auto;
     overflow-x: hidden;
-    border-radius: 5px;
 }
 
 .lyricful_sentence {

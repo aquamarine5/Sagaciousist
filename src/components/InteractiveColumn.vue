@@ -8,40 +8,40 @@ import { ContentLoader } from 'vue-content-loader';
 import { CircleCheckFilled, CloseBold, Loading, Select } from '@element-plus/icons-vue';
 
 
-let nowtime=new Date().getHours()
-var text=""
-if(0<=nowtime&&nowtime<4)
-    var text="深夜啦😉"
-else if(4<=nowtime&&nowtime<=11)
-    var text="早上好😉"
-else if(12<=nowtime&&nowtime<=17)
-    var text="下午好😉"
-else if(18<=nowtime&&nowtime<=24)
-    var text="晚上好😉"
-const iswelcomecn=Math.round(Math.random())==1
-const finalText=iswelcomecn?text:"Hello!😙"
+let nowtime = new Date().getHours()
+var text = ""
+if (0 <= nowtime && nowtime < 4)
+    var text = "深夜啦😉"
+else if (4 <= nowtime && nowtime <= 11)
+    var text = "早上好😉"
+else if (12 <= nowtime && nowtime <= 17)
+    var text = "下午好😉"
+else if (18 <= nowtime && nowtime <= 24)
+    var text = "晚上好😉"
+const iswelcomecn = Math.round(Math.random()) == 1
+const finalText = iswelcomecn ? text : "Hello!😙"
 
-const typingText=ref("")
-var index=0
-function typingNext(){
-    if(index!=finalText.length){
-        let char=finalText[index]
-        if(char=="\uD83D"){
-            index+=1
-            char+=finalText[index]
+const typingText = ref("")
+var index = 0
+function typingNext() {
+    if (index != finalText.length) {
+        let char = finalText[index]
+        if (char == "\uD83D") {
+            index += 1
+            char += finalText[index]
         }
-        typingText.value+=char
-        index+=1
-        setTimeout(typingNext,200)
+        typingText.value += char
+        index += 1
+        setTimeout(typingNext, 200)
     }
 }
-typingNext()
+setTimeout(typingNext, 1000)
 </script>
 
 <template>
     <div class="main_container">
         <ModelColumn ref="model" />
-        <div :class="iswelcome?'app_container':'app_container app_container_justified'">
+        <div :class="iswelcome ? 'app_container' : 'app_container app_container_justified'">
             <div class="result_container">
                 <ContentLoader viewBox="0 0 250 60" v-if="isloading">
                     <rect x="0" y="0" rx="3" ry="3" width="170" height="10" />
@@ -57,7 +57,7 @@ typingNext()
                     </div>
                 </Transition>
             </div> -->
-            <div :class="iswelcomecn?'welcome_tips_cn':'welcome_tips'" v-if="iswelcome">
+            <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="iswelcome">
                 {{ typingText }}
             </div>
             <div class="input_container">
@@ -77,7 +77,7 @@ typingNext()
 </template>
 
 <script>
-const iswelcome=ref(true)
+const iswelcome = ref(true)
 const isRunning = ref(false)
 const isReady = ref(false)
 const inputText = ref('')
@@ -112,7 +112,7 @@ export default {
                     isRunning.value = false
                     return
                 }
-                iswelcome.value=false
+                iswelcome.value = false
                 isloading.value = true
                 isRunning.value = true
                 responseStatus = true
@@ -170,20 +170,24 @@ export default {
 @keyframes textarea_focusIn {
     0% {
         background-position: 0% 50%;
+        border-width: 3px;
     }
 
     100% {
         background-position: 90% 50%;
+        border-width: 5px;
     }
 }
 
 @keyframes textarea_focusOut {
     0% {
         background-position: 90% 50%;
+        border-width: 5px;
     }
 
     100% {
         background-position: 0% 50%;
+        border-width: 3px;
     }
 }
 
@@ -210,14 +214,13 @@ export default {
 }
 
 :deep(.el-button) {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-color: transparent;
 }
 
 :deep(.btn_send_gradient .el-button) {
     animation: animation_loading 5s;
-
     animation-iteration-count: infinite;
     animation-direction: normal;
     animation-fill-mode: forwards;
@@ -233,7 +236,7 @@ export default {
     padding: 9px 15px;
     animation-fill-mode: forwards;
     animation: textarea_focusOut .3s cubic-bezier(0.85, 0.01, 0.58, 1);
-    border: 4px solid transparent;
+    border: 3px solid transparent;
     border-radius: 24px;
     background-clip: padding-box, border-box;
     background-origin: padding-box, border-box;
@@ -253,24 +256,24 @@ export default {
 }
 </style>
 <style>
-.welcome_tips_cn{
-    background-color: #fff;
+.welcome_tips_cn {
     white-space: nowrap;
     font-size: 30px;
     align-self: center;
     margin-right: 30px;
-    padding-bottom: 10px;
+    padding-bottom: 18px;
     font-family: "SourceHanSansBold";
 }
-.welcome_tips{
-    background-color: #fff;
+
+.welcome_tips {
     white-space: nowrap;
     font-family: "Gilroy";
     font-size: 30px;
     align-self: center;
     margin-right: 40px;
-    padding-bottom: 10px;
+    padding-bottom: 18px;
 }
+
 .is-loading {
     animation: rotating 2s linear infinite;
 }
@@ -288,13 +291,16 @@ export default {
 .app_container {
     width: 100%;
     display: flex;
+    padding: 10px;
     transition: justify-content 0.3s ease;
     flex-direction: column;
     justify-content: center;
 }
-.app_container_justified{
+
+.app_container_justified {
     justify-content: end;
 }
+
 .main_container {
     display: flex;
     width: 100%;

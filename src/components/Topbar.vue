@@ -13,14 +13,14 @@ import "../assets/fonts/font.css"
 <style>
 .topbar_container{
     background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-    border-radius: 0px 0px 5px 5px;
-    height: 60px;
+    border-radius: 0px 0px 8px 8px;
+    height: 70px;
 }
 .topbar_title{
     font-family: 'Gilroy';
     font-weight: 600;
     font-size: 32px;
-    padding-block: 10px;
+    padding-block: 15px;
     padding-left: 25px;
     color: white;
     cursor: pointer;
