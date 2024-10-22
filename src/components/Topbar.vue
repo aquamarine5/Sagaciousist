@@ -21,7 +21,7 @@ import "../assets/fonts/font.css"
     font-weight: 600;
     font-size: 32px;
     padding-block: 10px;
-    padding-left: 20px;
+    padding-left: 25px;
     color: white;
     cursor: pointer;
 }

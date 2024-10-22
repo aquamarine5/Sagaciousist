@@ -12,3 +12,8 @@
     font-family: "SourceHanSansBold";
     src: url("SourceHanSansSC-Bold.otf");
 }
+
+@font-face {
+    font-family: "SourceCodeProBold";
+    src: url("SourceCodePro-Bold.otf");
+}

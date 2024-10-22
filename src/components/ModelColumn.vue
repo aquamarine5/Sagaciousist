@@ -42,7 +42,7 @@ export default {
         renderer.setClearAlpha(0)
         scene.background = null
         scene.add(new AmbientLight(0xFFFFFF, 4))
-        renderer.setSize(window.innerWidth / 2, window.innerWidth / 2)
+        renderer.setSize((window.innerWidth-70) / 2, (window.innerWidth-70) / 2)
         function animate() {
             renderer.render(scene, camera);
         }
