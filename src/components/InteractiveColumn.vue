@@ -5,7 +5,7 @@ import ModelColumn from './ModelColumn.vue';
 import { ref } from 'vue';
 import LyricfulResponse from './LyricfulResponse.vue';
 import { ContentLoader } from 'vue-content-loader';
-import { CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue';
+import { CircleCheckFilled, CloseBold, Loading, Select } from '@element-plus/icons-vue';
 
 
 </script>
@@ -32,11 +32,11 @@ import { CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue';
             <div class="input_container">
                 <ElInput :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputText" type="textarea"
                     placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
-                <div class="container_btn_send">
-                    <ElButton v-wave class="btn_send" :type="isRunning ? 'danger' : 'primary'" @click="onsend" circle>
-                        <ElIcon>
-                            <CircleCloseFilled v-if="isRunning" />
-                            <CircleCheckFilled v-else />
+                <div :class="!isRunning ? 'container_btn_send' : 'container_btn_send btn_send_gradient'">
+                    <ElButton v-wave :type="'primary'" @click="onsend" circle>
+                        <ElIcon size="16">
+                            <Select v-if="!isRunning" />
+                            <Loading class="is-loading" v-else />
                         </ElIcon>
                     </ElButton>
                 </div>
@@ -50,8 +50,8 @@ import { CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue';
 const isRunning = ref(false)
 const isReady = ref(false)
 const inputText = ref('')
-const splitPatterns = ['。',"！","？"]//['，', '。', '：', '；', '！', '？',
-    //',', '.', ':', ';', '!', '?']
+const splitPatterns = ['。', "！", "？"]//['，', '。', '：', '；', '！', '？',
+//',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
 var responseStatus = undefined
 var onmou = false
@@ -173,6 +173,47 @@ export default {
         background-position: 0% 50%;
     }
 }
+
+@keyframes animation_loading {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    25% {
+        background-position: 33% 66%;
+    }
+
+    50% {
+        background-position: 100% 100%;
+    }
+
+    75% {
+        background-position: 66% 33%;
+    }
+
+    100% {
+        background-position: 0% 0%;
+    }
+}
+
+:deep(.el-button) {
+    width: 36px;
+    height: 36px;
+    border-color: transparent;
+}
+
+:deep(.btn_send_gradient .el-button) {
+    animation: animation_loading 5s;
+
+    animation-iteration-count: infinite;
+    animation-direction: normal;
+    animation-fill-mode: forwards;
+    background-size: 300%;
+    background-position: 0% 0%;
+    background-image: linear-gradient(to right, #eea2a2 0%, #bbc1bf 19%, #57c6e1 42%, #b49fda 79%, #7ac5d8 100%);
+
+}
+
 :deep(.el-textarea__inner) {
     animation-fill-mode: forwards;
     animation: textarea_focusOut .3s cubic-bezier(0.85, 0.01, 0.58, 1);
@@ -196,9 +237,18 @@ export default {
 }
 </style>
 <style>
+.is-loading {
+    animation: rotating 2s linear infinite;
+}
+
+.container_btn_send {
+    margin-left: 12px;
+    justify-self: end;
+}
+
 .input_container {
     display: flex;
-    justify-self: center;
+    align-items: center;
 }
 
 .app_container {
@@ -234,10 +284,6 @@ code {
     padding-block: 3px;
 }
 
-.container_btn_send {
-    display: grid;
-}
-
 .result_tips {
     align-items: center;
     display: flex;
@@ -247,6 +293,7 @@ code {
 }
 
 .btn_send {
+    margin-top: 1px;
     margin-left: 12px;
     justify-self: end;
     transition: background-color .2s ease-in-out;
