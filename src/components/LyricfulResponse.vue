@@ -19,6 +19,7 @@ function addSentence(text){
 
 function clearAllLyrics(){
     lyricful_data.value={}
+    speech.ttsClear()
 }
 
 /**
@@ -55,12 +56,13 @@ defineExpose({
         opacity: 1;
     }
 }
-
+.lyricful_part{
+    font-size: large;
+}
 .lyricful_container {
-    max-height: 300px;
+    padding-bottom: 15px;
     overflow-y: auto;
     overflow-x: hidden;
-    border-radius: 5px;
 }
 
 .lyricful_sentence {
@@ -70,17 +72,24 @@ defineExpose({
 }
 
 .lyricful_reading {
-    font-weight: 600;
+    animation: fadeIn .3s ease-in-out;
+    transition: color .4s ease-in-out;
+    font-family: "SourceHanSansBold";
     color: #000;
-
 }
 
 .lyricful_after_read {
+    
+    animation: fadeIn .3s ease-in-out;
+    transition: color .4s ease-in-out;
     font-weight: 500;
     color: #000;
 }
 
 .lyricful_before_read {
+    animation: fadeIn .3s ease-in-out;
+    transition: color .4s ease-in-out;
+    display: none;
     font-weight: 500;
     color: rgb(130, 130, 130);
 }

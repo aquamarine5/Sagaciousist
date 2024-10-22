@@ -1,0 +1,19 @@
+@font-face {
+    font-family: "Gilroy";
+    src: url("gilroy-bold.otf");
+}
+
+@font-face {
+    font-family: "SourceHanSansRegular";
+    src: url("SourceHanSansSC-Regular.otf");
+}
+
+@font-face {
+    font-family: "SourceHanSansBold";
+    src: url("SourceHanSansSC-Bold.otf");
+}
+
+@font-face {
+    font-family: "SourceCodeProBold";
+    src: url("SourceCodePro-Bold.otf");
+}

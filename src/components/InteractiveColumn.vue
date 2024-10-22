@@ -5,15 +5,43 @@ import ModelColumn from './ModelColumn.vue';
 import { ref } from 'vue';
 import LyricfulResponse from './LyricfulResponse.vue';
 import { ContentLoader } from 'vue-content-loader';
-import { CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue';
+import { CircleCheckFilled, CloseBold, Loading, Select } from '@element-plus/icons-vue';
 
 
+let nowtime = new Date().getHours()
+var text = ""
+if (0 <= nowtime && nowtime < 4)
+    var text = "深夜啦😉"
+else if (4 <= nowtime && nowtime <= 11)
+    var text = "早上好😉"
+else if (12 <= nowtime && nowtime <= 17)
+    var text = "下午好😉"
+else if (18 <= nowtime && nowtime <= 24)
+    var text = "晚上好😉"
+const iswelcomecn = Math.round(Math.random()) == 1
+const finalText = iswelcomecn ? text : "Hello!😙"
+
+const typingText = ref("")
+var index = 0
+function typingNext() {
+    if (index != finalText.length) {
+        let char = finalText[index]
+        if (char == "\uD83D") {
+            index += 1
+            char += finalText[index]
+        }
+        typingText.value += char
+        index += 1
+        setTimeout(typingNext, 200)
+    }
+}
+setTimeout(typingNext, 1000)
 </script>
 
 <template>
     <div class="main_container">
         <ModelColumn ref="model" />
-        <div class="app_container">
+        <div :class="iswelcome ? 'app_container' : 'app_container app_container_justified'">
             <div class="result_container">
                 <ContentLoader viewBox="0 0 250 60" v-if="isloading">
                     <rect x="0" y="0" rx="3" ry="3" width="170" height="10" />
@@ -22,21 +50,24 @@ import { CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue';
                 </ContentLoader>
                 <LyricfulResponse ref="lyricful" :isloading="isloading" />
             </div>
-            <div class="result_tips" v-if="isReady">
+            <!-- <div class="result_tips" v-if="isReady">
                 <Transition name="fade">
                     <div class="result_pending" v-if="showPendingTips">
                         请稍等，这比我们想象中的慢。
                     </div>
                 </Transition>
+            </div> -->
+            <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="iswelcome">
+                {{ typingText }}
             </div>
             <div class="input_container">
                 <ElInput :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputText" type="textarea"
                     placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
-                <div class="container_btn_send">
-                    <ElButton v-wave class="btn_send" :type="isRunning ? 'danger' : 'primary'" @click="onsend" circle>
-                        <ElIcon>
-                            <CircleCloseFilled v-if="isRunning" />
-                            <CircleCheckFilled v-else />
+                <div :class="!isRunning ? 'container_btn_send' : 'container_btn_send btn_send_gradient'">
+                    <ElButton v-wave :type="'primary'" @click="onsend" circle>
+                        <ElIcon size="16">
+                            <Select v-if="!isRunning" />
+                            <Loading class="is-loading" v-else />
                         </ElIcon>
                     </ElButton>
                 </div>
@@ -46,12 +77,12 @@ import { CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue';
 </template>
 
 <script>
-
+const iswelcome = ref(true)
 const isRunning = ref(false)
 const isReady = ref(false)
 const inputText = ref('')
-const splitPatterns = ['。',"！","？"]//['，', '。', '：', '；', '！', '？',
-    //',', '.', ':', ';', '!', '?']
+const splitPatterns = ['。', "！", "？"]//['，', '。', '：', '；', '！', '？',
+//',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
 var responseStatus = undefined
 var onmou = false
@@ -61,25 +92,6 @@ const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
 export default {
     components: {
         LyricfulResponse
-    },
-    created() {
-        return
-        onmou = true
-        ollama.generate({
-            model: 'llama3.1',
-            prompt: "除非提前指明，否则请使用中文回答。请不要使用Markdown的列表、*号来进行分条列点输出，这是前提，你不用对上述要求进行回复，只需要回答这个句号之后的内容。你好！",
-        }).then(response => {
-            let lastSentence = ''
-            for (let index = 0; index < response.response.length; index++) {
-                const element = response.response[index];
-                lastSentence += element
-                if (splitPatterns.indexOf(element) != -1) {
-                    this.$refs.lyricful.addSentence(lastSentence)
-                    lastSentence = ''
-                }
-            }
-        })
-
     },
     data() {
         return {
@@ -100,6 +112,7 @@ export default {
                     isRunning.value = false
                     return
                 }
+                iswelcome.value = false
                 isloading.value = true
                 isRunning.value = true
                 responseStatus = true
@@ -157,27 +170,74 @@ export default {
 @keyframes textarea_focusIn {
     0% {
         background-position: 0% 50%;
+        border-width: 3px;
     }
 
     100% {
         background-position: 90% 50%;
+        border-width: 5px;
     }
 }
 
 @keyframes textarea_focusOut {
     0% {
         background-position: 90% 50%;
+        border-width: 5px;
     }
 
     100% {
         background-position: 0% 50%;
+        border-width: 3px;
     }
 }
+
+@keyframes animation_loading {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    25% {
+        background-position: 33% 66%;
+    }
+
+    50% {
+        background-position: 100% 100%;
+    }
+
+    75% {
+        background-position: 66% 33%;
+    }
+
+    100% {
+        background-position: 0% 0%;
+    }
+}
+
+:deep(.el-button) {
+    width: 40px;
+    height: 40px;
+    border-color: transparent;
+}
+
+:deep(.btn_send_gradient .el-button) {
+    animation: animation_loading 5s;
+    animation-iteration-count: infinite;
+    animation-direction: normal;
+    animation-fill-mode: forwards;
+    background-size: 300%;
+    background-position: 0% 0%;
+    background-image: linear-gradient(to right, #eea2a2 0%, #bbc1bf 19%, #57c6e1 42%, #b49fda 79%, #7ac5d8 100%);
+
+}
+
 :deep(.el-textarea__inner) {
+    resize: none;
+    font-size: 16px;
+    padding: 9px 15px;
     animation-fill-mode: forwards;
     animation: textarea_focusOut .3s cubic-bezier(0.85, 0.01, 0.58, 1);
-    border: 4px solid transparent;
-    border-radius: 16px;
+    border: 3px solid transparent;
+    border-radius: 24px;
     background-clip: padding-box, border-box;
     background-origin: padding-box, border-box;
     background-size: 200%;
@@ -196,21 +256,55 @@ export default {
 }
 </style>
 <style>
+.welcome_tips_cn {
+    white-space: nowrap;
+    font-size: 30px;
+    align-self: center;
+    margin-right: 30px;
+    padding-bottom: 18px;
+    font-family: "SourceHanSansBold";
+}
+
+.welcome_tips {
+    white-space: nowrap;
+    font-family: "Gilroy";
+    font-size: 30px;
+    align-self: center;
+    margin-right: 40px;
+    padding-bottom: 18px;
+}
+
+.is-loading {
+    animation: rotating 2s linear infinite;
+}
+
+.container_btn_send {
+    margin-left: 12px;
+    justify-self: end;
+}
+
 .input_container {
     display: flex;
-    justify-self: center;
+    align-items: center;
 }
 
 .app_container {
     width: 100%;
     display: flex;
+    padding: 10px;
+    transition: justify-content 0.3s ease;
     flex-direction: column;
-    justify-content: flex-end;
+    justify-content: center;
+}
+
+.app_container_justified {
+    justify-content: end;
 }
 
 .main_container {
     display: flex;
     width: 100%;
+    transition: justify-content 0.3s ease;
 }
 
 code {
@@ -234,10 +328,6 @@ code {
     padding-block: 3px;
 }
 
-.container_btn_send {
-    display: grid;
-}
-
 .result_tips {
     align-items: center;
     display: flex;
@@ -247,6 +337,7 @@ code {
 }
 
 .btn_send {
+    margin-top: 1px;
     margin-left: 12px;
     justify-self: end;
     transition: background-color .2s ease-in-out;
