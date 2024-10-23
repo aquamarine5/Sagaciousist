@@ -68,7 +68,7 @@ defineExpose({
 .lyricful_sentence {
     animation: fadeIn .3s ease-in-out;
     transition: color .4s ease-in-out;
-    margin-block: 4px;
+    margin-block: 6px;
 }
 
 .lyricful_reading {

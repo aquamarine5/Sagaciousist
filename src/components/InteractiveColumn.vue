@@ -6,6 +6,7 @@ import { ref } from 'vue';
 import LyricfulResponse from './LyricfulResponse.vue';
 import { ContentLoader } from 'vue-content-loader';
 import { CircleCheckFilled, CloseBold, Loading, Select } from '@element-plus/icons-vue';
+import InteropPortal from '@/interop';
 
 
 let nowtime = new Date().getHours()
@@ -87,6 +88,7 @@ const showPendingTips = ref(false)
 var responseStatus = undefined
 var onmou = false
 var isloading = ref(false)
+const interopPortal=new InteropPortal("http://localhost:8080")
 
 const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
 export default {
@@ -125,7 +127,7 @@ export default {
                 }, 1000)
                 const response = await ollama.generate({
                     model: 'llama3.1',
-                    prompt: "除非提前指明，否则请使用中文回答。请不要使用Markdown的列表、*号来进行分条列点输出，这是前提，你不用对上述要求进行回复，只需要回答这个句号之后的内容。" + inputText.value,
+                    prompt: await interopPortal.combinePrompt(inputText.value),
                     stream: true
                 })
                 var lastSentence = ''
