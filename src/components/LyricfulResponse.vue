@@ -39,8 +39,8 @@ defineExpose({
     <div class="lyricful_container">
         <div class="lyricful_sentence" v-for="(sentence,ced) in lyricful_data"
             :id="ced">
-            <span :class="'lyricful_part ' + sentenceStatus[textpart.status]" v-for="textpart in sentence">
-                {{ textpart.text }}
+            <span class="lyricful_part">
+                {{ sentence.text }}
             </span>
         </div>
     </div>
