@@ -73,7 +73,7 @@ export default {
                 message: error
             })
         })
-        document.getElementsByClassName("three_renderer")[0].appendChild(renderer.domElement)
+        //document.getElementsByClassName("three_renderer")[0].appendChild(renderer.domElement)
     }
 }
 </script>

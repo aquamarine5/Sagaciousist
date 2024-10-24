@@ -125,9 +125,11 @@ export default {
                         showPendingTips.value = true
                     }
                 }, 1000)
+                let prompt=await interopPortal.combinePrompt(inputText.value)
+                console.log("Prompt: ",prompt)
                 const response = await ollama.generate({
                     model: 'llama3.1',
-                    prompt: await interopPortal.combinePrompt(inputText.value),
+                    prompt: prompt,
                     stream: true
                 })
                 var lastSentence = ''
@@ -145,6 +147,7 @@ export default {
                         if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
                             continue
                         if (splitPatterns.indexOf(char) != -1) {
+                            console.log("LS: ",lastSentence)
                             this.$refs.lyricful.addSentence(lastSentence)
                             lastSentence = ''
                         }

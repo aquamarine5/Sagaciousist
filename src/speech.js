@@ -166,7 +166,7 @@ export default class SpeechController {
                 "business": {
                     "aue": "raw",
                     "auf": "audio/L16;rate=16000",
-                    "vcn": "xiaoyan",
+                    "vcn": "aisxping",
                     "tte": "UTF8"
                 },
                 "data": {
