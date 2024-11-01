@@ -1,14 +1,14 @@
-import axios from "axios";
+import wnetwork from "./wnetwork";
 
 export default class InteropPortal {
     constructor(url) {
         this.baseUrl = url
     }
     getPrompt(text) {
-        return axios.get(this.baseUrl + "/search?query=" + text)
+        return wnetwork.get(this.baseUrl + "/search?query=" + text)
     }
     combinePrompt(text) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if(import.meta.env.MODE != "single") {
                 this.getPrompt(text).then(response => {
                     let esPrompt = ""

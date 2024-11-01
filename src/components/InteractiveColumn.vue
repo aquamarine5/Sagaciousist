@@ -5,20 +5,21 @@ import ModelColumn from './ModelColumn.vue';
 import { ref } from 'vue';
 import LyricfulResponse from './LyricfulResponse.vue';
 import { ContentLoader } from 'vue-content-loader';
-import { CircleCheckFilled, CloseBold, Loading, Select } from '@element-plus/icons-vue';
+import { Loading, Select } from '@element-plus/icons-vue';
 import InteropPortal from '@/interop';
+import QuestionsTipDisplayer from './QuestionsTipDisplayer.vue';
 
 
 let nowtime = new Date().getHours()
 var text = ""
 if (0 <= nowtime && nowtime < 4)
-    var text = "深夜啦😉"
+    text = "深夜啦😉"
 else if (4 <= nowtime && nowtime <= 11)
-    var text = "早上好😉"
+    text = "早上好😉"
 else if (12 <= nowtime && nowtime <= 17)
-    var text = "下午好😉"
+    text = "下午好😉"
 else if (18 <= nowtime && nowtime <= 24)
-    var text = "晚上好😉"
+    text = "晚上好😉"
 const iswelcomecn = Math.round(Math.random()) == 1
 const finalText = iswelcomecn ? text : "Hello!😙"
 
@@ -73,6 +74,7 @@ setTimeout(typingNext, 1000)
                     </ElButton>
                 </div>
             </div>
+            <QuestionsTipDisplayer @askQuestion="handleAskQuestion" />
         </div>
     </div>
 </template>
@@ -80,85 +82,89 @@ setTimeout(typingNext, 1000)
 <script>
 const iswelcome = ref(true)
 const isRunning = ref(false)
-const isReady = ref(false)
-const inputText = ref('')
-const splitPatterns = ['。', "！", "？"]//['，', '。', '：', '；', '！', '？',
+const splitPatterns = ['。', "！", "？"]
+//['，', '。', '：', '；', '！', '？',
 //',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
 var responseStatus = undefined
-var onmou = false
 var isloading = ref(false)
-const interopPortal=new InteropPortal("http://localhost:8080")
-
+const interopPortal = new InteropPortal("http://localhost:8080")
 const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
 export default {
     components: {
         LyricfulResponse
     },
-    data() {
-        return {
-            renderFinish: () => {
-                isloading = false
-            },
-            onsend: async () => {
-                if (inputText.value == '') {
-                    ElNotification({
-                        type: 'warning',
-                        title: "内容不能为空！",
-                        message: "内容不能为空！",
-                    })
-                    return
-                }
-                if (isRunning.value) {
-                    this.$refs.lyricful.ttsStop()
-                    isRunning.value = false
-                    return
-                }
-                iswelcome.value = false
-                isloading.value = true
-                isRunning.value = true
-                responseStatus = true
-                this.$refs.lyricful.clearAllLyrics()
-                speechSynthesis.cancel()
-                setTimeout(function () {
-                    if (responseStatus) {
-                        showPendingTips.value = true
-                    }
-                }, 1000)
-                const response = await ollama.generate({
-                    model: 'llama3.1',
-                    prompt: await interopPortal.combinePrompt(inputText.value),
-                    stream: true
+    methods: {
+        async handleAskQuestion(question) {
+            this.inputText = question;
+            await this.onsend()
+        },
+        async onsend() {
+            if (this.inputText == '') {
+                ElNotification({
+                    type: 'warning',
+                    title: "内容不能为空！",
+                    message: "内容不能为空！",
                 })
-                var lastSentence = ''
-                for await (const part of response) {
-                    for (let index = 0; index < part.response.length; index++) {
-                        const char = part.response[index];
-                        lastSentence += char
-                        if (!isRunning.value) {
-                            this.$refs.lyricful.addSentence(lastSentence, false)
-                            break
-                        }
-                        if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
-                            continue
-                        }
-                        if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
-                            continue
-                        if (splitPatterns.indexOf(char) != -1) {
-                            this.$refs.lyricful.addSentence(lastSentence)
-                            lastSentence = ''
-                        }
-                    }
+                return
+            }
+            if (isRunning.value) {
+                this.$refs.lyricful.ttsStop()
+                isRunning.value = false
+                return
+            }
+            iswelcome.value = false
+            isloading.value = true
+            isRunning.value = true
+            responseStatus = true
+            this.$refs.lyricful.clearAllLyrics()
+            speechSynthesis.cancel()
+            setTimeout(function () {
+                if (responseStatus) {
+                    showPendingTips.value = true
+                }
+            }, 1000)
+            const response = await ollama.generate({
+                model: 'llama3.1',
+                prompt: await interopPortal.combinePrompt(this.inputText),
+                stream: true
+            })
+            var lastSentence = ''
+            for await (const part of response) {
+                for (let index = 0; index < part.response.length; index++) {
+                    const char = part.response[index];
+                    lastSentence += char
                     if (!isRunning.value) {
+                        this.$refs.lyricful.addSentence(lastSentence, false)
                         break
                     }
+                    if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
+                        continue
+                    }
+                    if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
+                        continue
+                    if (splitPatterns.indexOf(char) != -1) {
+                        this.$refs.lyricful.addSentence(lastSentence)
+                        lastSentence = ''
+                    }
                 }
+                if (!isRunning.value) {
+                    break
+                }
+            }
+            isloading.value = false
+            setTimeout(function () {
+                responseStatus = false
+                showPendingTips.value = false
+            }, 100)
+            isRunning.value = false
+        }
+    },
+    data() {
+        return {
+            inputText: ref(''),
+            renderFinish: () => {
                 isloading.value = false
-                setTimeout(function () {
-                    responseStatus = false
-                    showPendingTips.value = false
-                }, 100)
-                isRunning.value = false
             },
             lyricfulResponse: undefined
         }

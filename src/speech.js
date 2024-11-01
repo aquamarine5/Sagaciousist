@@ -1,4 +1,5 @@
 import cryptoJs from 'crypto-js';
+import { ElNotification } from 'element-plus';
 import { ref } from 'vue';
 
 const xfyunConfig = {
@@ -24,6 +25,7 @@ export default class SpeechController {
         this._audioCtx = undefined
         this._textEncoder = undefined
         this._textDecoder = undefined
+        this._audioSource=undefined
     }
     get textDecoder() {
         if (this._textDecoder == undefined) {
@@ -60,6 +62,10 @@ export default class SpeechController {
             }
             return bytes.buffer;
         }
+        /**
+         * 
+         * @param {AudioContext} audioContext 
+         */
         function playPcm(base64PcmData, sampleRate = 44100, endedcallback, audioContext, self) {
             const pcmArrayBuffer = base64ToArrayBuffer(base64PcmData);
             const pcmData = new Int16Array(pcmArrayBuffer);
@@ -76,6 +82,7 @@ export default class SpeechController {
             }
             source.connect(audioContext.destination);
             source.start();
+            self._audioSource=source
         }
         playPcm(audio, 16000, this.ttsNext, this.audioContext, this)
     }
@@ -84,7 +91,6 @@ export default class SpeechController {
      * @param {SpeechController} self 
      */
     ttsNext(self) {
-        let rs = self.refsentence.value
         console.log("pending_tts: ", JSON.parse(JSON.stringify(pending_ttslist)))
         console.log("status: ", self.refsentence.value)
         if (pending_ttslist[0].pending_audiodata[0].status == 2 ||
@@ -133,7 +139,6 @@ export default class SpeechController {
         this.isTTSReading = true;
         if (pending_ttslist.length > 0 && pending_ttslist[0].pending_audiodata.length > 0) {
             console.log("status: ", this.refsentence.value)
-
             console.log("pending_tts: ", JSON.parse(JSON.stringify(pending_ttslist)))
             this.refsentence.value[pending_ttslist[0].index][pending_ttslist[0].partIndex].status = 1
             this.ttsDecode(pending_ttslist[0].pending_audiodata[0].audio)
@@ -156,7 +161,7 @@ export default class SpeechController {
         let ws = new WebSocket(wssUrl)
         console.log("ttsSend",speechData)
         this.lyricCurrentIndex += 1;
-        var lcindex = this.lyricCurrentIndex
+        let lcindex = this.lyricCurrentIndex
         ws.onopen = () => {
             console.log("websocket connect!")
             ws.send(JSON.stringify({
@@ -181,7 +186,11 @@ export default class SpeechController {
         }
 
         ws.onerror = (err) => {
-            console.error("websocket connect err: " + err)
+            ElNotification({
+                title:"TTS连接发生错误",
+                type:"error",
+                message:err
+            })
         }
         let previousCed = 0
         let ced = '-1'
@@ -287,5 +296,10 @@ export default class SpeechController {
         this.isTTSEnabled = true
         this.isTTSReading = false
         pending_ttslist = []
+    }
+
+    ttsStop(){
+        this.ttsClear()
+        this._audioSource.stop()
     }
 }

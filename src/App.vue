@@ -1,12 +1,12 @@
 <script setup>
 
 import InteractiveColumn from './components/InteractiveColumn.vue';
-import Topbar from './components/Topbar.vue';
+import TopBar from './components/TopBar.vue';
 
 </script>
 
 <template>
-    <Topbar></Topbar>
+    <TopBar></TopBar>
     <div style="margin: 24px">
         <InteractiveColumn/>
     </div>
