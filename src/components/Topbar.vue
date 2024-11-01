@@ -6,7 +6,7 @@ const isSilent=ref(false)
 if(localStorage.getItem('silent')==null){
     localStorage.setItem('silent',false)
 }else{
-    isSilent.value=localStorage.getItem('silent')
+    isSilent.value=localStorage.getItem('silent')=='true'
 }
 function changeSilent(){
     isSilent.value=!isSilent.value

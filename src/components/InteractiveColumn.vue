@@ -74,7 +74,7 @@ setTimeout(typingNext, 1000)
                     </ElButton>
                 </div>
             </div>
-            <QuestionsTipDisplayer @askQuestion="handleAskQuestion" />
+            <QuestionsTipDisplayer v-if="iswelcome" @askQuestion="handleAskQuestion" />
         </div>
     </div>
 </template>
@@ -239,9 +239,10 @@ export default {
 }
 
 :deep(.el-textarea__inner) {
+    scroll-behavior: smooth;
     resize: none;
     font-size: 16px;
-    padding: 9px 15px;
+    padding: 9px 11px;
     animation-fill-mode: forwards;
     animation: textarea_focusOut .3s cubic-bezier(0.85, 0.01, 0.58, 1);
     border: 3px solid transparent;
@@ -261,6 +262,15 @@ export default {
 :deep(.input_el_focusOut) {
     animation-fill-mode: forwards;
     animation: textarea_focusOut .5s ease-in-out;
+}
+:deep(.input_el textarea::-webkit-scrollbar-button) {
+    display: none;
+    width: 0;
+    height: 0;
+}
+:deep(.input_el textarea) {
+    scrollbar-color: #888 transparent;
+    scrollbar-gutter: stable both-edges;
 }
 </style>
 <style>

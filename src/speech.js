@@ -287,10 +287,13 @@ export default class SpeechController {
     silentNext() {
         this.silentIsPending = true
         if (this.silentPendingList.length > 0) {
-            this.refsentence.value.push({
+            console.log("silentNext", this.silentPendingList)
+            console.log(this.refsentence.value)
+            this.refsentence.value[this.lyricCurrentIndex] = {
                 status: ref(1),
                 text: this.silentPendingList[0]
-            })
+            }
+            this.lyricCurrentIndex += 1
             this.silentPendingList.shift()
             if (this.silentPendingList.length > 0) {
                 setTimeout(() => {
@@ -299,10 +302,12 @@ export default class SpeechController {
             } else {
                 this.silentIsPending = false
             }
+        }else{
+            this.silentIsPending = false
         }
     }
     addSentence(text) {
-        if (localStorage.getItem('silent')) {
+        if (localStorage.getItem('silent')=='true') {
             this.silentPendingList.push(text)
             if (!this.silentIsPending) {
                 this.silentNext()
