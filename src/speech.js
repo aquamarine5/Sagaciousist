@@ -18,6 +18,8 @@ export default class SpeechController {
      * @param {import('vue').Ref<{},{}>} refsentence 
      */
     constructor(refsentence) {
+        this.silentIsPending = false
+        this.silentPendingList = []
         this.refsentence = refsentence
         this.lyricCurrentIndex = 0
         this.isTTSEnabled = true
@@ -25,7 +27,7 @@ export default class SpeechController {
         this._audioCtx = undefined
         this._textEncoder = undefined
         this._textDecoder = undefined
-        this._audioSource=undefined
+        this._audioSource = undefined
     }
     get textDecoder() {
         if (this._textDecoder == undefined) {
@@ -82,7 +84,7 @@ export default class SpeechController {
             }
             source.connect(audioContext.destination);
             source.start();
-            self._audioSource=source
+            self._audioSource = source
         }
         playPcm(audio, 16000, this.ttsNext, this.audioContext, this)
     }
@@ -159,7 +161,7 @@ export default class SpeechController {
         const wssUrl = xfyunConfig.hostUrl + "?authorization="
             + getAuthStr(date) + "&date=" + date + "&host=" + xfyunConfig.host
         let ws = new WebSocket(wssUrl)
-        console.log("ttsSend",speechData)
+        console.log("ttsSend", speechData)
         this.lyricCurrentIndex += 1;
         let lcindex = this.lyricCurrentIndex
         ws.onopen = () => {
@@ -187,9 +189,9 @@ export default class SpeechController {
 
         ws.onerror = (err) => {
             ElNotification({
-                title:"TTS连接发生错误",
-                type:"error",
-                message:err
+                title: "TTS连接发生错误",
+                type: "error",
+                message: err
             })
         }
         let previousCed = 0
@@ -282,13 +284,36 @@ export default class SpeechController {
             }
         }
     }
-
+    silentNext() {
+        this.silentIsPending = true
+        if (this.silentPendingList.length > 0) {
+            this.refsentence.value.push({
+                status: ref(1),
+                text: this.silentPendingList[0]
+            })
+            this.silentPendingList.shift()
+            if (this.silentPendingList.length > 0) {
+                setTimeout(() => {
+                    this.silentNext()
+                }, 500)
+            } else {
+                this.silentIsPending = false
+            }
+        }
+    }
     addSentence(text) {
-        this.ttsSend({
-            content: text,
-            status: ref(this.isTTSEnabled ? 0 : 2),
-            istts: this.isTTSEnabled
-        })
+        if (localStorage.getItem('silent')) {
+            this.silentPendingList.push(text)
+            if (!this.silentIsPending) {
+                this.silentNext()
+            }
+        } else {
+            this.ttsSend({
+                content: text,
+                status: ref(this.isTTSEnabled ? 0 : 2),
+                istts: this.isTTSEnabled
+            })
+        }
     }
 
     ttsClear() {
@@ -298,7 +323,7 @@ export default class SpeechController {
         pending_ttslist = []
     }
 
-    ttsStop(){
+    ttsStop() {
         this.ttsClear()
         this._audioSource.stop()
     }

@@ -70,12 +70,12 @@ export default {
     align-items: center;
     border-style: solid;
     width: fit-content;
-    border-color: darkslategray;
+    border-color: gray;
     border-width: 2px;
     cursor: pointer;
 }
 
-.tips_forcontainer{
+.tips_forcontainer {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;

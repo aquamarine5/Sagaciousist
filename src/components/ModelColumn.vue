@@ -8,11 +8,10 @@
 <script>
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { ElNotification } from 'element-plus';
-import { AnimationMixer, AmbientLight, PerspectiveCamera, Scene, WebGLRenderer, Clock, LoopRepeat, LoopOnce } from 'three';
+import { AnimationMixer, AmbientLight, PerspectiveCamera, Scene, WebGLRenderer, Clock, LoopRepeat } from 'three';
 export default {
     methods: {
         playAnimate() {
-            console.log(12)
             this.idleAction.loop = LoopRepeat
             this.idleAction.play()
             const clock = new Clock()
@@ -42,7 +41,7 @@ export default {
         renderer.setClearAlpha(0)
         scene.background = null
         scene.add(new AmbientLight(0xFFFFFF, 4))
-        renderer.setSize((window.innerWidth-70) / 2, (window.innerWidth-70) / 2)
+        renderer.setSize((window.innerWidth - 70) / 2, (window.innerWidth - 70) / 2)
         function animate() {
             renderer.render(scene, camera);
         }
@@ -52,7 +51,7 @@ export default {
             console.log(gltf)
             this.obj3d = gltf.scene
             var mixer = new AnimationMixer(gltf.scene);
-            this.animateMixer=mixer
+            this.animateMixer = mixer
             gltf.scene.rotateY(0.3)
             gltf.scene.scale.set(2.5, 2.5, 2.5)
             //gltf.scene.scale.set(3, 3, 3)
