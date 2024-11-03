@@ -2,7 +2,6 @@
 import SpeechController from '@/speech';
 import { ref } from 'vue';
 
-const props = defineProps(["isloading"])
 var sentenceStatus = [
     'lyricful_before_read',
     'lyricful_reading',
@@ -37,8 +36,9 @@ defineExpose({
 
 <template>
     <div class="lyricful_container">
-        <div class="lyricful_sentence" v-for="(sentence,ced) in lyricful_data"
-            :id="ced">
+         <!-- eslint-disable-next-line vue/require-v-for-key, vue/no-unused-vars -->
+        <div class="lyricful_sentence" v-for="(sentence,ced) in lyricful_data" :key="ced">
+            <!-- eslint-disable-next-line vue/require-v-for-key -->
             <span :class="'lyricful_part ' + sentenceStatus[textpart.status]" v-for="textpart in sentence">
                 {{ textpart.text }}
             </span>
