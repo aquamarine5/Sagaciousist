@@ -131,6 +131,7 @@ export default {
             })
             var lastSentence = ''
             for await (const part of response) {
+                //console.log(part)
                 for (let index = 0; index < part.response.length; index++) {
                     const char = part.response[index];
                     lastSentence += char
@@ -239,6 +240,10 @@ export default {
 }
 
 :deep(.el-textarea__inner) {
+    overflow: auto;
+    overflow-x:hidden;
+    scrollbar-color: #888 transparent;
+    scrollbar-gutter: stable;
     scroll-behavior: smooth;
     resize: none;
     font-size: 16px;
@@ -262,15 +267,6 @@ export default {
 :deep(.input_el_focusOut) {
     animation-fill-mode: forwards;
     animation: textarea_focusOut .5s ease-in-out;
-}
-:deep(.input_el textarea::-webkit-scrollbar-button) {
-    display: none;
-    width: 0;
-    height: 0;
-}
-:deep(.input_el textarea) {
-    scrollbar-color: #888 transparent;
-    scrollbar-gutter: stable both-edges;
 }
 </style>
 <style>

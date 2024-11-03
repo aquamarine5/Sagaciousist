@@ -37,7 +37,7 @@ defineExpose({
 <template>
     <div class="lyricful_container">
          <!-- eslint-disable-next-line vue/require-v-for-key, vue/no-unused-vars -->
-        <div class="lyricful_sentence" v-for="(sentence,ced) in lyricful_data">
+        <div class="lyricful_sentence" v-for="(sentence,ced) in lyricful_data" :key="ced">
             <!-- eslint-disable-next-line vue/require-v-for-key -->
             <span :class="'lyricful_part ' + sentenceStatus[textpart.status]" v-for="textpart in sentence">
                 {{ textpart.text }}

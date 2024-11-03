@@ -287,30 +287,31 @@ export default class SpeechController {
     silentNext() {
         this.silentIsPending = true
         if (this.silentPendingList.length > 0) {
-            console.log("silentNext", this.silentPendingList)
-            console.log(this.refsentence.value)
-            this.refsentence.value[this.lyricCurrentIndex] = {
+            this.refsentence.value[this.lyricCurrentIndex] = [{
                 status: ref(1),
                 text: this.silentPendingList[0]
-            }
+            }]
             this.lyricCurrentIndex += 1
             this.silentPendingList.shift()
             if (this.silentPendingList.length > 0) {
                 setTimeout(() => {
                     this.silentNext()
+                    console.log("X", JSON.parse(JSON.stringify(this.silentPendingList)))
                 }, 500)
             } else {
                 this.silentIsPending = false
             }
-        }else{
+        } else {
             this.silentIsPending = false
         }
     }
     addSentence(text) {
-        if (localStorage.getItem('silent')=='true') {
+        if (localStorage.getItem('silent') == 'true') {
             this.silentPendingList.push(text)
+            console.log(this.silentIsPending)
             if (!this.silentIsPending) {
                 this.silentNext()
+                console.log(1)
             }
         } else {
             this.ttsSend({
@@ -326,10 +327,13 @@ export default class SpeechController {
         this.isTTSEnabled = true
         this.isTTSReading = false
         pending_ttslist = []
+        this.silentPendingList = []
+        this.silentIsPending=false
+        this.ttsStop()
     }
 
     ttsStop() {
-        this.ttsClear()
-        this._audioSource.stop()
+        if(this._audioSource!=undefined)
+            this._audioSource.stop()
     }
 }
