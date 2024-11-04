@@ -124,14 +124,26 @@ export default {
                     showPendingTips.value = true
                 }
             }, 1000)
-            const response = await ollama.generate({
+            if(import.meta.env.MODE=="pages"){
+                [
+                    "抱歉，由于当前环境限制，基于Github Pages的 Sagaciousist 无法使用此功能。",
+                    "请在本地运行项目以使用此功能。",
+                    "但是，我可以给你唱歌哦！",
+                    "笨笨的我，傻傻的活",
+                    "容易感动没有心机",
+                    "吃了亏还不知道长记性",
+                    "一路走来我不优秀",
+                    "但我善良不虚伪",
+                    "———— 那艺娜《笨笨的我傻傻的活》"
+                ].forEach((v)=>this.$refs.lyricful.addSentence(v))
+            }else{
+                const response = await ollama.generate({
                 model: 'llama3.1',
                 prompt: await interopPortal.combinePrompt(this.inputText),
                 stream: true
             })
             var lastSentence = ''
             for await (const part of response) {
-                //console.log(part)
                 for (let index = 0; index < part.response.length; index++) {
                     const char = part.response[index];
                     lastSentence += char
@@ -153,6 +165,8 @@ export default {
                     break
                 }
             }
+            }
+            
             isloading.value = false
             setTimeout(function () {
                 responseStatus = false
