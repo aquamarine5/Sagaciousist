@@ -25,7 +25,7 @@ export default {
     },
     methods: {
         loadQuestions() {
-            axios.get("/QuestionsTip.csv")
+            axios.get("QuestionsTip.csv")
                 .then(response => {
                     this.questions = response.data.split('\n').map(row => row.trim()).filter(row => row);
                     this.selectRandomQuestions();

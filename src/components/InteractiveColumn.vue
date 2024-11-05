@@ -68,8 +68,8 @@ setTimeout(typingNext, 1000)
                     placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
                 <div :class="!isRunning ? 'container_btn_send' : 'container_btn_send btn_send_gradient'">
                     <ElButton v-wave :type="'primary'" @click="onsend" circle>
-                        <MdiSendVariant v-if="!isloading"/>
-                        <LineMdLoadingTwotoneLoop v-else/>
+                        <MdiSendVariant v-if="!isloading" />
+                        <LineMdLoadingTwotoneLoop v-else />
                     </ElButton>
                 </div>
             </div>
@@ -123,7 +123,7 @@ export default {
                     showPendingTips.value = true
                 }
             }, 1000)
-            if(import.meta.env.MODE=="pages"){
+            if (import.meta.env.MODE == "pages") {
                 [
                     "抱歉，由于当前环境限制，基于Github Pages的 Sagaciousist 无法使用此功能。",
                     "请在本地运行项目以使用此功能。",
@@ -134,38 +134,38 @@ export default {
                     "一路走来我不优秀",
                     "但我善良不虚伪",
                     "———— 那艺娜《笨笨的我傻傻的活》"
-                ].forEach((v)=>this.$refs.lyricful.addSentence(v))
-            }else{
+                ].forEach((v) => this.$refs.lyricful.addSentence(v))
+            } else {
                 const response = await ollama.generate({
-                model: 'llama3.1',
-                prompt: await interopPortal.combinePrompt(this.inputText),
-                stream: true
-            })
-            var lastSentence = ''
-            for await (const part of response) {
-                for (let index = 0; index < part.response.length; index++) {
-                    const char = part.response[index];
-                    lastSentence += char
+                    model: 'llama3.1',
+                    prompt: await interopPortal.combinePrompt(this.inputText),
+                    stream: true
+                })
+                var lastSentence = ''
+                for await (const part of response) {
+                    for (let index = 0; index < part.response.length; index++) {
+                        const char = part.response[index];
+                        lastSentence += char
+                        if (!isRunning.value) {
+                            this.$refs.lyricful.addSentence(lastSentence, false)
+                            break
+                        }
+                        if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
+                            continue
+                        }
+                        if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
+                            continue
+                        if (splitPatterns.indexOf(char) != -1) {
+                            this.$refs.lyricful.addSentence(lastSentence)
+                            lastSentence = ''
+                        }
+                    }
                     if (!isRunning.value) {
-                        this.$refs.lyricful.addSentence(lastSentence, false)
                         break
                     }
-                    if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
-                        continue
-                    }
-                    if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
-                        continue
-                    if (splitPatterns.indexOf(char) != -1) {
-                        this.$refs.lyricful.addSentence(lastSentence)
-                        lastSentence = ''
-                    }
-                }
-                if (!isRunning.value) {
-                    break
                 }
             }
-            }
-            
+
             isloading.value = false
             setTimeout(function () {
                 responseStatus = false
@@ -254,7 +254,7 @@ export default {
 
 :deep(.el-textarea__inner) {
     overflow: auto;
-    overflow-x:hidden;
+    overflow-x: hidden;
     scrollbar-color: #888 transparent;
     scrollbar-gutter: stable;
     scroll-behavior: smooth;
