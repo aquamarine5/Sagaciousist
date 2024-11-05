@@ -47,7 +47,7 @@ export default {
         }
         renderer.setAnimationLoop(animate);
         const loader = new GLTFLoader()
-        loader.load(import.meta.env.MODE=="pages"?"Sagaciousist/sugardontstop.glb":"sugardontstop.glb", gltf => {
+        loader.load("sugardontstop.glb", gltf => {
             console.log(gltf)
             this.obj3d = gltf.scene
             var mixer = new AnimationMixer(gltf.scene);

@@ -1,11 +1,12 @@
 <script setup>
-import { ElButton, ElIcon, ElInput, ElNotification } from 'element-plus';
+import { ElButton, ElInput, ElNotification } from 'element-plus';
 import { Ollama } from 'ollama/src/browser';
 import ModelColumn from './ModelColumn.vue';
 import { ref } from 'vue';
+import MdiSendVariant from '~icons/mdi/send-variant?width=1.3em&height=1.3em';
+import LineMdLoadingTwotoneLoop from '~icons/line-md/loading-twotone-loop?width=1.8em&height=1.8em';
 import LyricfulResponse from './LyricfulResponse.vue';
 import { ContentLoader } from 'vue-content-loader';
-import { Loading, Select } from '@element-plus/icons-vue';
 import InteropPortal from '@/interop';
 import QuestionsTipDisplayer from './QuestionsTipDisplayer.vue';
 
@@ -67,10 +68,8 @@ setTimeout(typingNext, 1000)
                     placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
                 <div :class="!isRunning ? 'container_btn_send' : 'container_btn_send btn_send_gradient'">
                     <ElButton v-wave :type="'primary'" @click="onsend" circle>
-                        <ElIcon size="16">
-                            <Select v-if="!isRunning" />
-                            <Loading class="is-loading" v-else />
-                        </ElIcon>
+                        <MdiSendVariant v-if="!isloading"/>
+                        <LineMdLoadingTwotoneLoop v-else/>
                     </ElButton>
                 </div>
             </div>
