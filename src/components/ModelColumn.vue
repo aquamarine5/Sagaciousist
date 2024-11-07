@@ -1,8 +1,9 @@
 <script setup>
+const isShowModel=import.meta.env.MODE !== 'nomodel'
 </script>
 
 <template>
-    <div class="three_renderer"></div>
+    <div class="three_renderer" v-if="isShowModel"></div>
 </template>
 
 <script>
@@ -31,6 +32,7 @@ export default {
         }
     },
     mounted() {
+        if(!isShowModel) return
         const scene = new Scene()
         const camera = new PerspectiveCamera()
         camera.position.set(0, 3, 3)
@@ -47,7 +49,7 @@ export default {
         }
         renderer.setAnimationLoop(animate);
         const loader = new GLTFLoader()
-        loader.load("sugardontstop.glb", gltf => {
+        loader.loadAsync("sugardontstop.glb").then(gltf => {
             console.log(gltf)
             this.obj3d = gltf.scene
             var mixer = new AnimationMixer(gltf.scene);
@@ -65,14 +67,14 @@ export default {
                 mixer.update(clock.getDelta())
             }
             loop()
-        }, undefined, error => {
+            document.getElementsByClassName("three_renderer")[0].appendChild(renderer.domElement)
+        }).catch(error=>{
             ElNotification({
                 type: "error",
                 title: "Failed when load the model.",
                 message: error
             })
         })
-        document.getElementsByClassName("three_renderer")[0].appendChild(renderer.domElement)
     }
 }
 </script>
