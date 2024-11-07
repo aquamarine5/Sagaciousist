@@ -20,9 +20,10 @@ service.interceptors.response.use(
     },
     error => {
         console.log(error);
+        let message=error.response?error.response.data?error.response.data.message:undefined:undefined;
         ElNotification({
             title: error.message,
-            message: error.response.data.message || '发生未知错误',
+            message: message,
             type: 'error',
         });
         return Promise.reject(error);

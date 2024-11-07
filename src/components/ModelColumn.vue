@@ -1,5 +1,5 @@
 <script setup>
-const isShowModel=import.meta.env.MODE !== 'nomodel'
+
 </script>
 
 <template>
@@ -7,6 +7,7 @@ const isShowModel=import.meta.env.MODE !== 'nomodel'
 </template>
 
 <script>
+const isShowModel=import.meta.env.MODE !== 'nomodel'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { ElNotification } from 'element-plus';
 import { AnimationMixer, AmbientLight, PerspectiveCamera, Scene, WebGLRenderer, Clock, LoopRepeat } from 'three';
