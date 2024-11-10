@@ -1,13 +1,13 @@
 <script setup>
-
+const isNoModel = import.meta.env.MODE === 'nomodel';
 </script>
 
 <template>
-    <div class="three_renderer" v-if="isShowModel"></div>
+    <div class="three_renderer" v-if="!isNoModel"></div>
 </template>
 
 <script>
-const isShowModel=import.meta.env.MODE !== 'nomodel'
+
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { ElNotification } from 'element-plus';
 import { AnimationMixer, AmbientLight, PerspectiveCamera, Scene, WebGLRenderer, Clock, LoopRepeat } from 'three';
@@ -33,7 +33,7 @@ export default {
         }
     },
     mounted() {
-        if(!isShowModel) return
+        if(import.meta.env.MODE == 'nomodel') return
         const scene = new Scene()
         const camera = new PerspectiveCamera()
         camera.position.set(0, 3, 3)

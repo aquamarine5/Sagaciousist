@@ -93,7 +93,7 @@ typingNext()
 const isselecting = ref(true)
 const iswelcome = ref(true)
 const isRunning = ref(false)
-const splitPatterns = ['。', "！", "？"]
+// const splitPatterns = ['。', "！", "？"]
 //['，', '。', '：', '；', '！', '？',
 //',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
@@ -138,6 +138,7 @@ export default {
             responseStatus = true
             this.$refs.lyricful.clearAllLyrics()
             speechSynthesis.cancel()
+            const seg=new Intl.Segmenter("zh", {granularity: "sentence"})
             setTimeout(function () {
                 if (responseStatus) {
                     showPendingTips.value = true
@@ -175,10 +176,16 @@ export default {
                         }
                         if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
                             continue
-                        if (splitPatterns.indexOf(char) != -1) {
-                            this.$refs.lyricful.addSentence(lastSentence)
-                            lastSentence = ''
+                        const th = Array.from(seg.segment(lastSentence))
+                        if(th.length>1){
+                            this.$refs.lyricful.addSentence(th[0].segment)
+                            lastSentence = th[1].segment
                         }
+                        
+                        // if (splitPatterns.indexOf(char) != -1) {
+                        //     this.$refs.lyricful.addSentence(lastSentence)
+                        //     lastSentence = ''
+                        // }
                     }
                     if (!isRunning.value) {
                         break

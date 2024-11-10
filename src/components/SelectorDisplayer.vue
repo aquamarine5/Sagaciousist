@@ -94,7 +94,7 @@ export default {
 
 .selector_container {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
 }
 
 button {

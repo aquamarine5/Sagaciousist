@@ -306,6 +306,7 @@ export default class SpeechController {
         }
     }
     addSentence(text) {
+        text=text.replace("*","")
         if (localStorage.getItem('silent') == 'true') {
             this.silentPendingList.push(text)
             console.log(this.silentIsPending)
