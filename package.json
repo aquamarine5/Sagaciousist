@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "single": "vite --mode single",
-    "pages":"vite build --mode pages"
+    "pages": "vite build --mode pages"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
+    "@gradio/client": "^1.7.1",
     "@types/crypto-js": "^4.2.2",
     "@vitejs/plugin-vue": "^5.0.5",
     "eslint": "^9.14.0",
