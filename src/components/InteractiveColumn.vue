@@ -57,20 +57,20 @@ typingNext()
                 </ContentLoader>
                 <LyricfulResponse ref="lyricful" :isloading="isloading" />
             </div>
-            <div class="selector_result" v-if="!isselecting&&iswelcome">
+            <div class="selector_result" v-if="!isselecting && iswelcome">
                 <div class="selector_leftpart" @click="reselectMode">
-                    <LineMdArrowSmallLeft class="selector_result_icon"/>
+                    <LineMdArrowSmallLeft class="selector_result_icon" />
                     重新选择
                 </div>
                 <div class="selector_rightpart">
-                    <LineMdTextBoxMultipleTwotone class="selector_result_icon" v-if="model==='book'"/>
-                    <LineMdFileSearchTwotone class="selector_result_icon" v-else-if="model==='history'"/>
+                    <LineMdTextBoxMultipleTwotone class="selector_result_icon" v-if="model === 'book'" />
+                    <LineMdFileSearchTwotone class="selector_result_icon" v-else-if="model === 'history'" />
                     <span class="selector_result_icon" v-else></span>
-                    {{ model==='book' ? '书籍相关提问模式' : model==='history'?'历史事件提问模式':"?" }}
+                    {{ model === 'book' ? '书籍相关提问模式' : model === 'history' ? '历史事件提问模式' : "?" }}
                 </div>
 
             </div>
-            <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="iswelcome||isselecting">
+            <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="iswelcome || isselecting">
                 {{ typingText }}
             </div>
             <SelectorDisplayer v-if="isselecting" @modeSelected="handleModeSelected" />
@@ -84,7 +84,7 @@ typingNext()
                     </ElButton>
                 </div>
             </div>
-            <QuestionsTipDisplayer v-if="iswelcome&&!isselecting" @askQuestion="handleAskQuestion" />
+            <QuestionsTipDisplayer v-if="iswelcome && !isselecting" @askQuestion="handleAskQuestion" />
         </div>
     </div>
 </template>
@@ -98,7 +98,7 @@ const isRunning = ref(false)
 //',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
 var responseStatus = undefined
-var model=undefined
+var model = undefined
 var isloading = ref(false)
 const interopPortal = new InteropPortal("http://localhost:8080")
 const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
@@ -112,11 +112,11 @@ export default {
             await this.onsend()
         },
         handleModeSelected(mode) {
-            model=mode
+            model = mode
             isselecting.value = false
         },
-        reselectMode(){
-            isselecting.value=true
+        reselectMode() {
+            isselecting.value = true
         },
         async onsend() {
             if (this.inputText == '') {
@@ -138,7 +138,7 @@ export default {
             responseStatus = true
             this.$refs.lyricful.clearAllLyrics()
             speechSynthesis.cancel()
-            const seg=new Intl.Segmenter("zh", {granularity: "sentence"})
+            const seg = new Intl.Segmenter("zh", { granularity: "sentence" })
             setTimeout(function () {
                 if (responseStatus) {
                     showPendingTips.value = true
@@ -177,11 +177,19 @@ export default {
                         if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
                             continue
                         const th = Array.from(seg.segment(lastSentence))
-                        if(th.length>1){
+                        console.log(th)
+                        if (th.length > 1) {
+                            if (/[0-9]\..*/.test(th[0].segment)) {
+                                if (th.length > 2) {
+                                    this.$refs.lyricful.addSentence(th[0].segment + th[1].segment)
+                                    lastSentence = th[2].segment
+                                } else continue
+                            }
+                            if(th[0].segment == "\n") continue
                             this.$refs.lyricful.addSentence(th[0].segment)
                             lastSentence = th[1].segment
                         }
-                        
+
                         // if (splitPatterns.indexOf(char) != -1) {
                         //     this.$refs.lyricful.addSentence(lastSentence)
                         //     lastSentence = ''
@@ -190,6 +198,9 @@ export default {
                     if (!isRunning.value) {
                         break
                     }
+                }
+                if (lastSentence != '') {
+                    this.$refs.lyricful.addSentence(lastSentence)
                 }
             }
 
@@ -310,14 +321,16 @@ export default {
 }
 </style>
 <style>
-.selector_result_icon{
+.selector_result_icon {
     padding-right: 4px;
 }
-.selector_result{
+
+.selector_result {
     display: flex;
     padding-bottom: 8px;
 }
-.selector_leftpart{
+
+.selector_leftpart {
     border-radius: 6px 0px 0px 6px;
     border-color: gray;
     border-width: 2px;
@@ -328,7 +341,8 @@ export default {
     font-size: 12px;
     cursor: pointer;
 }
-.selector_rightpart{
+
+.selector_rightpart {
     border-radius: 0px 6px 6px 0px;
     border-color: gray;
     border-width: 2px 2px 2px 0px;
@@ -338,6 +352,7 @@ export default {
     align-items: center;
     font-size: 12px;
 }
+
 .welcome_tips_cn {
     white-space: nowrap;
     font-size: 30px;
