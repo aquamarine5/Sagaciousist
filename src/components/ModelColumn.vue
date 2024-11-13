@@ -1,11 +1,13 @@
 <script setup>
+const isNoModel = import.meta.env.MODE === 'nomodel';
 </script>
 
 <template>
-    <div class="three_renderer"></div>
+    <div class="three_renderer" v-if="!isNoModel"></div>
 </template>
 
 <script>
+
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { ElNotification } from 'element-plus';
 import { AnimationMixer, AmbientLight, PerspectiveCamera, Scene, WebGLRenderer, Clock, LoopRepeat } from 'three';
@@ -31,6 +33,7 @@ export default {
         }
     },
     mounted() {
+        if(import.meta.env.MODE == 'nomodel') return
         const scene = new Scene()
         const camera = new PerspectiveCamera()
         camera.position.set(0, 3, 3)
@@ -47,7 +50,7 @@ export default {
         }
         renderer.setAnimationLoop(animate);
         const loader = new GLTFLoader()
-        loader.load("src\\assets\\models\\sugardontstop.glb", gltf => {
+        loader.loadAsync("sugardontstop.glb").then(gltf => {
             console.log(gltf)
             this.obj3d = gltf.scene
             var mixer = new AnimationMixer(gltf.scene);
@@ -65,14 +68,14 @@ export default {
                 mixer.update(clock.getDelta())
             }
             loop()
-        }, undefined, error => {
+            document.getElementsByClassName("three_renderer")[0].appendChild(renderer.domElement)
+        }).catch(error=>{
             ElNotification({
                 type: "error",
                 title: "Failed when load the model.",
                 message: error
             })
         })
-        document.getElementsByClassName("three_renderer")[0].appendChild(renderer.domElement)
     }
 }
 </script>

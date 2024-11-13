@@ -1,13 +1,18 @@
 <script setup>
-import { ElButton, ElIcon, ElInput, ElNotification } from 'element-plus';
+import { ElButton, ElInput, ElNotification } from 'element-plus';
 import { Ollama } from 'ollama/src/browser';
 import ModelColumn from './ModelColumn.vue';
 import { ref } from 'vue';
+import MdiSendVariant from '~icons/mdi/send-variant?width=1.3em&height=1.3em';
+import LineMdLoadingTwotoneLoop from '~icons/line-md/loading-twotone-loop?width=1.8em&height=1.8em';
 import LyricfulResponse from './LyricfulResponse.vue';
 import { ContentLoader } from 'vue-content-loader';
-import { Loading, Select } from '@element-plus/icons-vue';
 import InteropPortal from '@/interop';
 import QuestionsTipDisplayer from './QuestionsTipDisplayer.vue';
+import SelectorDisplayer from './SelectorDisplayer.vue';
+import LineMdArrowSmallLeft from '~icons/line-md/arrow-small-left?width=16px&height=16px';
+import LineMdTextBoxMultipleTwotone from '~icons/line-md/text-box-multiple-twotone?width=16px&height=16px';
+import LineMdFileSearchTwotone from '~icons/line-md/file-search-twotone?width=16px&height=16px';
 
 
 let nowtime = new Date().getHours()
@@ -37,14 +42,14 @@ function typingNext() {
         setTimeout(typingNext, 200)
     }
 }
-setTimeout(typingNext, 1000)
+typingNext()
 </script>
 
 <template>
     <div class="main_container">
         <ModelColumn ref="model" />
         <div :class="iswelcome ? 'app_container' : 'app_container app_container_justified'">
-            <div class="result_container">
+            <div class="result_container" v-if="!isselecting">
                 <ContentLoader viewBox="0 0 250 60" v-if="isloading">
                     <rect x="0" y="0" rx="3" ry="3" width="170" height="10" />
                     <rect x="0" y="20" rx="3" ry="3" width="220" height="10" />
@@ -52,41 +57,48 @@ setTimeout(typingNext, 1000)
                 </ContentLoader>
                 <LyricfulResponse ref="lyricful" :isloading="isloading" />
             </div>
-            <!-- <div class="result_tips" v-if="isReady">
-                <Transition name="fade">
-                    <div class="result_pending" v-if="showPendingTips">
-                        请稍等，这比我们想象中的慢。
-                    </div>
-                </Transition>
-            </div> -->
-            <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="iswelcome">
+            <div class="selector_result" v-if="!isselecting && iswelcome">
+                <div class="selector_leftpart" @click="reselectMode">
+                    <LineMdArrowSmallLeft class="selector_result_icon" />
+                    重新选择
+                </div>
+                <div class="selector_rightpart">
+                    <LineMdTextBoxMultipleTwotone class="selector_result_icon" v-if="model === 'book'" />
+                    <LineMdFileSearchTwotone class="selector_result_icon" v-else-if="model === 'history'" />
+                    <span class="selector_result_icon" v-else></span>
+                    {{ model === 'book' ? '书籍相关提问模式' : model === 'history' ? '历史事件提问模式' : "?" }}
+                </div>
+
+            </div>
+            <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="iswelcome || isselecting">
                 {{ typingText }}
             </div>
-            <div class="input_container">
+            <SelectorDisplayer v-if="isselecting" @modeSelected="handleModeSelected" />
+            <div class="input_container" v-if="!isselecting">
                 <ElInput :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputText" type="textarea"
                     placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
                 <div :class="!isRunning ? 'container_btn_send' : 'container_btn_send btn_send_gradient'">
                     <ElButton v-wave :type="'primary'" @click="onsend" circle>
-                        <ElIcon size="16">
-                            <Select v-if="!isRunning" />
-                            <Loading class="is-loading" v-else />
-                        </ElIcon>
+                        <MdiSendVariant v-if="!isloading" />
+                        <LineMdLoadingTwotoneLoop v-else />
                     </ElButton>
                 </div>
             </div>
-            <QuestionsTipDisplayer v-if="iswelcome" @askQuestion="handleAskQuestion" />
+            <QuestionsTipDisplayer v-if="iswelcome && !isselecting" @askQuestion="handleAskQuestion" />
         </div>
     </div>
 </template>
 
 <script>
+const isselecting = ref(true)
 const iswelcome = ref(true)
 const isRunning = ref(false)
-const splitPatterns = ['。', "！", "？"]
+// const splitPatterns = ['。', "！", "？"]
 //['，', '。', '：', '；', '！', '？',
 //',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
 var responseStatus = undefined
+var model = undefined
 var isloading = ref(false)
 const interopPortal = new InteropPortal("http://localhost:8080")
 const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
@@ -98,6 +110,13 @@ export default {
         async handleAskQuestion(question) {
             this.inputText = question;
             await this.onsend()
+        },
+        handleModeSelected(mode) {
+            model = mode
+            isselecting.value = false
+        },
+        reselectMode() {
+            isselecting.value = true
         },
         async onsend() {
             if (this.inputText == '') {
@@ -119,12 +138,13 @@ export default {
             responseStatus = true
             this.$refs.lyricful.clearAllLyrics()
             speechSynthesis.cancel()
+            const seg = new Intl.Segmenter("zh", { granularity: "sentence" })
             setTimeout(function () {
                 if (responseStatus) {
                     showPendingTips.value = true
                 }
             }, 1000)
-            if(import.meta.env.MODE=="pages"){
+            if (import.meta.env.MODE == "pages") {
                 [
                     "抱歉，由于当前环境限制，基于Github Pages的 Sagaciousist 无法使用此功能。",
                     "请在本地运行项目以使用此功能。",
@@ -135,38 +155,55 @@ export default {
                     "一路走来我不优秀",
                     "但我善良不虚伪",
                     "———— 那艺娜《笨笨的我傻傻的活》"
-                ].forEach((v)=>this.$refs.lyricful.addSentence(v))
-            }else{
+                ].forEach((v) => this.$refs.lyricful.addSentence(v))
+            } else {
                 const response = await ollama.generate({
-                model: 'llama3.1',
-                prompt: await interopPortal.combinePrompt(this.inputText),
-                stream: true
-            })
-            var lastSentence = ''
-            for await (const part of response) {
-                for (let index = 0; index < part.response.length; index++) {
-                    const char = part.response[index];
-                    lastSentence += char
+                    model: 'llama3.1',
+                    prompt: await interopPortal.combinePrompt(this.inputText),
+                    stream: true
+                })
+                var lastSentence = ''
+                for await (const part of response) {
+                    for (let index = 0; index < part.response.length; index++) {
+                        const char = part.response[index];
+                        lastSentence += char
+                        if (!isRunning.value) {
+                            this.$refs.lyricful.addSentence(lastSentence, false)
+                            break
+                        }
+                        if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
+                            continue
+                        }
+                        if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
+                            continue
+                        const th = Array.from(seg.segment(lastSentence))
+                        console.log(th)
+                        if (th.length > 1) {
+                            if (/[0-9]\..*/.test(th[0].segment)) {
+                                if (th.length > 2) {
+                                    this.$refs.lyricful.addSentence(th[0].segment + th[1].segment)
+                                    lastSentence = th[2].segment
+                                } else continue
+                            }
+                            if(th[0].segment == "\n") continue
+                            this.$refs.lyricful.addSentence(th[0].segment)
+                            lastSentence = th[1].segment
+                        }
+
+                        // if (splitPatterns.indexOf(char) != -1) {
+                        //     this.$refs.lyricful.addSentence(lastSentence)
+                        //     lastSentence = ''
+                        // }
+                    }
                     if (!isRunning.value) {
-                        this.$refs.lyricful.addSentence(lastSentence, false)
                         break
                     }
-                    if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
-                        continue
-                    }
-                    if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
-                        continue
-                    if (splitPatterns.indexOf(char) != -1) {
-                        this.$refs.lyricful.addSentence(lastSentence)
-                        lastSentence = ''
-                    }
                 }
-                if (!isRunning.value) {
-                    break
+                if (lastSentence != '') {
+                    this.$refs.lyricful.addSentence(lastSentence)
                 }
             }
-            }
-            
+
             isloading.value = false
             setTimeout(function () {
                 responseStatus = false
@@ -255,7 +292,7 @@ export default {
 
 :deep(.el-textarea__inner) {
     overflow: auto;
-    overflow-x:hidden;
+    overflow-x: hidden;
     scrollbar-color: #888 transparent;
     scrollbar-gutter: stable;
     scroll-behavior: smooth;
@@ -284,6 +321,38 @@ export default {
 }
 </style>
 <style>
+.selector_result_icon {
+    padding-right: 4px;
+}
+
+.selector_result {
+    display: flex;
+    padding-bottom: 8px;
+}
+
+.selector_leftpart {
+    border-radius: 6px 0px 0px 6px;
+    border-color: gray;
+    border-width: 2px;
+    border-style: solid;
+    padding: 3px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.selector_rightpart {
+    border-radius: 0px 6px 6px 0px;
+    border-color: gray;
+    border-width: 2px 2px 2px 0px;
+    border-style: solid;
+    padding: 3px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+}
+
 .welcome_tips_cn {
     white-space: nowrap;
     font-size: 30px;
