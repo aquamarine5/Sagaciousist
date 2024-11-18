@@ -82,7 +82,7 @@ setTimeout(typingNext, 1000)
 <script>
 const iswelcome = ref(true)
 const isRunning = ref(false)
-const splitPatterns = ['。', "！", "？"]
+const splitPatterns = ['。', "！", "？","，","：","；"]
 //['，', '。', '：', '；', '！', '？',
 //',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)

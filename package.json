@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "single": "vite --mode single",
-    "pages": "vite build --mode pages"
+    "pages": "vite build --mode pages",
+    "server":"node ttsbridge/server.js"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
