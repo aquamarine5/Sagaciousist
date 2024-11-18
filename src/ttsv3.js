@@ -1,5 +1,5 @@
 import { ref } from "vue";
-import wnetwork from "./wnetwork";
+import axios from "axios";
 
 export default class SpeechControllerV3 {
     /**
@@ -7,14 +7,24 @@ export default class SpeechControllerV3 {
      */
     constructor(refsentence) {
         this.refsentence = refsentence
-        this.audioContext = new AudioContext()
+        this._audioContext = null
         this.pendingTTSList = []
         this.isTTSPlaying = false
+        this.isMuteDisplaying=false
         this._currentIndex=0
         this.ismute=localStorage.getItem('silent')=='true'
     }
     /**
-     * @param {{sentence:string, base64str:string}} audiodata
+     * @returns {AudioContext}
+     */
+    get audioContext() {
+        if (!this._audioContext) {
+            this._audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        return this._audioContext;
+    }
+    /**
+     * @param {*} audiodata
      */
     ttsPlay(audiodata) {
         /**
@@ -42,14 +52,15 @@ export default class SpeechControllerV3 {
                 source.buffer = buffer;
                 source.connect(audioContext.destination);
                 source.onended = endedCallback;
-                source.start(0);
+                console.log(source)
+                source.start();
             }, (error) => {
                 console.error('解码音频数据时出错:', error);
             });
         }
         let index=this.showSentence(audiodata)
         playBase64Audio(audiodata.base64str, this.audioContext, () => {
-            this.refsentence.value[index].status.value = 2
+            this.refsentence.value[index].status = 2
             this.ttsNext()
         });
     }
@@ -59,30 +70,45 @@ export default class SpeechControllerV3 {
      */
     showSentence(audiodata) {
         if(audiodata.issplit){
-            this._currentIndex++;
-            this.refsentence.value.push([])
+            this._currentIndex+=1;
+            this.refsentence.value.push(ref([]))
         }
+        console.log(this.refsentence.value[this._currentIndex])
         this.refsentence.value[this._currentIndex].push({
-            sentence: audiodata.sentence,
+            text: audiodata.text,
             status: ref(1)
         })
         return this.refsentence.value.length - 1
     }
     ttsRequest(audiodata) {
-        wnetwork.get("/tts", { text: audiodata.sentence }).then((response) => {
+        if(audiodata.text=="\n"){
+            console.warn("?")
+            return
+        }
+        axios.post("http://localhost:1114/tts", { text: audiodata.text }).then((response) => {
             audiodata.base64str = response.data.audio
+            console.log(this)
             if (!this.isTTSPlaying) {
                 this.isTTSPlaying = true
-                this.ttsPlay(this.pendingTTSList.shift())
+                console.log(audiodata)
+                if(this.pendingTTSList.length>0&&this.pendingTTSList[0].base64str!=null){
+                    this.ttsPlay(this.pendingTTSList.shift())
+                }
             }
         })
     }
     ttsNext() {
+        console.log(this.pendingTTSList.length)
         if (this.pendingTTSList.length > 0) {
             this.ttsPlay(this.pendingTTSList.shift())
         } else {
             this.isTTSPlaying = false
         }
+    }
+    ttsClear(){
+        this.refsentence.value=[[]]
+        this._currentIndex=0
+        this.pendingTTSList=[]
     }
     /**
      * @param {boolean} status 
@@ -96,11 +122,29 @@ export default class SpeechControllerV3 {
      */
     addSentence(sentence,issplit=false) {
         this.pendingTTSList.push({
-            sentence: sentence,
+            text: sentence,
             base64str: null,
             issplit:issplit,
-            index:this.pendingTTSList.length-1
+            index:this.pendingTTSList.length
         })
-        this.ttsRequest(this.pendingTTSList[this.pendingTTSList.length-1])
+        if(this.ismute){
+            this.muteNext()
+        }else{
+            this.ttsRequest(this.pendingTTSList[this.pendingTTSList.length-1])
+        }
+    }
+    muteNext(){
+        if(!this.isMuteDisplaying){
+            this.isMuteDisplaying=true
+            if(this.pendingTTSList.length>0){
+                this.showSentence(this.pendingTTSList.shift())
+                setTimeout(()=>{
+                    this.muteNext()
+                },500)
+            }
+            else{
+                this.isMuteDisplaying=false
+            }
+        }
     }
 }

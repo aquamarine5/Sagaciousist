@@ -156,6 +156,10 @@ export default {
                     }
                     if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
                         continue
+                    if(char=='\n'){
+                        this.$refs.lyricful.addSentence(lastSentence,true)
+                        lastSentence = ''
+                    }
                     if (splitPatterns.indexOf(char) != -1) {
                         this.$refs.lyricful.addSentence(lastSentence)
                         lastSentence = ''
