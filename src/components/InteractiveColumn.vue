@@ -93,7 +93,7 @@ typingNext()
 const isselecting = ref(true)
 const iswelcome = ref(true)
 const isRunning = ref(false)
-// const splitPatterns = ['。', "！", "？"]
+const splitPatterns = ['。', "！", "？","，","：","；"]
 //['，', '。', '：', '；', '！', '？',
 //',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
@@ -158,50 +158,37 @@ export default {
                 ].forEach((v) => this.$refs.lyricful.addSentence(v))
             } else {
                 const response = await ollama.generate({
-                    model: 'llama3.1',
-                    prompt: await interopPortal.combinePrompt(this.inputText),
-                    stream: true
-                })
-                var lastSentence = ''
-                for await (const part of response) {
-                    for (let index = 0; index < part.response.length; index++) {
-                        const char = part.response[index];
-                        lastSentence += char
-                        if (!isRunning.value) {
-                            this.$refs.lyricful.addSentence(lastSentence, false)
-                            break
-                        }
-                        if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
-                            continue
-                        }
-                        if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
-                            continue
-                        const th = Array.from(seg.segment(lastSentence))
-                        console.log(th)
-                        if (th.length > 1) {
-                            if (/[0-9]\..*/.test(th[0].segment)) {
-                                if (th.length > 2) {
-                                    this.$refs.lyricful.addSentence(th[0].segment + th[1].segment)
-                                    lastSentence = th[2].segment
-                                } else continue
-                            }
-                            if(th[0].segment == "\n") continue
-                            this.$refs.lyricful.addSentence(th[0].segment)
-                            lastSentence = th[1].segment
-                        }
-
-                        // if (splitPatterns.indexOf(char) != -1) {
-                        //     this.$refs.lyricful.addSentence(lastSentence)
-                        //     lastSentence = ''
-                        // }
-                    }
+                model: 'llama3.1',
+                prompt: await interopPortal.combinePrompt(this.inputText),
+                stream: true
+            })
+            var lastSentence = ''
+            for await (const part of response) {
+                for (let index = 0; index < part.response.length; index++) {
+                    const char = part.response[index];
+                    lastSentence += char
                     if (!isRunning.value) {
+                        this.$refs.lyricful.addSentence(lastSentence, false)
                         break
                     }
+                    if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
+                        continue
+                    }
+                    if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
+                        continue
+                    if(char=='\n'){
+                        this.$refs.lyricful.addSentence(lastSentence,true)
+                        lastSentence = ''
+                    }
+                    if (splitPatterns.indexOf(char) != -1) {
+                        this.$refs.lyricful.addSentence(lastSentence)
+                        lastSentence = ''
+                    }
                 }
-                if (lastSentence != '') {
-                    this.$refs.lyricful.addSentence(lastSentence)
+                if (!isRunning.value) {
+                    break
                 }
+            }
             }
 
             isloading.value = false

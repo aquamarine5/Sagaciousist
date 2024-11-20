@@ -1,5 +1,5 @@
 <script setup>
-const isNoModel = import.meta.env.MODE === 'nomodel';
+const isNoModel = import.meta.env.MODE === 'nomodel' || import.meta.env.MODE === 'debug';
 </script>
 
 <template>

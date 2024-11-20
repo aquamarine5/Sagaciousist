@@ -1,5 +1,5 @@
 <script setup>
-import SpeechController from '@/speech';
+import SpeechControllerV3 from '@/ttsv3';
 import { ref } from 'vue';
 
 var sentenceStatus = [
@@ -7,13 +7,15 @@ var sentenceStatus = [
     'lyricful_reading',
     'lyricful_after_read'
 ]
-var lyricful_data = ref({})
+var lyricful_data = ref([
+    ref([])
+])
 
-const speech=new SpeechController(lyricful_data)
+const speech=new SpeechControllerV3(lyricful_data)
 
-function addSentence(text){
+function addSentence(text,issplit=false){
     console.log(text)
-    speech.addSentence(text)
+    speech.addSentence(text,issplit)
 }
 
 function clearAllLyrics(){
@@ -21,11 +23,8 @@ function clearAllLyrics(){
     speech.ttsClear()
 }
 
-/**
- * still work in progress, see #2
- */
 function switchTTSStatus(istts){
-    speech.isTTSEnabled=istts
+    speech.ttsSetStatus(istts)
 }
 defineExpose({
     clearAllLyrics,
@@ -37,7 +36,7 @@ defineExpose({
 <template>
     <div class="lyricful_container">
          <!-- eslint-disable-next-line vue/require-v-for-key, vue/no-unused-vars -->
-        <div class="lyricful_sentence" v-for="(sentence,ced) in lyricful_data" :key="ced">
+        <div class="lyricful_sentence" v-for="sentence in lyricful_data">
             <!-- eslint-disable-next-line vue/require-v-for-key -->
             <span :class="'lyricful_part ' + sentenceStatus[textpart.status]" v-for="textpart in sentence">
                 {{ textpart.text }}
