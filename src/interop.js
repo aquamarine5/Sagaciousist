@@ -11,7 +11,7 @@ export default class InteropPortal {
     }
     combinePrompt(text) {
         return new Promise((resolve) => {
-            if (import.meta.env.MODE != "single") {
+            if (import.meta.env.MODE != "single" && import.meta.env.MODE!="debug") {
                 this.getPrompt(text).then(response => {
                     let esPrompt = ""
                     response.data[0].forEach(element => {

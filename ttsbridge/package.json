@@ -1,0 +1,10 @@
+{
+    "name": "sagaciousist.ttsbridge",
+    "version": "1.1",
+    "private": true,
+    "type": "module",
+    "devDependencies": {
+      "@gradio/client": "^1.7.1"
+    }
+  }
+  

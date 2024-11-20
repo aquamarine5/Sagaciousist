@@ -12,9 +12,13 @@ const xfyunConfig = {
 }
 var pending_ttslist = []
 
-
+/**
+ * @deprecated use ``SpeechController`` instead
+ * @see SpeechControllerV3
+ */
 export default class SpeechController {
     /**
+     * @deprecated
      * @param {import('vue').Ref<{},{}>} refsentence 
      */
     constructor(refsentence) {

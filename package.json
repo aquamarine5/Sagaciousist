@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/package",
   "name": "sagaciousist",
-  "version": "1.1",
+  "version": "1.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "single": "vite --mode single",
     "pages": "vite build --mode pages",
-    "nomodel": "vite --mode nomodel"
+    "server":"node ttsbridge/server.js",
+    "nomodel":"vite --mode nomodel",
+    "debug":"vite --mode debug"
   },
   "dependencies": {
     "axios": "^1.7.7",
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
+    "@gradio/client": "^1.7.1",
     "@iconify-json/line-md": "^1.2.2",
     "@iconify-json/mdi": "^1.2.1",
     "@iconify/vue": "^4.1.2",
