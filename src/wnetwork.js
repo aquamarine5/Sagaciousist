@@ -1,15 +1,13 @@
-
 import axios from 'axios';
 import { ElNotification } from 'element-plus';
 
 const service = axios.create({
-    baseURL: import.meta.env.VITE_APIHOST, // You can set your base URL here
-    timeout: 5000 // Request timeout
+    baseURL: import.meta.env.VITE_APIHOST,
+    timeout: 5000
 });
 
 service.interceptors.response.use(
     response => {
-        // 检查响应状态码，如果是错误状态码则触发错误提醒
         if (response.data.status === 'err') {
             ElNotification({
                 title: '错误',
@@ -21,10 +19,11 @@ service.interceptors.response.use(
         return response;
     },
     error => {
-        console.log(error); // for debug
+        console.log(error);
+        let message=error.response?error.response.data?error.response.data.message:undefined:undefined;
         ElNotification({
             title: error.message,
-            message: error.response.data.message || '发生未知错误',
+            message: message,
             type: 'error',
         });
         return Promise.reject(error);

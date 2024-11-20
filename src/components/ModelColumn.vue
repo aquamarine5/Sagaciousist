@@ -4,9 +4,11 @@ const isNoModel = import.meta.env.MODE === 'nomodel' || import.meta.env.MODE ===
 
 <template>
     <div class="three_renderer" v-if="!isNoModel"></div>
+    <div class="three_renderer" v-if="!isNoModel"></div>
 </template>
 
 <script>
+
 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { ElNotification } from 'element-plus';
@@ -34,6 +36,7 @@ export default {
     },
     mounted() {
         if(import.meta.env.MODE == 'nomodel') return
+        if(import.meta.env.MODE == 'nomodel') return
         const scene = new Scene()
         const camera = new PerspectiveCamera()
         camera.position.set(0, 3, 3)
@@ -50,6 +53,7 @@ export default {
         }
         renderer.setAnimationLoop(animate);
         const loader = new GLTFLoader()
+        loader.loadAsync("sugardontstop.glb").then(gltf => {
         loader.loadAsync("sugardontstop.glb").then(gltf => {
             console.log(gltf)
             this.obj3d = gltf.scene
@@ -68,6 +72,8 @@ export default {
                 mixer.update(clock.getDelta())
             }
             loop()
+            document.getElementsByClassName("three_renderer")[0].appendChild(renderer.domElement)
+        }).catch(error=>{
             document.getElementsByClassName("three_renderer")[0].appendChild(renderer.domElement)
         }).catch(error=>{
             ElNotification({

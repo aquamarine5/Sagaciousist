@@ -310,6 +310,7 @@ export default class SpeechController {
         }
     }
     addSentence(text) {
+        console.log("addSentence",text)
         if (localStorage.getItem('silent') == 'true') {
             this.silentPendingList.push(text)
             console.log(this.silentIsPending)
