@@ -93,7 +93,7 @@ typingNext()
 const isselecting = ref(true)
 const iswelcome = ref(true)
 const isRunning = ref(false)
-const splitPatterns = ['。', "！", "？","，","：","；"]
+const splitPatterns = ['。', "！", "？", "，", "：", "；"]
 //['，', '。', '：', '；', '！', '？',
 //',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
@@ -138,7 +138,7 @@ export default {
             responseStatus = true
             this.$refs.lyricful.clearAllLyrics()
             speechSynthesis.cancel()
-            const seg = new Intl.Segmenter("zh", { granularity: "sentence" })
+            //const seg = new Intl.Segmenter("zh", { granularity: "sentence" })
             setTimeout(function () {
                 if (responseStatus) {
                     showPendingTips.value = true
@@ -158,37 +158,37 @@ export default {
                 ].forEach((v) => this.$refs.lyricful.addSentence(v))
             } else {
                 const response = await ollama.generate({
-                model: 'llama3.1',
-                prompt: await interopPortal.combinePrompt(this.inputText),
-                stream: true
-            })
-            var lastSentence = ''
-            for await (const part of response) {
-                for (let index = 0; index < part.response.length; index++) {
-                    const char = part.response[index];
-                    lastSentence += char
+                    model: 'llama3.1',
+                    prompt: await interopPortal.combinePrompt(this.inputText),
+                    stream: true
+                })
+                var lastSentence = ''
+                for await (const part of response) {
+                    for (let index = 0; index < part.response.length; index++) {
+                        const char = part.response[index];
+                        lastSentence += char
+                        if (!isRunning.value) {
+                            this.$refs.lyricful.addSentence(lastSentence, false)
+                            break
+                        }
+                        if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
+                            continue
+                        }
+                        if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
+                            continue
+                        if (char == '\n') {
+                            this.$refs.lyricful.addSentence(lastSentence, true)
+                            lastSentence = ''
+                        }
+                        if (splitPatterns.indexOf(char) != -1) {
+                            this.$refs.lyricful.addSentence(lastSentence)
+                            lastSentence = ''
+                        }
+                    }
                     if (!isRunning.value) {
-                        this.$refs.lyricful.addSentence(lastSentence, false)
                         break
                     }
-                    if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
-                        continue
-                    }
-                    if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
-                        continue
-                    if(char=='\n'){
-                        this.$refs.lyricful.addSentence(lastSentence,true)
-                        lastSentence = ''
-                    }
-                    if (splitPatterns.indexOf(char) != -1) {
-                        this.$refs.lyricful.addSentence(lastSentence)
-                        lastSentence = ''
-                    }
                 }
-                if (!isRunning.value) {
-                    break
-                }
-            }
             }
 
             isloading.value = false
