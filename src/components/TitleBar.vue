@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from "vue";
 import "../assets/fonts/font.css"
-import LineMdVolumeRemoveTwotone from '~icons/line-md/volume-remove-twotone?width=33px&height=33px';
-import LineMdVolumeHighTwotone from '~icons/line-md/volume-high-twotone?width=33px&height=33px';
+import MdiTts from '~icons/mdi/tts?&width=30px&height=30px';
+import MdiTtsOff from '~icons/mdi/tts-off?&width=30px&height=30px';
 
 const isSilent=ref(false)
 if(localStorage.getItem('silent')==null){
@@ -22,8 +22,8 @@ function changeSilent(){
             Sagaciousist
         </div>
         <div class="silent_button" @click="changeSilent">
-            <LineMdVolumeRemoveTwotone v-if="isSilent"/>    
-            <LineMdVolumeHighTwotone v-else/>
+            <MdiTtsOff v-if="isSilent"/>    
+            <MdiTts v-else/>
         </div>
     </div>
 </template>

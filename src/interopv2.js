@@ -8,10 +8,20 @@ export class InteropPortalV2 {
      * @param {import('ollama').Ollama} ollamaInstance 
      */
     constructor(ollamaInstance, esUrl) {
+        this.storagedMessage=[]
         this.ollama = ollamaInstance
         this.esUrl = esUrl
     }
-    createOllama
+    storageMessage(question,answer){
+        this.storageMessage.push({
+            role: 'user',
+            content: question
+        })
+        this.storageMessage.push({
+            role: 'assistant',
+            content: answer
+        })
+    }
     /**
      * 
      * @param {string} text 
@@ -22,6 +32,7 @@ export class InteropPortalV2 {
         if (import.meta.env.MODE != "single" && import.meta.env.MODE != "debug") {
             messages=messages.concat(await this.createESPrompt(text))
         }
+        messages=messages.concat(this.storagedMessage)
         messages=messages.concat(this.combineSAGEPrompt(text))
         return this.ollama.chat({
             model: 'llama3.1',

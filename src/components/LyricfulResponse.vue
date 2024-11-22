@@ -8,25 +8,61 @@ var sentenceStatus = [
     'lyricful_after_read'
 ]
 var lyricful_data = ref([
-    ref([])
+    {
+        question: 'Question 1',
+        answer: ref([
+            { text: 'This is a ', status: 0 },
+            { text: 'sentence', status: 0 },
+            { text: ' for testing', status: 0 }
+        ])
+    },
+    {
+        question: 'Question 2',
+        answer: ref([
+            { text: 'This is a ', status: 0 },
+            { text: 'sentence', status: 0 },
+            { text: ' for testing', status: 0 }
+        ])
+    }
 ])
 
-const speech=new SpeechControllerV3(lyricful_data)
+const speech = new SpeechControllerV3(lyricful_data)
 
-function addSentence(text,issplit=false){
+/**
+ * @param {import('vue').Ref} answerref
+ * @param {string} text
+ * @param {boolean} issplit
+ */
+function addSentence(answerref,text, issplit = false) {
     console.log(text)
-    speech.addSentence(text,issplit)
+    speech.addSentence(answerref,text, issplit)
 }
 
-function clearAllLyrics(){
-    lyricful_data.value={}
+/**
+ * @param {string} questionstr 
+ * @returns {import('vue').Ref}
+ */
+function createQAStructure(questionstr){
+    let answerref=ref([])
+    lyricful_data.value.push({question:questionstr,answer:answerref})
+    return answerref
+}
+
+function clearAllLyrics() {
+    lyricful_data.value = {}
     speech.ttsClear()
 }
 
-function switchTTSStatus(istts){
+/**
+ * 
+ * @param {boolean} istts 
+ */
+function switchTTSStatus(istts) {
     speech.ttsSetStatus(istts)
 }
+
 defineExpose({
+    createQAStructure,
     clearAllLyrics,
     addSentence,
     switchTTSStatus
@@ -35,12 +71,20 @@ defineExpose({
 
 <template>
     <div class="lyricful_container">
-         <!-- eslint-disable-next-line vue/require-v-for-key, vue/no-unused-vars -->
-        <div class="lyricful_sentence" v-for="sentence in lyricful_data">
-            <!-- eslint-disable-next-line vue/require-v-for-key -->
-            <span :class="'lyricful_part ' + sentenceStatus[textpart.status]" v-for="textpart in sentence">
-                {{ textpart.text }}
-            </span>
+        <!-- eslint-disable-next-line vue/require-v-for-key, vue/no-unused-vars -->
+        <div class="lyricful_qastructure" v-for="data in lyricful_data">
+            <div class="lyricful_question">
+                <div class="lyricful_question_text">{{ data.question }}</div>
+            </div>
+            <div class="lyricful_answer">
+                <!-- eslint-disable-next-line vue/require-v-for-key, vue/no-unused-vars -->
+                <div :class="'lyricful_sentence'" v-for="sentence in data.answer">
+                    <!-- eslint-disable-next-line vue/require-v-for-key -->
+                    <span :class="'lyricful_part ' + sentenceStatus[textpart.status]" v-for="textpart in sentence">
+                        {{ textpart.text }}
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -55,9 +99,11 @@ defineExpose({
         opacity: 1;
     }
 }
-.lyricful_part{
+
+.lyricful_part {
     font-size: large;
 }
+
 .lyricful_container {
     padding-bottom: 15px;
     overflow-y: auto;
@@ -78,7 +124,7 @@ defineExpose({
 }
 
 .lyricful_after_read {
-    
+
     animation: fadeIn .3s ease-in-out;
     transition: color .4s ease-in-out;
     font-weight: 500;

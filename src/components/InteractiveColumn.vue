@@ -155,15 +155,17 @@ export default {
                 //     stream: true
                 // })
                 const response=await interopPortalV2.generateChatRequest(this.inputText)
+                let answerref=this.$refs.lyricful.createQAStructure(this.inputText)
                 var lastSentence = ''
+                var allResponse=''
                 for await (const part of response) {
-                    console.log(part.response)
                     let content=part.message.content
+                    allResponse+=content
                     for (let index = 0; index < content.length; index++) {
                         const char = content[index];
                         lastSentence += char
                         if (!isRunning.value) {
-                            this.$refs.lyricful.addSentence(lastSentence, false)
+                            this.$refs.lyricful.addSentence(answerref,lastSentence, false)
                             break
                         }
                         if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
@@ -172,11 +174,11 @@ export default {
                         if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
                             continue
                         if (char == '\n') {
-                            this.$refs.lyricful.addSentence(lastSentence, true)
+                            this.$refs.lyricful.addSentence(answerref,lastSentence, true)
                             lastSentence = ''
                         }
                         if (splitPatterns.indexOf(char) != -1) {
-                            this.$refs.lyricful.addSentence(lastSentence)
+                            this.$refs.lyricful.addSentence(answerref,lastSentence)
                             lastSentence = ''
                         }
                     }
@@ -184,6 +186,7 @@ export default {
                         break
                     }
                 }
+                interopPortalV2.storageMessage(this.inputText,allResponse)
             }
 
             isloading.value = false
