@@ -1,30 +1,14 @@
 <script setup>
 import SpeechControllerV3 from '@/ttsv3';
 import { ref } from 'vue';
+import { ContentLoader } from 'vue-content-loader';
 
 var sentenceStatus = [
     'lyricful_before_read',
     'lyricful_reading',
     'lyricful_after_read'
 ]
-var lyricful_data = ref([
-    {
-        question: 'Question 1',
-        answer: ref([
-            { text: 'This is a ', status: 0 },
-            { text: 'sentence', status: 0 },
-            { text: ' for testing', status: 0 }
-        ])
-    },
-    {
-        question: 'Question 2',
-        answer: ref([
-            { text: 'This is a ', status: 0 },
-            { text: 'sentence', status: 0 },
-            { text: ' for testing', status: 0 }
-        ])
-    }
-])
+const lyricful_data = ref([]);
 
 const speech = new SpeechControllerV3(lyricful_data)
 
@@ -33,23 +17,23 @@ const speech = new SpeechControllerV3(lyricful_data)
  * @param {string} text
  * @param {boolean} issplit
  */
-function addSentence(answerref,text, issplit = false) {
+function addSentence(answerref, text, issplit = false) {
     console.log(text)
-    speech.addSentence(answerref,text, issplit)
+    speech.addSentence(answerref, text, issplit)
 }
 
 /**
  * @param {string} questionstr 
- * @returns {import('vue').Ref}
  */
-function createQAStructure(questionstr){
-    let answerref=ref([])
-    lyricful_data.value.push({question:questionstr,answer:answerref})
-    return answerref
+function createQAStructure(questionstr) {
+    let answerref = ref([[]])
+    let isloadingref = ref(true)
+    lyricful_data.value.push({ question: questionstr, answer: answerref, isloading: isloadingref })
+    return lyricful_data.value[lyricful_data.value.length - 1]
 }
 
 function clearAllLyrics() {
-    lyricful_data.value = {}
+    //lyricful_data.value = {}
     speech.ttsClear()
 }
 
@@ -73,18 +57,24 @@ defineExpose({
     <div class="lyricful_container">
         <!-- eslint-disable-next-line vue/require-v-for-key, vue/no-unused-vars -->
         <div class="lyricful_qastructure" v-for="data in lyricful_data">
+
             <div class="lyricful_question">
                 <div class="lyricful_question_text">{{ data.question }}</div>
             </div>
             <div class="lyricful_answer">
+                <div class="lyricful_loading" v-if="data.isloading">
+                    <ContentLoader :width="50" :height="20" :speed="2" primaryColor="#eee" secondaryColor="#ccc">
+                    </ContentLoader>
+                </div>
                 <!-- eslint-disable-next-line vue/require-v-for-key, vue/no-unused-vars -->
-                <div :class="'lyricful_sentence'" v-for="sentence in data.answer">
+                <div :class="'lyricful_sentence'" v-for="sentence in data.answer" v-else>
                     <!-- eslint-disable-next-line vue/require-v-for-key -->
                     <span :class="'lyricful_part ' + sentenceStatus[textpart.status]" v-for="textpart in sentence">
                         {{ textpart.text }}
                     </span>
                 </div>
             </div>
+
         </div>
     </div>
 </template>
@@ -100,11 +90,45 @@ defineExpose({
     }
 }
 
+.lyricful_loading {
+    display: flex;
+    align-items: center;
+}
+
+.lyricful_qastructure {
+    margin-block: 6px;
+    display: flex;
+    flex-direction: column;
+}
+
+.lyricful_answer {
+    padding: 5px 10px;
+    border-radius: 10px;
+    width: fit-content;
+    border-color: gray;
+    border-style: solid;
+    border-width: 2px;
+}
+
+.lyricful_question {
+    padding: 5px 10px;
+    text-align: right;
+    width: fit-content;
+    margin-left: auto;
+    border-radius: 10px;
+    border-color: #56f9c4;
+    border-style: solid;
+    border-width: 2px;
+    margin-bottom: 5px;
+}
+
 .lyricful_part {
     font-size: large;
 }
 
 .lyricful_container {
+    display: flex;
+    flex-direction: column;
     padding-bottom: 15px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -113,7 +137,6 @@ defineExpose({
 .lyricful_sentence {
     animation: fadeIn .3s ease-in-out;
     transition: color .4s ease-in-out;
-    margin-block: 6px;
 }
 
 .lyricful_reading {

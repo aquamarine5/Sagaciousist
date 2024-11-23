@@ -68,14 +68,14 @@ export default class SpeechControllerV3 {
     showSentence(audiodata) {
         if (audiodata.issplit) {
             this._currentIndex += 1;
-            this.refsentence.value.push([])
+            this.refsentence.push([])
         }
-        console.log(this.refsentence.value[this._currentIndex])
-        this.refsentence.value[this._currentIndex].push({
+        console.log(this.refsentence)
+        this.refsentence[this._currentIndex].push({
             text: audiodata.text,
             status: ref(2)
         })
-        return this.refsentence.value.length - 1
+        return this.refsentence.length - 1
     }
     ttsRequest(audiodata) {
         if (audiodata.text == "\n") {
@@ -103,7 +103,7 @@ export default class SpeechControllerV3 {
         }
     }
     ttsClear() {
-        this.refsentence.value = [[]]
+        //this.refsentence.value = [[]]
         this._currentIndex = 0
         this.pendingTTSList = []
     }
@@ -118,21 +118,21 @@ export default class SpeechControllerV3 {
      * @param {string} sentence 
      * @param {boolean} issplit
      */
-    addSentence(answerref,sentence, issplit = false) {
+    addSentence(answerref, sentence, issplit = false) {
         this.pendingTTSList.push({
             text: sentence,
             base64str: null,
             issplit: issplit,
             index: this.pendingTTSList.length
         })
-        this.refsentence=answerref
+        this.refsentence = answerref
         if (this.ismute) {
             this.muteNext()
         } else {
             this.ttsRequest(this.pendingTTSList[this.pendingTTSList.length - 1])
         }
     }
-    muteDisplay(){
+    muteDisplay() {
         if (!this.isMuteDisplaying) {
             this.isMuteDisplaying = true
             this.muteNext()
@@ -145,7 +145,7 @@ export default class SpeechControllerV3 {
             setTimeout(() => {
                 this.muteNext()
             }, 200)
-        }else{
+        } else {
             this.isMuteDisplaying = false
         }
     }

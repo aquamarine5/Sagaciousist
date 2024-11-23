@@ -47,10 +47,10 @@ typingNext()
 
 <template>
     <div class="main_container">
-        <ModelColumn ref="model" />
+        <ModelColumn />
         <div :class="iswelcome ? 'app_container' : 'app_container app_container_justified'">
             <div class="result_container">
-                <ContentLoader viewBox="0 0 250 60" v-if="isloading">
+                <ContentLoader viewBox="0 0 250 60" v-if="false">
                     <rect x="0" y="0" rx="3" ry="3" width="170" height="10" />
                     <rect x="0" y="20" rx="3" ry="3" width="220" height="10" />
                     <rect x="0" y="40" rx="3" ry="3" width="250" height="10" />
@@ -96,11 +96,10 @@ const splitPatterns = ['。', "！", "？", "，", "：", "；"]
 //',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
 var responseStatus = undefined
-var model = undefined
 var isloading = ref(false)
 // const interopPortal = new InteropPortal("http://localhost:8080")
 const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
-const interopPortalV2=new InteropPortalV2(ollama,"http://localhost:8080")
+const interopPortalV2 = new InteropPortalV2(ollama, "http://localhost:8080")
 export default {
     components: {
         LyricfulResponse
@@ -154,18 +153,21 @@ export default {
                 //     prompt: await interopPortal.combinePrompt(this.inputText),
                 //     stream: true
                 // })
-                const response=await interopPortalV2.generateChatRequest(this.inputText)
-                let answerref=this.$refs.lyricful.createQAStructure(this.inputText)
+                let qastruct = this.$refs.lyricful.createQAStructure(this.inputText)
+                const response = await interopPortalV2.generateChatRequest(this.inputText)
                 var lastSentence = ''
-                var allResponse=''
+                var allResponse = ''
+                console.log(qastruct)
                 for await (const part of response) {
-                    let content=part.message.content
-                    allResponse+=content
+                    let content = part.message.content
+                    allResponse += content
                     for (let index = 0; index < content.length; index++) {
                         const char = content[index];
                         lastSentence += char
                         if (!isRunning.value) {
-                            this.$refs.lyricful.addSentence(answerref,lastSentence, false)
+
+                            qastruct.isloading = false
+                            this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, false)
                             break
                         }
                         if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
@@ -174,11 +176,15 @@ export default {
                         if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
                             continue
                         if (char == '\n') {
-                            this.$refs.lyricful.addSentence(answerref,lastSentence, true)
+
+                            qastruct.isloading = false
+                            this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, true)
                             lastSentence = ''
                         }
                         if (splitPatterns.indexOf(char) != -1) {
-                            this.$refs.lyricful.addSentence(answerref,lastSentence)
+
+                            qastruct.isloading = false
+                            this.$refs.lyricful.addSentence(qastruct.answer, lastSentence)
                             lastSentence = ''
                         }
                     }
@@ -186,7 +192,7 @@ export default {
                         break
                     }
                 }
-                interopPortalV2.storageMessage(this.inputText,allResponse)
+                interopPortalV2.storageMessage(this.inputText, allResponse)
             }
 
             isloading.value = false

@@ -8,16 +8,16 @@ export class InteropPortalV2 {
      * @param {import('ollama').Ollama} ollamaInstance 
      */
     constructor(ollamaInstance, esUrl) {
-        this.storagedMessage=[]
+        this.storagedMessage = []
         this.ollama = ollamaInstance
         this.esUrl = esUrl
     }
-    storageMessage(question,answer){
-        this.storageMessage.push({
+    storageMessage(question, answer) {
+        this.storagedMessage.push({
             role: 'user',
             content: question
         })
-        this.storageMessage.push({
+        this.storagedMessage.push({
             role: 'assistant',
             content: answer
         })
@@ -30,10 +30,10 @@ export class InteropPortalV2 {
     async generateChatRequest(text) {
         let messages = this.createBaseSystemPrompt()
         if (import.meta.env.MODE != "single" && import.meta.env.MODE != "debug") {
-            messages=messages.concat(await this.createESPrompt(text))
+            messages = messages.concat(await this.createESPrompt(text))
         }
-        messages=messages.concat(this.storagedMessage)
-        messages=messages.concat(this.combineSAGEPrompt(text))
+        messages = messages.concat(this.storagedMessage)
+        messages = messages.concat(this.combineSAGEPrompt(text))
         return this.ollama.chat({
             model: 'llama3.1',
             stream: true,
@@ -86,8 +86,8 @@ export class InteropPortalV2 {
     combineSAGEPrompt(text) {
         return {
             "role": "user",
-            "content": 
-`情况：大学生在阅读${BASE_LIBRARY}的过程中会产生一些疑问。
+            "content":
+                `情况：大学生在阅读${BASE_LIBRARY}的过程中会产生一些疑问。
 行动：请你对这些问题进行回答并给出指导建议，在回答时给予具体实例。
 目标：让用户得到问题的准确答案，并从中获得对个人发展方面的建议以及对社会，人生等方面的思考。
 预期: 输出文本即可。请解决以下问题：
