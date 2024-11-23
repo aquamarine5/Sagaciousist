@@ -11,6 +11,7 @@ const isNoModel = import.meta.env.MODE === 'nomodel' || import.meta.env.MODE ===
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { ElNotification } from 'element-plus';
 import { AnimationMixer, AmbientLight, PerspectiveCamera, Scene, WebGLRenderer, Clock, LoopRepeat } from 'three';
+
 export default {
     methods: {
         playAnimate() {
@@ -33,7 +34,7 @@ export default {
         }
     },
     mounted() {
-        if(import.meta.env.MODE == 'nomodel') return
+        if(import.meta.env.MODE === 'nomodel' || import.meta.env.MODE === 'debug') return
         const scene = new Scene()
         const camera = new PerspectiveCamera()
         camera.position.set(0, 3, 3)

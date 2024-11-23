@@ -1,7 +1,10 @@
-import wnetwork from "./wnetwork";
+import wnetwork from "../wnetwork";
 
 const baseLibrary = "定位理论"
 
+/**
+ * @deprecated
+ */
 export default class InteropPortal {
     constructor(url) {
         this.baseUrl = url

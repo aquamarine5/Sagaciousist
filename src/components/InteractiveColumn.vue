@@ -7,12 +7,12 @@ import MdiSendVariant from '~icons/mdi/send-variant?width=1.3em&height=1.3em';
 import LineMdLoadingTwotoneLoop from '~icons/line-md/loading-twotone-loop?width=1.8em&height=1.8em';
 import LyricfulResponse from './LyricfulResponse.vue';
 import { ContentLoader } from 'vue-content-loader';
-import InteropPortal from '@/interop';
 import QuestionsTipDisplayer from './QuestionsTipDisplayer.vue';
-import SelectorDisplayer from './SelectorDisplayer.vue';
-import LineMdArrowSmallLeft from '~icons/line-md/arrow-small-left?width=16px&height=16px';
-import LineMdTextBoxMultipleTwotone from '~icons/line-md/text-box-multiple-twotone?width=16px&height=16px';
-import LineMdFileSearchTwotone from '~icons/line-md/file-search-twotone?width=16px&height=16px';
+// import SelectorDisplayer from './SelectorDisplayer.vue';
+// import LineMdArrowSmallLeft from '~icons/line-md/arrow-small-left?width=16px&height=16px';
+// import LineMdTextBoxMultipleTwotone from '~icons/line-md/text-box-multiple-twotone?width=16px&height=16px';
+// import LineMdFileSearchTwotone from '~icons/line-md/file-search-twotone?width=16px&height=16px';
+import { InteropPortalV2 } from '@/interopv2';
 
 
 let nowtime = new Date().getHours()
@@ -47,17 +47,17 @@ typingNext()
 
 <template>
     <div class="main_container">
-        <ModelColumn ref="model" />
+        <ModelColumn />
         <div :class="iswelcome ? 'app_container' : 'app_container app_container_justified'">
-            <div class="result_container" v-if="!isselecting">
-                <ContentLoader viewBox="0 0 250 60" v-if="isloading">
+            <div class="result_container">
+                <ContentLoader viewBox="0 0 250 60" v-if="false">
                     <rect x="0" y="0" rx="3" ry="3" width="170" height="10" />
                     <rect x="0" y="20" rx="3" ry="3" width="220" height="10" />
                     <rect x="0" y="40" rx="3" ry="3" width="250" height="10" />
                 </ContentLoader>
                 <LyricfulResponse ref="lyricful" :isloading="isloading" />
             </div>
-            <div class="selector_result" v-if="!isselecting && iswelcome">
+            <!-- <div class="selector_result" v-if="!isselecting && iswelcome">
                 <div class="selector_leftpart" @click="reselectMode">
                     <LineMdArrowSmallLeft class="selector_result_icon" />
                     重新选择
@@ -68,13 +68,12 @@ typingNext()
                     <span class="selector_result_icon" v-else></span>
                     {{ model === 'book' ? '书籍相关提问模式' : model === 'history' ? '历史事件提问模式' : "?" }}
                 </div>
-
-            </div>
-            <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="iswelcome || isselecting">
+            </div> -->
+            <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="iswelcome">
                 {{ typingText }}
             </div>
-            <SelectorDisplayer v-if="isselecting" @modeSelected="handleModeSelected" />
-            <div class="input_container" v-if="!isselecting">
+            <!-- <SelectorDisplayer v-if="isselecting" @modeSelected="handleModeSelected" /> -->
+            <div class="input_container">
                 <ElInput :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputText" type="textarea"
                     placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
                 <div :class="!isRunning ? 'container_btn_send' : 'container_btn_send btn_send_gradient'">
@@ -84,24 +83,23 @@ typingNext()
                     </ElButton>
                 </div>
             </div>
-            <QuestionsTipDisplayer v-if="iswelcome && !isselecting" @askQuestion="handleAskQuestion" />
+            <QuestionsTipDisplayer v-if="iswelcome" @askQuestion="handleAskQuestion" />
         </div>
     </div>
 </template>
 
 <script>
-const isselecting = ref(true)
 const iswelcome = ref(true)
 const isRunning = ref(false)
-const splitPatterns = ['。', "！", "？","，","：","；"]
+const splitPatterns = ['。', "！", "？", "，", "：", "；"]
 //['，', '。', '：', '；', '！', '？',
 //',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
 var responseStatus = undefined
-var model = undefined
 var isloading = ref(false)
-const interopPortal = new InteropPortal("http://localhost:8080")
+// const interopPortal = new InteropPortal("http://localhost:8080")
 const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
+const interopPortalV2 = new InteropPortalV2(ollama, "http://localhost:8080")
 export default {
     components: {
         LyricfulResponse
@@ -110,13 +108,6 @@ export default {
         async handleAskQuestion(question) {
             this.inputText = question;
             await this.onsend()
-        },
-        handleModeSelected(mode) {
-            model = mode
-            isselecting.value = false
-        },
-        reselectMode() {
-            isselecting.value = true
         },
         async onsend() {
             if (this.inputText == '') {
@@ -138,7 +129,7 @@ export default {
             responseStatus = true
             this.$refs.lyricful.clearAllLyrics()
             speechSynthesis.cancel()
-            const seg = new Intl.Segmenter("zh", { granularity: "sentence" })
+            //const seg = new Intl.Segmenter("zh", { granularity: "sentence" })
             setTimeout(function () {
                 if (responseStatus) {
                     showPendingTips.value = true
@@ -157,38 +148,51 @@ export default {
                     "———— 那艺娜《笨笨的我傻傻的活》"
                 ].forEach((v) => this.$refs.lyricful.addSentence(v))
             } else {
-                const response = await ollama.generate({
-                model: 'llama3.1',
-                prompt: await interopPortal.combinePrompt(this.inputText),
-                stream: true
-            })
-            var lastSentence = ''
-            for await (const part of response) {
-                for (let index = 0; index < part.response.length; index++) {
-                    const char = part.response[index];
-                    lastSentence += char
+                // const response = await ollama.generate({
+                //     model: 'llama3.1',
+                //     prompt: await interopPortal.combinePrompt(this.inputText),
+                //     stream: true
+                // })
+                let qastruct = this.$refs.lyricful.createQAStructure(this.inputText)
+                const response = await interopPortalV2.generateChatRequest(this.inputText)
+                var lastSentence = ''
+                var allResponse = ''
+                console.log(qastruct)
+                for await (const part of response) {
+                    let content = part.message.content
+                    allResponse += content
+                    for (let index = 0; index < content.length; index++) {
+                        const char = content[index];
+                        lastSentence += char
+                        if (!isRunning.value) {
+
+                            qastruct.isloading = false
+                            this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, false)
+                            break
+                        }
+                        if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
+                            continue
+                        }
+                        if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
+                            continue
+                        if (char == '\n') {
+
+                            qastruct.isloading = false
+                            this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, true)
+                            lastSentence = ''
+                        }
+                        if (splitPatterns.indexOf(char) != -1) {
+
+                            qastruct.isloading = false
+                            this.$refs.lyricful.addSentence(qastruct.answer, lastSentence)
+                            lastSentence = ''
+                        }
+                    }
                     if (!isRunning.value) {
-                        this.$refs.lyricful.addSentence(lastSentence, false)
                         break
                     }
-                    if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
-                        continue
-                    }
-                    if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
-                        continue
-                    if(char=='\n'){
-                        this.$refs.lyricful.addSentence(lastSentence,true)
-                        lastSentence = ''
-                    }
-                    if (splitPatterns.indexOf(char) != -1) {
-                        this.$refs.lyricful.addSentence(lastSentence)
-                        lastSentence = ''
-                    }
                 }
-                if (!isRunning.value) {
-                    break
-                }
-            }
+                interopPortalV2.storageMessage(this.inputText, allResponse)
             }
 
             isloading.value = false

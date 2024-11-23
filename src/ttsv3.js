@@ -2,17 +2,14 @@ import { ref } from "vue";
 import axios from "axios";
 
 export default class SpeechControllerV3 {
-    /**
-     * @param {import("vue").Ref} refsentence 
-     */
-    constructor(refsentence) {
-        this.refsentence = refsentence
+    constructor() {
+        this.refsentence = null
         this._audioContext = null
         this.pendingTTSList = []
         this.isTTSPlaying = false
-        this.isMuteDisplaying=false
-        this._currentIndex=0
-        this.ismute=localStorage.getItem('silent')=='true'
+        this.isMuteDisplaying = false
+        this._currentIndex = 0
+        this.ismute = localStorage.getItem('silent') == 'true'
     }
     /**
      * @returns {AudioContext}
@@ -58,7 +55,7 @@ export default class SpeechControllerV3 {
                 console.error('解码音频数据时出错:', error);
             });
         }
-        let index=this.showSentence(audiodata)
+        let index = this.showSentence(audiodata)
         playBase64Audio(audiodata.base64str, this.audioContext, () => {
             this.refsentence.value[index].status = 2
             this.ttsNext()
@@ -69,19 +66,19 @@ export default class SpeechControllerV3 {
      * @param {*} audiodata 
      */
     showSentence(audiodata) {
-        if(audiodata.issplit){
-            this._currentIndex+=1;
-            this.refsentence.value.push(ref([]))
+        if (audiodata.issplit) {
+            this._currentIndex += 1;
+            this.refsentence.push([])
         }
-        console.log(this.refsentence.value[this._currentIndex])
-        this.refsentence.value[this._currentIndex].push({
+        console.log(this.refsentence)
+        this.refsentence[this._currentIndex].push({
             text: audiodata.text,
-            status: ref(1)
+            status: ref(2)
         })
-        return this.refsentence.value.length - 1
+        return this.refsentence.length - 1
     }
     ttsRequest(audiodata) {
-        if(audiodata.text=="\n"){
+        if (audiodata.text == "\n") {
             console.warn("?")
             return
         }
@@ -91,7 +88,7 @@ export default class SpeechControllerV3 {
             if (!this.isTTSPlaying) {
                 this.isTTSPlaying = true
                 console.log(audiodata)
-                if(this.pendingTTSList.length>0&&this.pendingTTSList[0].base64str!=null){
+                if (this.pendingTTSList.length > 0 && this.pendingTTSList[0].base64str != null) {
                     this.ttsPlay(this.pendingTTSList.shift())
                 }
             }
@@ -105,46 +102,51 @@ export default class SpeechControllerV3 {
             this.isTTSPlaying = false
         }
     }
-    ttsClear(){
-        this.refsentence.value=[[]]
-        this._currentIndex=0
-        this.pendingTTSList=[]
+    ttsClear() {
+        //this.refsentence.value = [[]]
+        this._currentIndex = 0
+        this.pendingTTSList = []
     }
     /**
      * @param {boolean} status 
      */
     ttsSetStatus(status) {
-        this.ismute=status
+        this.ismute = status
     }
     /**
+     * @param {import('vue').Ref} answerref 
      * @param {string} sentence 
      * @param {boolean} issplit
      */
-    addSentence(sentence,issplit=false) {
+    addSentence(answerref, sentence, issplit = false) {
         this.pendingTTSList.push({
             text: sentence,
             base64str: null,
-            issplit:issplit,
-            index:this.pendingTTSList.length
+            issplit: issplit,
+            index: this.pendingTTSList.length
         })
-        if(this.ismute){
+        this.refsentence = answerref
+        if (this.ismute) {
             this.muteNext()
-        }else{
-            this.ttsRequest(this.pendingTTSList[this.pendingTTSList.length-1])
+        } else {
+            this.ttsRequest(this.pendingTTSList[this.pendingTTSList.length - 1])
         }
     }
-    muteNext(){
-        if(!this.isMuteDisplaying){
-            this.isMuteDisplaying=true
-            if(this.pendingTTSList.length>0){
-                this.showSentence(this.pendingTTSList.shift())
-                setTimeout(()=>{
-                    this.muteNext()
-                },500)
-            }
-            else{
-                this.isMuteDisplaying=false
-            }
+    muteDisplay() {
+        if (!this.isMuteDisplaying) {
+            this.isMuteDisplaying = true
+            this.muteNext()
+        }
+    }
+    muteNext() {
+        if (this.pendingTTSList.length > 0) {
+            console.log(1)
+            this.showSentence(this.pendingTTSList.shift())
+            setTimeout(() => {
+                this.muteNext()
+            }, 200)
+        } else {
+            this.isMuteDisplaying = false
         }
     }
 }
