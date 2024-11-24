@@ -1,3 +1,7 @@
+/*
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+ */
 import wnetwork from './wnetwork'
 
 const BASE_LIBRARY = "定位理论"
@@ -39,6 +43,33 @@ export class InteropPortalV2 {
             stream: true,
             messages: messages
         });
+    }
+
+    /**
+     * @param {string} text 
+     * @returns {Promise<string>}
+     */
+    async generateGeneratePrompt(text) {
+        let messages = this.createBaseSystemPrompt()
+        if (import.meta.env.MODE != "single" && import.meta.env.MODE != "debug") {
+            messages = messages.concat(await this.createESPrompt(text))
+        }
+        messages = messages.concat(this.storagedMessage)
+        messages = messages.concat(this.combineSAGEPrompt(text))
+        return this.combineListToPrompt(messages)
+    }
+
+    combineListToPrompt(messageList) {
+        let prompt = ""
+        const matchMap = {
+            "system": "系统：",
+            "user": "用户问题：",
+            "assistant": "回答："
+        }
+        for (let message of messageList) {
+            prompt += matchMap[message.role] + message.content + "\n"
+        }
+        return prompt
     }
     /**
      * 

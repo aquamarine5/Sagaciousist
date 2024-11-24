@@ -1,3 +1,7 @@
+/*
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+ */
 import { ref } from "vue";
 import axios from "axios";
 
@@ -11,6 +15,7 @@ export default class SpeechControllerV3 {
         this._currentIndex = 0
         this.ismute = localStorage.getItem('silent') == 'true'
     }
+
     /**
      * @returns {AudioContext}
      */

@@ -1,18 +1,22 @@
+<!--
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+-->
 <script setup>
 import { ref } from "vue";
 import "../assets/fonts/font.css"
 import MdiTts from '~icons/mdi/tts?&width=30px&height=30px';
 import MdiTtsOff from '~icons/mdi/tts-off?&width=30px&height=30px';
 
-const isSilent=ref(false)
-if(localStorage.getItem('silent')==null){
-    localStorage.setItem('silent',false)
-}else{
-    isSilent.value=localStorage.getItem('silent')=='true'
+const isSilent = ref(false)
+if (localStorage.getItem('silent') == null) {
+    localStorage.setItem('silent', false)
+} else {
+    isSilent.value = localStorage.getItem('silent') == 'true'
 }
-function changeSilent(){
-    isSilent.value=!isSilent.value
-    localStorage.setItem('silent',isSilent.value)
+function changeSilent() {
+    isSilent.value = !isSilent.value
+    localStorage.setItem('silent', isSilent.value)
 }
 </script>
 
@@ -22,30 +26,32 @@ function changeSilent(){
             Sagaciousist
         </div>
         <div class="silent_button" @click="changeSilent">
-            <MdiTtsOff v-if="isSilent"/>    
-            <MdiTts v-else/>
+            <MdiTtsOff v-if="isSilent" />
+            <MdiTts v-else />
         </div>
     </div>
 </template>
 
 <style scoped>
-.topbar_container{
+.topbar_container {
     background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
     border-radius: 0px 0px 16px 16px;
     height: 70px;
     display: flex;
     align-items: center;
     padding: 0px 25px;
-    
+
 }
-.topbar_title{
+
+.topbar_title {
     font-family: 'Gilroy';
     font-weight: 600;
     font-size: 32px;
     color: white;
     cursor: pointer;
 }
-.silent_button{
+
+.silent_button {
     margin-top: 2px;
     cursor: pointer;
     margin-left: auto;

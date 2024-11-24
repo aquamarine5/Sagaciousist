@@ -1,3 +1,7 @@
+/*
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+ */
 import axios from 'axios';
 import { ElNotification } from 'element-plus';
 
@@ -20,7 +24,7 @@ service.interceptors.response.use(
     },
     error => {
         console.log(error);
-        let message=error.response?error.response.data?error.response.data.message:undefined:undefined;
+        let message = error.response ? error.response.data ? error.response.data.message : undefined : undefined;
         ElNotification({
             title: error.message,
             message: message,

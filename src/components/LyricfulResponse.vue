@@ -1,3 +1,7 @@
+<!--
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+-->
 <script setup>
 import SpeechControllerV3 from '@/ttsv3';
 import { ref } from 'vue';

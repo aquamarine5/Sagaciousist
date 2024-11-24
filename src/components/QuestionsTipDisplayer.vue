@@ -1,3 +1,7 @@
+<!--
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+-->
 <template>
     <div class="tips_container">
         <div class="tips_title">💡不知道问什么？试试下面的问题吧👇</div>
