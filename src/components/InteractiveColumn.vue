@@ -1,3 +1,7 @@
+<!--
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+-->
 <script setup>
 import { ElButton, ElInput, ElNotification } from 'element-plus';
 import { Ollama } from 'ollama/src/browser';
@@ -92,8 +96,6 @@ typingNext()
 const iswelcome = ref(true)
 const isRunning = ref(false)
 const splitPatterns = ['。', "！", "？", "，", "：", "；"]
-//['，', '。', '：', '；', '！', '？',
-//',', '.', ':', ';', '!', '?']
 const showPendingTips = ref(false)
 var responseStatus = undefined
 var isloading = ref(false)

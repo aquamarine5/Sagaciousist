@@ -1,3 +1,7 @@
+<!--
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+-->
 <script setup>
 const isNoModel = import.meta.env.MODE === 'nomodel' || import.meta.env.MODE === 'debug';
 </script>
@@ -7,7 +11,6 @@ const isNoModel = import.meta.env.MODE === 'nomodel' || import.meta.env.MODE ===
 </template>
 
 <script>
-
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { ElNotification } from 'element-plus';
 import { AnimationMixer, AmbientLight, PerspectiveCamera, Scene, WebGLRenderer, Clock, LoopRepeat } from 'three';
@@ -34,7 +37,7 @@ export default {
         }
     },
     mounted() {
-        if(import.meta.env.MODE === 'nomodel' || import.meta.env.MODE === 'debug') return
+        if (import.meta.env.MODE === 'nomodel' || import.meta.env.MODE === 'debug') return
         const scene = new Scene()
         const camera = new PerspectiveCamera()
         camera.position.set(0, 3, 3)
@@ -70,7 +73,7 @@ export default {
             }
             loop()
             document.getElementsByClassName("three_renderer")[0].appendChild(renderer.domElement)
-        }).catch(error=>{
+        }).catch(error => {
             ElNotification({
                 type: "error",
                 title: "Failed when load the model.",

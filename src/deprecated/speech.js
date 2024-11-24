@@ -1,3 +1,7 @@
+/*
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+ */
 import cryptoJs from 'crypto-js';
 import { ElNotification } from 'element-plus';
 import { ref } from 'vue';
@@ -10,6 +14,7 @@ const xfyunConfig = {
     apiKey: "20b03e7490607b93caaa96eb56650e92",
     uri: "/v2/tts",
 }
+
 var pending_ttslist = []
 
 /**
@@ -310,7 +315,7 @@ export default class SpeechController {
         }
     }
     addSentence(text) {
-        console.log("addSentence",text)
+        console.log("addSentence", text)
         if (localStorage.getItem('silent') == 'true') {
             this.silentPendingList.push(text)
             console.log(this.silentIsPending)
@@ -333,12 +338,12 @@ export default class SpeechController {
         this.isTTSReading = false
         pending_ttslist = []
         this.silentPendingList = []
-        this.silentIsPending=false
+        this.silentIsPending = false
         this.ttsStop()
     }
 
     ttsStop() {
-        if(this._audioSource!=undefined)
+        if (this._audioSource != undefined)
             this._audioSource.stop()
     }
 }
