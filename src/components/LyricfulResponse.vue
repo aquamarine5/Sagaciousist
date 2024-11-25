@@ -119,15 +119,16 @@ defineExpose({
     text-align: right;
     width: fit-content;
     margin-left: auto;
-    border-radius: 10px;
+    font-size: large;
+    /* border-radius: 10px;
     border-color: #56f9c4;
     border-style: solid;
-    border-width: 2px;
+    border-width: 2px; */
     margin-bottom: 5px;
 }
 
 .lyricful_part {
-    font-size: large;
+    font-size: medium;
 }
 
 .lyricful_container {

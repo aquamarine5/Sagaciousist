@@ -2,6 +2,10 @@
  * @Author: aquamarine5 && aquamarine5_@outlook.com
  * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
 -->
+<!--
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+-->
 <script setup>
 import { ElButton, ElInput, ElNotification } from 'element-plus';
 import { Ollama } from 'ollama/src/browser';
@@ -155,13 +159,16 @@ export default {
                 //     prompt: await interopPortal.combinePrompt(this.inputText),
                 //     stream: true
                 // })
-                let qastruct = this.$refs.lyricful.createQAStructure(this.inputText)
-                const response = await interopPortalV2.generateChatRequest(this.inputText)
+                let itext = this.inputText
+                let qastruct = this.$refs.lyricful.createQAStructure(itext)
+                this.inputText = ""
+                const response = await interopPortalV2.generateChatRequest(itext)
                 var lastSentence = ''
                 var allResponse = ''
                 console.log(qastruct)
                 for await (const part of response) {
                     let content = part.message.content
+                    // let content = part.response
                     allResponse += content
                     for (let index = 0; index < content.length; index++) {
                         const char = content[index];
@@ -194,7 +201,7 @@ export default {
                         break
                     }
                 }
-                interopPortalV2.storageMessage(this.inputText, allResponse)
+                interopPortalV2.storageMessage(itext, allResponse)
             }
 
             isloading.value = false

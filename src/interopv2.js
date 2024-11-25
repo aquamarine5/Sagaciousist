@@ -2,6 +2,10 @@
  * @Author: aquamarine5 && aquamarine5_@outlook.com
  * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
  */
+/*
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+ */
 import wnetwork from './wnetwork'
 
 const BASE_LIBRARY = "定位理论"
@@ -57,6 +61,13 @@ export class InteropPortalV2 {
         messages = messages.concat(this.storagedMessage)
         messages = messages.concat(this.combineSAGEPrompt(text))
         return this.combineListToPrompt(messages)
+    }
+
+    async generateGenerateRequest(text) {
+        return this.ollama.generate({
+            model: 'llama3.1',
+            prompt: await this.generateGeneratePrompt(text)
+        })
     }
 
     combineListToPrompt(messageList) {
