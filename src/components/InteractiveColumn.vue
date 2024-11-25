@@ -6,6 +6,10 @@
  * @Author: aquamarine5 && aquamarine5_@outlook.com
  * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
 -->
+<!--
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+-->
 <script setup>
 import { ElButton, ElInput, ElNotification } from 'element-plus';
 import { Ollama } from 'ollama/src/browser';
@@ -63,7 +67,7 @@ typingNext()
                     <rect x="0" y="20" rx="3" ry="3" width="220" height="10" />
                     <rect x="0" y="40" rx="3" ry="3" width="250" height="10" />
                 </ContentLoader>
-                <LyricfulResponse ref="lyricful" :isloading="isloading" />
+                <LyricfulResponse ref="lyricful" :isloading="isloading" @loadingFinish="loadingFinished" />
             </div>
             <!-- <div class="selector_result" v-if="!isselecting && iswelcome">
                 <div class="selector_leftpart" @click="reselectMode">
@@ -114,6 +118,9 @@ export default {
         async handleAskQuestion(question) {
             this.inputText = question;
             await this.onsend()
+        },
+        loadingFinished() {
+            isloading.value = false
         },
         async onsend() {
             if (this.inputText == '') {
@@ -172,10 +179,14 @@ export default {
                     allResponse += content
                     for (let index = 0; index < content.length; index++) {
                         const char = content[index];
+                        if (char == '\n') {
+                            //qastruct.isloading = false
+                            this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, true)
+                            lastSentence = ''
+                        }
                         lastSentence += char
                         if (!isRunning.value) {
-
-                            qastruct.isloading = false
+                            //qastruct.isloading = false
                             this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, false)
                             break
                         }
@@ -184,15 +195,8 @@ export default {
                         }
                         if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
                             continue
-                        if (char == '\n') {
-
-                            qastruct.isloading = false
-                            this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, true)
-                            lastSentence = ''
-                        }
                         if (splitPatterns.indexOf(char) != -1) {
-
-                            qastruct.isloading = false
+                            //qastruct.isloading = false
                             this.$refs.lyricful.addSentence(qastruct.answer, lastSentence)
                             lastSentence = ''
                         }
@@ -203,8 +207,6 @@ export default {
                 }
                 interopPortalV2.storageMessage(itext, allResponse)
             }
-
-            isloading.value = false
             setTimeout(function () {
                 responseStatus = false
                 showPendingTips.value = false

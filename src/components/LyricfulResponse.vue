@@ -7,15 +7,19 @@ import SpeechControllerV3 from '@/ttsv3';
 import { ref } from 'vue';
 import { ContentLoader } from 'vue-content-loader';
 
-var sentenceStatus = [
+const sentenceStatus = [
     'lyricful_before_read',
     'lyricful_reading',
     'lyricful_after_read'
 ]
+const emit = defineEmits(['loadingFinish'])
 const lyricful_data = ref([]);
-
-const speech = new SpeechControllerV3(lyricful_data)
-
+const speech = new SpeechControllerV3()
+speech.bindShowCallback(() => {
+    emit('loadingFinish')
+    console.log(11)
+    lyricful_data.value[lyricful_data.value.length - 1].isloading = false
+})
 /**
  * @param {import('vue').Ref} answerref
  * @param {string} text
@@ -23,6 +27,7 @@ const speech = new SpeechControllerV3(lyricful_data)
  */
 function addSentence(answerref, text, issplit = false) {
     console.log(text)
+    if (text == "" || text == "\n" || text == " ") return
     speech.addSentence(answerref, text, issplit)
 }
 

@@ -2,6 +2,10 @@
  * @Author: aquamarine5 && aquamarine5_@outlook.com
  * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
  */
+/*
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+ */
 import { ref } from "vue";
 import axios from "axios";
 
@@ -12,7 +16,10 @@ export default class SpeechControllerV3 {
         this.pendingTTSList = []
         this.isTTSPlaying = false
         this.isMuteDisplaying = false
+        this.isPreviousSplit = false
         this._currentIndex = 0
+        this.isfirstSentenceShow = true
+        this.firstSentenceShowCallback = null
         this.ismute = localStorage.getItem('silent') == 'true'
     }
 
@@ -25,6 +32,23 @@ export default class SpeechControllerV3 {
         }
         return this._audioContext;
     }
+
+    /**
+     * 
+     * @param {function} callback 
+     */
+    bindShowCallback(callback) {
+        this.firstSentenceShowCallback = callback
+    }
+
+    setFirstSentenceShow() {
+        if (this.isfirstSentenceShow) {
+            this.isfirstSentenceShow = false
+            if (this.firstSentenceShowCallback != null)
+                this.firstSentenceShowCallback()
+        }
+    }
+
     /**
      * @param {*} audiodata
      */
@@ -57,12 +81,19 @@ export default class SpeechControllerV3 {
                 console.log(source)
                 source.start();
             }, (error) => {
+                console.warn(base64AudioData)
                 console.error('解码音频数据时出错:', error);
             });
         }
+        if (audiodata.base64str == null) {
+            return
+        }
         let index = this.showSentence(audiodata)
+        if (audiodata.issplit) {
+            return
+        }
         playBase64Audio(audiodata.base64str, this.audioContext, () => {
-            this.refsentence.value[index].status = 2
+            this.refsentence[index].status = 2
             this.ttsNext()
         });
     }
@@ -74,8 +105,10 @@ export default class SpeechControllerV3 {
         if (audiodata.issplit) {
             this._currentIndex += 1;
             this.refsentence.push([])
+            return this.refsentence.length - 1
         }
         console.log(this.refsentence)
+        this.setFirstSentenceShow()
         this.refsentence[this._currentIndex].push({
             text: audiodata.text,
             status: ref(2)
@@ -92,16 +125,18 @@ export default class SpeechControllerV3 {
             console.log(this)
             if (!this.isTTSPlaying) {
                 this.isTTSPlaying = true
-                console.log(audiodata)
+                console.log(JSON.parse(JSON.stringify(this.pendingTTSList[0])))
                 if (this.pendingTTSList.length > 0 && this.pendingTTSList[0].base64str != null) {
                     this.ttsPlay(this.pendingTTSList.shift())
                 }
             }
+        }).catch((error) => {
+            console.error("TTS请求失败", error)
         })
     }
     ttsNext() {
         console.log(this.pendingTTSList.length)
-        if (this.pendingTTSList.length > 0) {
+        if (this.pendingTTSList.length > 0 && this.pendingTTSList[0].base64str != null) {
             this.ttsPlay(this.pendingTTSList.shift())
         } else {
             this.isTTSPlaying = false
@@ -111,6 +146,10 @@ export default class SpeechControllerV3 {
         //this.refsentence.value = [[]]
         this._currentIndex = 0
         this.pendingTTSList = []
+        this.firstSentenceShowCallback = null
+        this.isfirstSentenceShow = true
+        this.ismute = localStorage.getItem('silent') == 'true'
+        this.isPreviousSplit = false
     }
     /**
      * @param {boolean} status 
@@ -124,6 +163,14 @@ export default class SpeechControllerV3 {
      * @param {boolean} issplit
      */
     addSentence(answerref, sentence, issplit = false) {
+        if (issplit && this.isPreviousSplit) {
+            return
+        }
+        if (issplit) {
+            this.isPreviousSplit = true
+        } else {
+            this.isPreviousSplit = false
+        }
         this.pendingTTSList.push({
             text: sentence,
             base64str: null,
