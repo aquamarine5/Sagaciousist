@@ -1,3 +1,7 @@
+/*
+ * @Author: aquamarine5 && aquamarine5_@outlook.com
+ * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
+ */
 import http from 'http';
 import url from 'url';
 import fs from 'fs';
@@ -40,7 +44,7 @@ const server = http.createServer(async (req, res) => {
                 const exampleAudio = fs.readFileSync("D:\\GPT-SoVITS-v2-240821\\GPT-SoVITS-v2-240821\\这「七圣召唤」虽说是游戏，但对局之中也隐隐有策算谋略之理。.wav");
 
                 const app = await Client.connect("http://localhost:9872/");
-                let data=[
+                let data = [
                     exampleAudio, 	// blob in '请上传3~10秒内参考音频，超过会报错！' Audio component		
                     "这「七圣召唤」虽说是游戏，但对局之中也隐隐有策算谋略之理。", // string  in '参考音频的文本' Textbox component		
                     "中文", // string  in '参考音频的语种' Dropdown component		

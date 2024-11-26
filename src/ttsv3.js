@@ -2,10 +2,6 @@
  * @Author: aquamarine5 && aquamarine5_@outlook.com
  * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
  */
-/*
- * @Author: aquamarine5 && aquamarine5_@outlook.com
- * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
- */
 import { ref } from "vue";
 import axios from "axios";
 
@@ -19,6 +15,7 @@ export default class SpeechControllerV3 {
         this.isPreviousSplit = false
         this._currentIndex = 0
         this.isfirstSentenceShow = true
+        this.readFinishCallback = null
         this.firstSentenceShowCallback = null
         this.ismute = localStorage.getItem('silent') == 'true'
     }
@@ -44,8 +41,11 @@ export default class SpeechControllerV3 {
     setFirstSentenceShow() {
         if (this.isfirstSentenceShow) {
             this.isfirstSentenceShow = false
-            if (this.firstSentenceShowCallback != null)
+            console.log(this.firstSentenceShowCallback)
+            if (this.firstSentenceShowCallback != null) {
+                console.log("xiso")
                 this.firstSentenceShowCallback()
+            }
         }
     }
 
@@ -107,7 +107,6 @@ export default class SpeechControllerV3 {
             this.refsentence.push([])
             return this.refsentence.length - 1
         }
-        console.log(this.refsentence)
         this.setFirstSentenceShow()
         this.refsentence[this._currentIndex].push({
             text: audiodata.text,
@@ -128,6 +127,8 @@ export default class SpeechControllerV3 {
                 console.log(JSON.parse(JSON.stringify(this.pendingTTSList[0])))
                 if (this.pendingTTSList.length > 0 && this.pendingTTSList[0].base64str != null) {
                     this.ttsPlay(this.pendingTTSList.shift())
+                } else {
+                    this.isTTSPlaying = false
                 }
             }
         }).catch((error) => {
@@ -135,9 +136,14 @@ export default class SpeechControllerV3 {
         })
     }
     ttsNext() {
-        console.log(this.pendingTTSList.length)
         if (this.pendingTTSList.length > 0 && this.pendingTTSList[0].base64str != null) {
-            this.ttsPlay(this.pendingTTSList.shift())
+            let ttsnode = this.pendingTTSList.shift()
+            if (ttsnode.isend) {
+                if (this.readFinishCallback != null) {
+                    this.readFinishCallback()
+                }
+            }
+            this.ttsPlay(ttsnode)
         } else {
             this.isTTSPlaying = false
         }
@@ -146,7 +152,6 @@ export default class SpeechControllerV3 {
         //this.refsentence.value = [[]]
         this._currentIndex = 0
         this.pendingTTSList = []
-        this.firstSentenceShowCallback = null
         this.isfirstSentenceShow = true
         this.ismute = localStorage.getItem('silent') == 'true'
         this.isPreviousSplit = false
@@ -156,6 +161,19 @@ export default class SpeechControllerV3 {
      */
     ttsSetStatus(status) {
         this.ismute = status
+    }
+    /**
+     * 
+     * @returns {boolean}
+     */
+    ttsEndMark() {
+        if (this.pendingTTSList.length > 0) {
+            this.pendingTTSList[this.pendingTTSList.length - 1].isend = true
+            return false
+        }
+        else {
+            return true
+        }
     }
     /**
      * @param {import('vue').Ref} answerref 
@@ -172,6 +190,7 @@ export default class SpeechControllerV3 {
             this.isPreviousSplit = false
         }
         this.pendingTTSList.push({
+            isend: false,
             text: sentence,
             base64str: null,
             issplit: issplit,

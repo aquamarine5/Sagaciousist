@@ -12,9 +12,12 @@ const sentenceStatus = [
     'lyricful_reading',
     'lyricful_after_read'
 ]
-const emit = defineEmits(['loadingFinish'])
+const emit = defineEmits(['loadingFinish', "readFinished"])
 const lyricful_data = ref([]);
 const speech = new SpeechControllerV3()
+speech.readFinishCallback = () => {
+    emit('readFinished')
+}
 speech.bindShowCallback(() => {
     emit('loadingFinish')
     console.log(11)
@@ -54,7 +57,15 @@ function switchTTSStatus(istts) {
     speech.ttsSetStatus(istts)
 }
 
+/**
+ * @returns {boolean}
+ */
+function ttsEndMark() {
+    return speech.ttsEndMark()
+}
+
 defineExpose({
+    ttsEndMark,
     createQAStructure,
     clearAllLyrics,
     addSentence,

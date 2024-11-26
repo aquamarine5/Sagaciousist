@@ -2,14 +2,6 @@
  * @Author: aquamarine5 && aquamarine5_@outlook.com
  * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
 -->
-<!--
- * @Author: aquamarine5 && aquamarine5_@outlook.com
- * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
--->
-<!--
- * @Author: aquamarine5 && aquamarine5_@outlook.com
- * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
--->
 <script setup>
 import { ElButton, ElInput, ElNotification } from 'element-plus';
 import { Ollama } from 'ollama/src/browser';
@@ -67,7 +59,8 @@ typingNext()
                     <rect x="0" y="20" rx="3" ry="3" width="220" height="10" />
                     <rect x="0" y="40" rx="3" ry="3" width="250" height="10" />
                 </ContentLoader>
-                <LyricfulResponse ref="lyricful" :isloading="isloading" @loadingFinish="loadingFinished" />
+                <LyricfulResponse ref="lyricful" :isloading="isloading" @loadingFinish="loadingFinished"
+                    @readFinished="readFinished" />
             </div>
             <!-- <div class="selector_result" v-if="!isselecting && iswelcome">
                 <div class="selector_leftpart" @click="reselectMode">
@@ -90,7 +83,7 @@ typingNext()
                     placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
                 <div :class="!isRunning ? 'container_btn_send' : 'container_btn_send btn_send_gradient'">
                     <ElButton v-wave :type="'primary'" @click="onsend" circle>
-                        <MdiSendVariant v-if="!isloading" />
+                        <MdiSendVariant v-if="!isRunning" />
                         <LineMdLoadingTwotoneLoop v-else />
                     </ElButton>
                 </div>
@@ -106,7 +99,7 @@ const isRunning = ref(false)
 const splitPatterns = ['。', "！", "？", "，", "：", "；"]
 const showPendingTips = ref(false)
 var responseStatus = undefined
-var isloading = ref(false)
+const isloading = ref(false)
 // const interopPortal = new InteropPortal("http://localhost:8080")
 const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
 const interopPortalV2 = new InteropPortalV2(ollama, "http://localhost:8080")
@@ -118,6 +111,9 @@ export default {
         async handleAskQuestion(question) {
             this.inputText = question;
             await this.onsend()
+        },
+        readFinished() {
+            isRunning.value = false
         },
         loadingFinished() {
             isloading.value = false
@@ -182,6 +178,7 @@ export default {
                         if (char == '\n') {
                             //qastruct.isloading = false
                             this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, true)
+                            console.log("issplit: true")
                             lastSentence = ''
                         }
                         lastSentence += char
@@ -197,7 +194,7 @@ export default {
                             continue
                         if (splitPatterns.indexOf(char) != -1) {
                             //qastruct.isloading = false
-                            this.$refs.lyricful.addSentence(qastruct.answer, lastSentence)
+                            this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, false)
                             lastSentence = ''
                         }
                     }
@@ -205,13 +202,15 @@ export default {
                         break
                     }
                 }
+                if (this.$refs.lyricful.ttsEndMark()) {
+                    isRunning.value = false
+                }
                 interopPortalV2.storageMessage(itext, allResponse)
             }
             setTimeout(function () {
                 responseStatus = false
                 showPendingTips.value = false
             }, 100)
-            isRunning.value = false
         }
     },
     data() {

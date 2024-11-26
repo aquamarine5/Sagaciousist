@@ -2,10 +2,6 @@
  * @Author: aquamarine5 && aquamarine5_@outlook.com
  * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
  */
-/*
- * @Author: aquamarine5 && aquamarine5_@outlook.com
- * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
- */
 import wnetwork from './wnetwork'
 
 const BASE_LIBRARY = "定位理论"
