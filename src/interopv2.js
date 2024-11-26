@@ -62,7 +62,8 @@ export class InteropPortalV2 {
     async generateGenerateRequest(text) {
         return this.ollama.generate({
             model: 'llama3.1',
-            prompt: await this.generateGeneratePrompt(text)
+            prompt: await this.generateGeneratePrompt(text),
+            stream: true
         })
     }
 

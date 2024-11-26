@@ -41,9 +41,7 @@ export default class SpeechControllerV3 {
     setFirstSentenceShow() {
         if (this.isfirstSentenceShow) {
             this.isfirstSentenceShow = false
-            console.log(this.firstSentenceShowCallback)
             if (this.firstSentenceShowCallback != null) {
-                console.log("xiso")
                 this.firstSentenceShowCallback()
             }
         }
@@ -88,12 +86,12 @@ export default class SpeechControllerV3 {
         if (audiodata.base64str == null) {
             return
         }
-        let index = this.showSentence(audiodata)
+        let [index1, index2] = this.showSentence(audiodata)
         if (audiodata.issplit) {
             return
         }
         playBase64Audio(audiodata.base64str, this.audioContext, () => {
-            this.refsentence[index].status = 2
+            this.refsentence[index1][index2].status = 2
             this.ttsNext()
         });
     }
@@ -110,9 +108,9 @@ export default class SpeechControllerV3 {
         this.setFirstSentenceShow()
         this.refsentence[this._currentIndex].push({
             text: audiodata.text,
-            status: ref(2)
+            status: this.ismute ? ref(2) : ref(1)
         })
-        return this.refsentence.length - 1
+        return [this._currentIndex, this.refsentence[this._currentIndex].length - 1]
     }
     ttsRequest(audiodata) {
         if (audiodata.text == "\n") {

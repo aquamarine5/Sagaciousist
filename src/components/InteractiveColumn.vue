@@ -165,13 +165,14 @@ export default {
                 let itext = this.inputText
                 let qastruct = this.$refs.lyricful.createQAStructure(itext)
                 this.inputText = ""
-                const response = await interopPortalV2.generateChatRequest(itext)
+                //const response = await interopPortalV2.generateChatRequest(itext)
+                const response = await interopPortalV2.generateGenerateRequest(itext)
                 var lastSentence = ''
                 var allResponse = ''
                 console.log(qastruct)
                 for await (const part of response) {
-                    let content = part.message.content
-                    // let content = part.response
+                    //let content = part.message.content
+                    let content = part.response
                     allResponse += content
                     for (let index = 0; index < content.length; index++) {
                         const char = content[index];
