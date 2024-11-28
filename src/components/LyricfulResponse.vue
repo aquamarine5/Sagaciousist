@@ -33,7 +33,9 @@ function addSentence(answerref, text, issplit = false) {
     if (text == "" || text == "\n" || text == " ") return
     speech.addSentence(answerref, text, issplit)
 }
-
+function checkTTSStatus() {
+    speech.checkTTSStatus()
+}
 /**
  * @param {string} questionstr 
  */
@@ -65,6 +67,7 @@ function ttsEndMark() {
 }
 
 defineExpose({
+    checkTTSStatus,
     ttsEndMark,
     createQAStructure,
     clearAllLyrics,

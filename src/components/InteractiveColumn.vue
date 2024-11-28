@@ -162,6 +162,7 @@ export default {
                 //     prompt: await interopPortal.combinePrompt(this.inputText),
                 //     stream: true
                 // })
+                this.$refs.lyricful.checkTTSStatus()
                 let itext = this.inputText
                 let qastruct = this.$refs.lyricful.createQAStructure(itext)
                 this.inputText = ""

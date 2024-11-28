@@ -30,6 +30,10 @@ export default class SpeechControllerV3 {
         return this._audioContext;
     }
 
+    ttsCheckStatus() {
+        this.ismute = localStorage.getItem('silent') == 'true'
+    }
+
     /**
      * 
      * @param {function} callback 

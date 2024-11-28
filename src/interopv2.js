@@ -85,7 +85,7 @@ export class InteropPortalV2 {
      * @returns {Promise<import('axios').AxiosResponse<any,any>}
      */
     getESPrompt(text) {
-        const ES_REQUEST_PATH = "/materialSearch?query="
+        const ES_REQUEST_PATH = "/bookSearch?query="
         return wnetwork.get(this.esUrl + ES_REQUEST_PATH + text)
     }
     /**
