@@ -17,7 +17,7 @@ export default class SpeechControllerV3 {
         this.isfirstSentenceShow = true
         this.readFinishCallback = null
         this.firstSentenceShowCallback = null
-        this.ismute = localStorage.getItem('silent') == 'true'
+        this.ismute = localStorage.getItem('silent') === 'true'
     }
 
     /**
@@ -31,7 +31,7 @@ export default class SpeechControllerV3 {
     }
 
     ttsCheckStatus() {
-        this.ismute = localStorage.getItem('silent') == 'true'
+        this.ismute = localStorage.getItem('silent') === 'true'
     }
 
     /**
@@ -99,21 +99,22 @@ export default class SpeechControllerV3 {
             this.ttsNext()
         });
     }
-    /**
-     * 
+    /** 
      * @param {*} audiodata 
+     * @returns {[number, number]}
      */
     showSentence(audiodata) {
         if (audiodata.issplit) {
             this._currentIndex += 1;
             this.refsentence.push([])
-            return this.refsentence.length - 1
+            console.log("audiodata.issplit")
         }
         this.setFirstSentenceShow()
         this.refsentence[this._currentIndex].push({
             text: audiodata.text,
             status: this.ismute ? ref(2) : ref(1)
         })
+        console.log(this._currentIndex, this.refsentence[this._currentIndex].length - 1)
         return [this._currentIndex, this.refsentence[this._currentIndex].length - 1]
     }
     ttsRequest(audiodata) {
@@ -135,6 +136,7 @@ export default class SpeechControllerV3 {
             }
         }).catch((error) => {
             console.error("TTS请求失败", error)
+            this.isTTSPlaying = false
         })
     }
     ttsNext() {
@@ -163,6 +165,7 @@ export default class SpeechControllerV3 {
      */
     ttsSetStatus(status) {
         this.ismute = status
+        localStorage.setItem('silent', status.toString())
     }
     /**
      * 
@@ -175,6 +178,15 @@ export default class SpeechControllerV3 {
         }
         else {
             return true
+        }
+    }
+    setSplitMark() {
+        if (this.pendingTTSList.length > 0)
+            this.pendingTTSList[this.pendingTTSList.length - 1].issplit = true
+        else {
+            this._currentIndex += 1;
+            this.refsentence.push([])
+            console.log("audiodata.forcesplit")
         }
     }
     /**
@@ -191,6 +203,7 @@ export default class SpeechControllerV3 {
         } else {
             this.isPreviousSplit = false
         }
+        console.log(issplit)
         this.pendingTTSList.push({
             isend: false,
             text: sentence,

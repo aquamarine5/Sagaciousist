@@ -24,6 +24,9 @@ function changeSilent() {
     <div class="topbar_container">
         <div class="topbar_title">
             Sagaciousist
+            <div class="topbar_version">
+                v1.5
+            </div>
         </div>
         <div class="silent_button" @click="changeSilent">
             <MdiTtsOff v-if="isSilent" />
@@ -33,6 +36,13 @@ function changeSilent() {
 </template>
 
 <style scoped>
+.topbar_version {
+    font-size: medium;
+    font-family: "Gilroy", sans-serif;
+    padding-top: 3px;
+    padding-left: 2px;
+}
+
 .topbar_container {
     background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
     border-radius: 0px 0px 16px 16px;
@@ -44,6 +54,7 @@ function changeSilent() {
 }
 
 .topbar_title {
+    display: flex;
     font-family: 'Gilroy';
     font-weight: 600;
     font-size: 32px;
