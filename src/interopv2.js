@@ -4,7 +4,7 @@
  */
 import wnetwork from './wnetwork'
 
-const BASE_LIBRARY = "定位理论"
+const BASE_LIBRARY = "国学经典"
 
 export class InteropPortalV2 {
     /**

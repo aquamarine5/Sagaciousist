@@ -30,11 +30,14 @@ speech.bindShowCallback(() => {
  */
 function addSentence(answerref, text, issplit = false) {
     console.log(text)
-    if (text == "" || text == "\n" || text == " ") return
-    speech.addSentence(answerref, text, issplit)
+    if (text == "" || text == "\n" || text == " ") {
+        speech.setSplitMark()
+    } else {
+        speech.addSentence(answerref, text, issplit)
+    }
 }
 function checkTTSStatus() {
-    speech.checkTTSStatus()
+    speech.ttsCheckStatus()
 }
 /**
  * @param {string} questionstr 

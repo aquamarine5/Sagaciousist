@@ -41,12 +41,12 @@ const server = http.createServer(async (req, res) => {
 
                 // 在这里处理 TTS 请求，例如调用 TTS 服务生成音频
                 console.log(`接收到的文本: ${text}`);
-                const exampleAudio = fs.readFileSync("D:\\GPT-SoVITS-v2-240821\\GPT-SoVITS-v2-240821\\这「七圣召唤」虽说是游戏，但对局之中也隐隐有策算谋略之理。.wav");
+                const exampleAudio = fs.readFileSync("D:\\GPT-SoVITS-v2-240821\\audios\\vocal_录音 (10).m4a.reformatted_vocals.flac_main_vocal.flac_10.flac_0000053760_0000303040.wav");
 
                 const app = await Client.connect("http://localhost:9872/");
                 let data = [
                     exampleAudio, 	// blob in '请上传3~10秒内参考音频，超过会报错！' Audio component		
-                    "这「七圣召唤」虽说是游戏，但对局之中也隐隐有策算谋略之理。", // string  in '参考音频的文本' Textbox component		
+                    "前款规定的债务人或者第三人为抵押人，债权人为抵押权人，提供担保的财产为抵押财产。", // string  in '参考音频的文本' Textbox component		
                     "中文", // string  in '参考音频的语种' Dropdown component		
                     text, // string  in '需要合成的文本' Textbox component		
                     "中英混合", // string  in '需要合成的语种.限制范围越小判别效果越好。' Dropdown component		
@@ -73,6 +73,7 @@ const server = http.createServer(async (req, res) => {
                 res.statusCode = 400;
                 res.setHeader('Content-Type', 'application/json');
                 res.end(JSON.stringify({ error: error.message }));
+                console.log(error)
             }
         });
     } else {

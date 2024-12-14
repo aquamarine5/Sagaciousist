@@ -3,7 +3,7 @@
  * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
 -->
 <template>
-    <div class="tips_container">
+    <div class="tips_container" v-if="false">
         <div class="tips_title">💡不知道问什么？试试下面的问题吧👇</div>
         <div class="tips_forcontainer">
             <div v-for="(question, index) in selectedQuestions" :key="index" class="tips_item">

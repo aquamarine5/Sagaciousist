@@ -157,11 +157,6 @@ export default {
                     "———— 那艺娜《笨笨的我傻傻的活》"
                 ].forEach((v) => this.$refs.lyricful.addSentence(v))
             } else {
-                // const response = await ollama.generate({
-                //     model: 'llama3.1',
-                //     prompt: await interopPortal.combinePrompt(this.inputText),
-                //     stream: true
-                // })
                 this.$refs.lyricful.checkTTSStatus()
                 let itext = this.inputText
                 let qastruct = this.$refs.lyricful.createQAStructure(itext)
