@@ -6,6 +6,8 @@
 import SpeechControllerV3 from '@/ttsv3';
 import { ref } from 'vue';
 import { ContentLoader } from 'vue-content-loader';
+//import LucideSquareUserRound from '~icons/lucide/square-user-round?width=24px&height=24px';
+//import LucideBot from '~icons/lucide/bot?width=24px&height=24px';
 
 const sentenceStatus = [
     'lyricful_before_read',
@@ -21,7 +23,9 @@ speech.readFinishCallback = () => {
 speech.bindShowCallback(() => {
     emit('loadingFinish')
     console.log(11)
-    lyricful_data.value[lyricful_data.value.length - 1].isloading = false
+    if (lyricful_data.value && lyricful_data.value.length > 0) {
+        lyricful_data.value[lyricful_data.value.length - 1].isloading = false
+    }
 })
 /**
  * @param {import('vue').Ref} answerref
@@ -45,7 +49,11 @@ function checkTTSStatus() {
 function createQAStructure(questionstr) {
     let answerref = ref([[]])
     let isloadingref = ref(true)
-    lyricful_data.value.push({ question: questionstr, answer: answerref, isloading: isloadingref })
+    lyricful_data.value.push({
+        question: questionstr,
+        answer: answerref,
+        isloading: isloadingref
+    })
     return lyricful_data.value[lyricful_data.value.length - 1]
 }
 
@@ -81,21 +89,18 @@ defineExpose({
 
 <template>
     <div class="lyricful_container">
-        <!-- eslint-disable-next-line vue/require-v-for-key, vue/no-unused-vars -->
-        <div class="lyricful_qastructure" v-for="data in lyricful_data">
-
+        <div class="lyricful_qastructure" v-for="(data, index) in lyricful_data" :key="index">
             <div class="lyricful_question">
                 <div class="lyricful_question_text">{{ data.question }}</div>
             </div>
             <div class="lyricful_answer">
                 <div class="lyricful_loading" v-if="data.isloading">
-                    <ContentLoader :width="50" :height="20" :speed="2" primaryColor="#eee" secondaryColor="#ccc">
+                    <ContentLoader :width="50" :height="20" :speed="3" primaryColor="#eee" secondaryColor="#ccc">
                     </ContentLoader>
                 </div>
-                <!-- eslint-disable-next-line vue/require-v-for-key, vue/no-unused-vars -->
-                <div :class="'lyricful_sentence'" v-for="sentence in data.answer" v-else>
-                    <!-- eslint-disable-next-line vue/require-v-for-key -->
-                    <span :class="'lyricful_part ' + sentenceStatus[textpart.status]" v-for="textpart in sentence">
+                <div :class="'lyricful_sentence'" v-for="(sentence, aindex) in data.answer" v-else :key="aindex">
+                    <span :class="'lyricful_part ' + sentenceStatus[textpart.status]"
+                        v-for="(textpart, taindex) in sentence" :key="taindex">
                         {{ textpart.text }}
                     </span>
                 </div>
@@ -128,8 +133,8 @@ defineExpose({
 }
 
 .lyricful_answer {
-    padding: 5px 10px;
-    border-radius: 10px;
+    padding: 8px 13px;
+    border-radius: 20px;
     width: fit-content;
     border-color: gray;
     border-style: solid;

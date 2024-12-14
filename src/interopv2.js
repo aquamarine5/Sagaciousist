@@ -6,6 +6,8 @@ import wnetwork from './wnetwork'
 
 const BASE_LIBRARY = "国学经典"
 
+const ES_REQUEST_PATH = "/bookSearch?query="
+
 export class InteropPortalV2 {
     /**
      * @param {string} esUrl 
@@ -85,7 +87,6 @@ export class InteropPortalV2 {
      * @returns {Promise<import('axios').AxiosResponse<any,any>}
      */
     getESPrompt(text) {
-        const ES_REQUEST_PATH = "/bookSearch?query="
         return wnetwork.get(this.esUrl + ES_REQUEST_PATH + text)
     }
     /**

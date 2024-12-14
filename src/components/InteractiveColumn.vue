@@ -7,15 +7,11 @@ import { ElButton, ElInput, ElNotification } from 'element-plus';
 import { Ollama } from 'ollama/src/browser';
 import ModelColumn from './ModelColumn.vue';
 import { ref } from 'vue';
-import MdiSendVariant from '~icons/mdi/send-variant?width=1.3em&height=1.3em';
+import MdiSendVariant from '~icons/mdi/send-variant?width=1.5em&height=1.5em';
 import LineMdLoadingTwotoneLoop from '~icons/line-md/loading-twotone-loop?width=1.8em&height=1.8em';
 import LyricfulResponse from './LyricfulResponse.vue';
 import { ContentLoader } from 'vue-content-loader';
 import QuestionsTipDisplayer from './QuestionsTipDisplayer.vue';
-// import SelectorDisplayer from './SelectorDisplayer.vue';
-// import LineMdArrowSmallLeft from '~icons/line-md/arrow-small-left?width=16px&height=16px';
-// import LineMdTextBoxMultipleTwotone from '~icons/line-md/text-box-multiple-twotone?width=16px&height=16px';
-// import LineMdFileSearchTwotone from '~icons/line-md/file-search-twotone?width=16px&height=16px';
 import { InteropPortalV2 } from '@/interopv2';
 
 
@@ -173,14 +169,12 @@ export default {
                     for (let index = 0; index < content.length; index++) {
                         const char = content[index];
                         if (char == '\n') {
-                            //qastruct.isloading = false
                             this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, true)
                             console.log("issplit: true")
                             lastSentence = ''
                         }
                         lastSentence += char
                         if (!isRunning.value) {
-                            //qastruct.isloading = false
                             this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, false)
                             break
                         }
@@ -190,7 +184,6 @@ export default {
                         if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
                             continue
                         if (splitPatterns.indexOf(char) != -1) {
-                            //qastruct.isloading = false
                             this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, false)
                             lastSentence = ''
                         }
@@ -218,9 +211,6 @@ export default {
             },
             lyricfulResponse: undefined
         }
-    },
-    mounted() {
-
     }
 }
 </script>

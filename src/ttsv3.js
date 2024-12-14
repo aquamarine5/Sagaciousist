@@ -31,7 +31,7 @@ export default class SpeechControllerV3 {
     }
 
     ttsCheckStatus() {
-        this.ismute = localStorage.getItem('silent') == 'true'
+        this.ismute = localStorage.getItem('silent') === 'true'
     }
 
     /**
@@ -165,6 +165,7 @@ export default class SpeechControllerV3 {
      */
     ttsSetStatus(status) {
         this.ismute = status
+        localStorage.setItem('silent', status.toString())
     }
     /**
      * 
@@ -180,7 +181,13 @@ export default class SpeechControllerV3 {
         }
     }
     setSplitMark() {
-        this.pendingTTSList[this.pendingTTSList.length - 1].issplit = true
+        if (this.pendingTTSList.length > 0)
+            this.pendingTTSList[this.pendingTTSList.length - 1].issplit = true
+        else {
+            this._currentIndex += 1;
+            this.refsentence.push([])
+            console.log("audiodata.forcesplit")
+        }
     }
     /**
      * @param {import('vue').Ref} answerref 
