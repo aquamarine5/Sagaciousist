@@ -23,16 +23,21 @@ export class InteropPortalV2 {
      * 
      * @param {string} question 
      * @param {string} answer 
+     * @returns {StoragedMessageIndexes}
      */
     storageMessage(question, answer) {
-        this.storagedMessage.push({
+        let userindex = this.storagedMessage.push({
             role: 'user',
             content: question
         })
-        this.storagedMessage.push({
+        let answerindex = this.storagedMessage.push({
             role: 'assistant',
             content: answer
         })
+        return {
+            userindex: userindex - 1,
+            answerindex: answerindex - 1
+        }
     }
     /**
      * 

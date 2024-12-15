@@ -5,6 +5,7 @@
 import { ref } from "vue";
 import axios from "axios";
 
+const MUTE_DELAY = 100
 
 /**
  * @typedef {Object} Audiodata
@@ -264,7 +265,7 @@ export default class SpeechControllerV3 {
             this.showSentence(this.pendingTTSList.shift())
             setTimeout(() => {
                 this.muteNext()
-            }, 200)
+            }, MUTE_DELAY)
         } else {
             this.isMuteDisplaying = false
         }

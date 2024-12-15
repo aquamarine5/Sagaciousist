@@ -7,6 +7,7 @@ import { ref } from "vue";
 import "../assets/fonts/font.css"
 import MdiTts from '~icons/mdi/tts?&width=30px&height=30px';
 import MdiTtsOff from '~icons/mdi/tts-off?&width=30px&height=30px';
+import LucideBotMessageSquare from '~icons/lucide/bot-message-square?width=30px&height=30px';
 import pkginfo from '../../package.json'
 
 const isSilent = ref(false)
@@ -17,14 +18,17 @@ if (localStorage.getItem('silent') == null) {
 }
 function changeSilent() {
     isSilent.value = !isSilent.value
-    localStorage.setItem('silent', isSilent.value)
+    localStorage.setItem('silent', isSilent.value.toString())
 }
 </script>
 
 <template>
     <div class="topbar_container">
         <div class="topbar_title">
-            Sagaciousist
+            <div class="topbar_center">
+                <LucideBotMessageSquare class="topbar_logo" />
+                国学人工智能
+            </div>
             <div class="topbar_version">
                 v{{ pkginfo.version }}
             </div>
@@ -37,6 +41,10 @@ function changeSilent() {
 </template>
 
 <style scoped>
+.topbar_logo {
+    margin-right: 3px;
+}
+
 .topbar_version {
     font-size: medium;
     font-family: "Gilroy", sans-serif;
@@ -54,11 +62,16 @@ function changeSilent() {
 
 }
 
+.topbar_center {
+    display: flex;
+    align-items: center;
+}
+
 .topbar_title {
     display: flex;
-    font-family: 'Gilroy';
+    font-family: 'SourceHanSansBold';
     font-weight: 600;
-    font-size: 32px;
+    font-size: 24px;
     color: white;
     cursor: pointer;
 }

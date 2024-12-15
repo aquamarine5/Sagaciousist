@@ -12,7 +12,7 @@ import LineMdLoadingTwotoneLoop from '~icons/line-md/loading-twotone-loop?width=
 import LyricfulResponse from './LyricfulResponse.vue';
 import QuestionsTipDisplayer from './QuestionsTipDisplayer.vue';
 import { InteropPortalV2 } from '@/interopv2';
-
+// import SelectorDisplayer from './SelectorDisplayer.vue';
 
 let nowtime = new Date().getHours()
 var text = ""
@@ -64,10 +64,14 @@ typingNext()
                     {{ model === 'book' ? '书籍相关提问模式' : model === 'history' ? '历史事件提问模式' : "?" }}
                 </div>
             </div> -->
-            <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="iswelcome">
-                {{ typingText }}
-            </div>
+
             <!-- <SelectorDisplayer v-if="isselecting" @modeSelected="handleModeSelected" /> -->
+            <div class="center_tips">
+                <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="iswelcome">
+                    {{ typingText }}
+                </div>
+                <QuestionsTipDisplayer class="question_tips" v-if="iswelcome" @askQuestion="handleAskQuestion" />
+            </div>
             <div class="input_container">
                 <ElInput :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputText" type="textarea"
                     placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
@@ -78,12 +82,12 @@ typingNext()
                     </ElButton>
                 </div>
             </div>
-            <QuestionsTipDisplayer v-if="iswelcome" @askQuestion="handleAskQuestion" />
         </div>
     </div>
 </template>
 
 <script>
+// const isselecting = ref(true)
 const iswelcome = ref(true)
 const isRunning = ref(false)
 const splitPatterns = ['。', "！", "？", "，", "：", "；"]
@@ -109,6 +113,10 @@ export default {
             isloading.value = false
         },
         async onsend() {
+            /**
+             * @type {LyricfulResponse}
+             */
+            let lyricfulRef = this.$refs.lyricful
             if (this.inputText == '') {
                 ElNotification({
                     type: 'warning',
@@ -118,7 +126,7 @@ export default {
                 return
             }
             if (isRunning.value) {
-                this.$refs.lyricful.ttsStop()
+                lyricfulRef.ttsStop()
                 isRunning.value = false
                 return
             }
@@ -126,7 +134,7 @@ export default {
             isloading.value = true
             isRunning.value = true
             responseStatus = true
-            this.$refs.lyricful.clearAllLyrics()
+            lyricfulRef.clearAllLyrics()
             speechSynthesis.cancel()
             //const seg = new Intl.Segmenter("zh", { granularity: "sentence" })
             setTimeout(function () {
@@ -145,11 +153,14 @@ export default {
                     "一路走来我不优秀",
                     "但我善良不虚伪",
                     "———— 那艺娜《笨笨的我傻傻的活》"
-                ].forEach((v) => this.$refs.lyricful.addSentence(v))
+                ].forEach((v) => lyricfulRef.addSentence(v))
             } else {
-                this.$refs.lyricful.checkTTSStatus()
+                lyricfulRef.checkTTSStatus()
                 let itext = this.inputText
-                let qastruct = this.$refs.lyricful.createQAStructure(itext)
+                /**
+                 * @type {QAStructure}
+                 */
+                let qastruct = lyricfulRef.createQAStructure(itext)
                 this.inputText = ""
                 //const response = await interopPortalV2.generateChatRequest(itext)
                 const response = await interopPortalV2.generateGenerateRequest(itext)
@@ -163,13 +174,13 @@ export default {
                     for (let index = 0; index < content.length; index++) {
                         const char = content[index];
                         if (char == '\n') {
-                            this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, true)
+                            lyricfulRef.addSentence(qastruct.answer, lastSentence, true)
                             console.log("issplit: true")
                             lastSentence = ''
                         }
                         lastSentence += char
                         if (!isRunning.value) {
-                            this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, false)
+                            lyricfulRef.addSentence(qastruct.answer, lastSentence, false)
                             break
                         }
                         if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
@@ -178,7 +189,7 @@ export default {
                         if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
                             continue
                         if (splitPatterns.indexOf(char) != -1) {
-                            this.$refs.lyricful.addSentence(qastruct.answer, lastSentence, false)
+                            lyricfulRef.addSentence(qastruct.answer, lastSentence, false)
                             lastSentence = ''
                         }
                     }
@@ -186,10 +197,12 @@ export default {
                         break
                     }
                 }
-                if (this.$refs.lyricful.ttsEndMark()) {
+                console.log("last content: " + lastSentence)
+                if (lyricfulRef.ttsEndMark()) {
                     isRunning.value = false
                 }
-                interopPortalV2.storageMessage(itext, allResponse)
+                let messageIndex = interopPortalV2.storageMessage(itext, allResponse)
+                qastruct.messageindex = messageIndex
             }
             setTimeout(function () {
                 responseStatus = false
@@ -317,6 +330,14 @@ export default {
     margin-bottom: 5px;
 }
 
+.center_tips {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
 .selector_leftpart {
     border-radius: 6px 0px 0px 6px;
     border-color: gray;
@@ -341,25 +362,23 @@ export default {
 }
 
 .welcome_tips_cn {
+    align-items: center;
+    display: flex;
     white-space: nowrap;
+    justify-content: center;
     font-size: 30px;
     align-self: center;
-    margin-right: 30px;
-    padding-bottom: 18px;
     font-family: "SourceHanSansBold";
 }
 
 .welcome_tips {
+    align-items: center;
+    display: flex;
     white-space: nowrap;
     font-family: "Gilroy";
     font-size: 30px;
+    justify-content: center;
     align-self: center;
-    margin-right: 40px;
-    padding-bottom: 18px;
-}
-
-.is-loading {
-    animation: rotating 2s linear infinite;
 }
 
 .container_btn_send {
@@ -369,6 +388,7 @@ export default {
 
 .input_container {
     display: flex;
+    margin-top: auto;
     align-items: center;
 }
 
@@ -381,11 +401,8 @@ export default {
     justify-content: center;
 }
 
-.app_container_justified {
-    justify-content: flex-end;
-}
-
 .main_container {
+    height: 87vh;
     display: flex;
     width: 100%;
     transition: justify-content 0.3s ease;

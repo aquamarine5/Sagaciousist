@@ -66,17 +66,19 @@ function checkTTSStatus() {
 }
 /**
  * @param {string} questionstr 
+ * @returns {QAStructure}
  */
 function createQAStructure(questionstr) {
     let answerref = ref([[]])
     let isloadingref = ref(true)
-    lyricful_data.value.push({
+    let index = lyricful_data.value.push({
         question: questionstr,
         answer: answerref,
         isloading: isloadingref,
-        isfinish: false
+        isfinish: false,
+        messageIndexes: null
     })
-    return lyricful_data.value[lyricful_data.value.length - 1]
+    return lyricful_data.value[index - 1]
 }
 
 function clearAllLyrics() {
@@ -112,16 +114,16 @@ defineExpose({
 <template>
     <div class="lyricful_container" ref="containerRef">
         <div class="lyricful_qastructure" v-for="(data, index) in lyricful_data" :key="index">
+            <div class="lyricful_question_icon">
+                用户
+                <LucideSquareUserRound />
+            </div>
             <div class="lyricful_question">
-                <div class="lyricful_question_icon">
-                    用户
-                    <LucideSquareUserRound />
-                </div>
-                <div class="lyricful_question_text">{{ data.question }}</div>
+                {{ data.question }}
             </div>
             <div class="lyricful_answer_icon">
                 <LucideBot />
-                Sagaciousist
+                国学人工智能
             </div>
             <div class="lyricful_answer">
                 <div class="lyricful_loading" v-if="data.isloading">
@@ -173,8 +175,8 @@ defineExpose({
     display: flex;
     gap: 5px;
     align-items: center;
-    font-family: "Gilroy";
-    font-size: medium;
+    font-family: "SourceHanSansBold";
+    font-size: smaller;
     margin-bottom: 5px;
 }
 
@@ -202,22 +204,25 @@ defineExpose({
     padding: 8px 13px;
     border-radius: 20px;
     width: fit-content;
-    border-color: gray;
+    border-color: transparent;
+    background-clip: padding-box, border-box;
+    background-origin: padding-box, border-box;
+    background-image: linear-gradient(to right, #fff, #fff), linear-gradient(315deg, #04d4fd, #0989f4, #284fab);
     border-style: solid;
     border-width: 2px;
 }
 
 .lyricful_question {
-    padding: 5px 10px;
-    text-align: right;
-    width: fit-content;
     margin-left: auto;
-    font-size: large;
-    /* border-radius: 10px;
-    border-color: #56f9c4;
+    margin-block: 5px;
+    width: fit-content;
+    padding: 6px 13px;
+    text-align: right;
     border-style: solid;
-    border-width: 2px; */
-    margin-bottom: 5px;
+    border-color: #888;
+    border-width: 2px;
+    border-radius: 20px;
+    background-color: #fff;
 }
 
 .lyricful_part {
