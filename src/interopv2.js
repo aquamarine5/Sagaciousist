@@ -5,7 +5,7 @@
 import wnetwork from './wnetwork'
 
 const BASE_LIBRARY = "国学经典"
-
+const MODEL_NAME = 'llama3.1'
 const ES_REQUEST_PATH = "/bookSearch?query="
 
 export class InteropPortalV2 {
@@ -18,6 +18,12 @@ export class InteropPortalV2 {
         this.ollama = ollamaInstance
         this.esUrl = esUrl
     }
+
+    /**
+     * 
+     * @param {string} question 
+     * @param {string} answer 
+     */
     storageMessage(question, answer) {
         this.storagedMessage.push({
             role: 'user',
@@ -41,7 +47,7 @@ export class InteropPortalV2 {
         messages = messages.concat(this.storagedMessage)
         messages = messages.concat(this.combineSAGEPrompt(text))
         return this.ollama.chat({
-            model: 'llama3.1',
+            model: MODEL_NAME,
             stream: true,
             messages: messages
         });
@@ -61,14 +67,24 @@ export class InteropPortalV2 {
         return this.combineListToPrompt(messages)
     }
 
+    /**
+     * 
+     * @param {string} text 
+     * @returns {Promise<import("ollama").AbortableAsyncIterator<import("ollama").GenerateResponse>>}
+     */
     async generateGenerateRequest(text) {
         return this.ollama.generate({
-            model: 'llama3.1',
+            model: MODEL_NAME,
             prompt: await this.generateGeneratePrompt(text),
             stream: true
         })
     }
 
+    /**
+     * 
+     * @param {*[]} messageList 
+     * @returns {string}
+     */
     combineListToPrompt(messageList) {
         let prompt = ""
         const matchMap = {

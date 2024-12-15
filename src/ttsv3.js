@@ -5,6 +5,16 @@
 import { ref } from "vue";
 import axios from "axios";
 
+
+/**
+ * @typedef {Object} Audiodata
+ * @property {string} text
+ * @property {string} base64str
+ * @property {boolean} isend
+ * @property {boolean} issplit
+ * @property {number} index
+ */
+
 export default class SpeechControllerV3 {
     constructor() {
         this.refsentence = null
@@ -52,7 +62,7 @@ export default class SpeechControllerV3 {
     }
 
     /**
-     * @param {*} audiodata
+     * @param {Audiodata} audiodata
      */
     ttsPlay(audiodata) {
         /**
@@ -100,7 +110,7 @@ export default class SpeechControllerV3 {
         });
     }
     /** 
-     * @param {*} audiodata 
+     * @param {Audiodata} audiodata 
      * @returns {[number, number]}
      */
     showSentence(audiodata) {
@@ -117,6 +127,12 @@ export default class SpeechControllerV3 {
         console.log(this._currentIndex, this.refsentence[this._currentIndex].length - 1)
         return [this._currentIndex, this.refsentence[this._currentIndex].length - 1]
     }
+
+    /**
+     * 
+     * @param {Audiodata} audiodata 
+     * @returns 
+     */
     ttsRequest(audiodata) {
         if (audiodata.text == "\n") {
             console.warn("?")
@@ -139,6 +155,7 @@ export default class SpeechControllerV3 {
             this.isTTSPlaying = false
         })
     }
+
     ttsNext() {
         if (this.pendingTTSList.length > 0 && this.pendingTTSList[0].base64str != null) {
             let ttsnode = this.pendingTTSList.shift()
@@ -152,6 +169,7 @@ export default class SpeechControllerV3 {
             this.isTTSPlaying = false
         }
     }
+
     ttsClear() {
         //this.refsentence.value = [[]]
         this._currentIndex = 0
@@ -180,6 +198,7 @@ export default class SpeechControllerV3 {
             return true
         }
     }
+
     setSplitMark() {
         if (this.pendingTTSList.length > 0)
             this.pendingTTSList[this.pendingTTSList.length - 1].issplit = true
@@ -189,6 +208,7 @@ export default class SpeechControllerV3 {
             console.log("audiodata.forcesplit")
         }
     }
+
     /**
      * @param {import('vue').Ref} answerref 
      * @param {string} sentence 
@@ -218,12 +238,14 @@ export default class SpeechControllerV3 {
             this.ttsRequest(this.pendingTTSList[this.pendingTTSList.length - 1])
         }
     }
+
     muteDisplay() {
         if (!this.isMuteDisplaying) {
             this.isMuteDisplaying = true
             this.muteNext()
         }
     }
+
     muteNext() {
         if (this.pendingTTSList.length > 0) {
             console.log(1)

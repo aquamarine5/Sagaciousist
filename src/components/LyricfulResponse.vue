@@ -6,8 +6,8 @@
 import SpeechControllerV3 from '@/ttsv3';
 import { ref } from 'vue';
 import { ContentLoader } from 'vue-content-loader';
-//import LucideSquareUserRound from '~icons/lucide/square-user-round?width=24px&height=24px';
-//import LucideBot from '~icons/lucide/bot?width=24px&height=24px';
+import LucideSquareUserRound from '~icons/lucide/square-user-round?width=24px&height=24px';
+import LucideBot from '~icons/lucide/bot?width=24px&height=24px';
 
 const sentenceStatus = [
     'lyricful_before_read',
@@ -91,7 +91,15 @@ defineExpose({
     <div class="lyricful_container">
         <div class="lyricful_qastructure" v-for="(data, index) in lyricful_data" :key="index">
             <div class="lyricful_question">
+                <div class="lyricful_question_icon">
+                    用户
+                    <LucideSquareUserRound />
+                </div>
                 <div class="lyricful_question_text">{{ data.question }}</div>
+            </div>
+            <div class="lyricful_answer_icon">
+                <LucideBot />
+                Sagaciousist
             </div>
             <div class="lyricful_answer">
                 <div class="lyricful_loading" v-if="data.isloading">
@@ -119,6 +127,24 @@ defineExpose({
     100% {
         opacity: 1;
     }
+}
+
+.lyricful_answer_icon {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    font-family: "Gilroy";
+    font-size: medium;
+    margin-bottom: 5px;
+}
+
+.lyricful_question_icon {
+    display: flex;
+    align-items: center;
+    font-size: smaller;
+    font-family: "SourceHanSansBold";
+    gap: 5px;
+    justify-content: center;
 }
 
 .lyricful_loading {
