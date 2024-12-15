@@ -4,7 +4,7 @@
 -->
 <script setup>
 import SpeechControllerV3 from '@/ttsv3';
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import { ContentLoader } from 'vue-content-loader';
 import LucideSquareUserRound from '~icons/lucide/square-user-round?width=24px&height=24px';
 import LucideBot from '~icons/lucide/bot?width=24px&height=24px';
@@ -16,7 +16,21 @@ const sentenceStatus = [
 ]
 const emit = defineEmits(['loadingFinish', "readFinished"])
 const lyricful_data = ref([]);
-const speech = new SpeechControllerV3()
+const containerRef = ref(null)
+const speech = new SpeechControllerV3(() => {
+    nextTick(() => {
+        const container = containerRef.value
+        if (container) {
+            container.scrollTo({
+                top: container.scrollHeight,
+                behavior: 'smooth'
+            })
+        }
+        else {
+            console.warn('container is null')
+        }
+    })
+})
 speech.readFinishCallback = () => {
     emit('readFinished')
 }
@@ -88,7 +102,7 @@ defineExpose({
 </script>
 
 <template>
-    <div class="lyricful_container">
+    <div class="lyricful_container" ref="containerRef">
         <div class="lyricful_qastructure" v-for="(data, index) in lyricful_data" :key="index">
             <div class="lyricful_question">
                 <div class="lyricful_question_icon">
@@ -144,7 +158,7 @@ defineExpose({
     font-size: smaller;
     font-family: "SourceHanSansBold";
     gap: 5px;
-    justify-content: center;
+    justify-content: flex-end;
 }
 
 .lyricful_loading {
@@ -184,12 +198,40 @@ defineExpose({
     font-size: medium;
 }
 
+.lyricful_container::-webkit-scrollbar-button {
+    display: none;
+}
+
 .lyricful_container {
+    max-height: 80vh;
     display: flex;
     flex-direction: column;
-    padding-bottom: 15px;
-    overflow-y: auto;
+    margin-bottom: 8px;
+    padding-right: 0.8px;
+    overflow-y: overlay;
     overflow-x: hidden;
+    scrollbar-gutter: stable;
+    scroll-behavior: smooth;
+    scrollbar-color: #888 transparent;
+}
+
+.lyricful_container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.lyricful_container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.lyricful_container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+/* 隐藏滚动条箭头按钮 */
+.lyricful_container::-webkit-scrollbar-button:vertical:start:decrement,
+.lyricful_container::-webkit-scrollbar-button:vertical:end:increment {
+    display: none;
 }
 
 .lyricful_sentence {

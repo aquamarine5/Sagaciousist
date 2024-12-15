@@ -82,7 +82,7 @@ export class InteropPortalV2 {
 
     /**
      * 
-     * @param {*[]} messageList 
+     * @param {import('ollama').Message[]} messageList 
      * @returns {string}
      */
     combineListToPrompt(messageList) {
@@ -97,6 +97,7 @@ export class InteropPortalV2 {
         }
         return prompt
     }
+
     /**
      * 
      * @param {string} text 
@@ -105,6 +106,7 @@ export class InteropPortalV2 {
     getESPrompt(text) {
         return wnetwork.get(this.esUrl + ES_REQUEST_PATH + text)
     }
+
     /**
      * 
      * @param {string} text 
@@ -125,6 +127,7 @@ export class InteropPortalV2 {
         })
         return esPrompt;
     }
+
     /**
      * 
      * @returns {import('ollama').Message[]}
@@ -139,6 +142,11 @@ export class InteropPortalV2 {
         }]
     }
 
+    /**
+     * 
+     * @param {string} text 
+     * @returns {import('ollama').Message}
+     */
     combineSAGEPrompt(text) {
         return {
             "role": "user",

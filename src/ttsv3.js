@@ -16,7 +16,11 @@ import axios from "axios";
  */
 
 export default class SpeechControllerV3 {
-    constructor() {
+    /**
+     * 
+     * @param {function} scrollFunction 
+     */
+    constructor(scrollFunction) {
         this.refsentence = null
         this._audioContext = null
         this.pendingTTSList = []
@@ -28,6 +32,7 @@ export default class SpeechControllerV3 {
         this.readFinishCallback = null
         this.firstSentenceShowCallback = null
         this.ismute = localStorage.getItem('silent') === 'true'
+        this.scrollFunction = scrollFunction
     }
 
     /**
@@ -124,6 +129,9 @@ export default class SpeechControllerV3 {
             text: audiodata.text,
             status: this.ismute ? ref(2) : ref(1)
         })
+        if (this.scrollFunction) {
+            this.scrollFunction()
+        }
         console.log(this._currentIndex, this.refsentence[this._currentIndex].length - 1)
         return [this._currentIndex, this.refsentence[this._currentIndex].length - 1]
     }
@@ -223,7 +231,6 @@ export default class SpeechControllerV3 {
         } else {
             this.isPreviousSplit = false
         }
-        console.log(issplit)
         this.pendingTTSList.push({
             isend: false,
             text: sentence,
@@ -248,7 +255,6 @@ export default class SpeechControllerV3 {
 
     muteNext() {
         if (this.pendingTTSList.length > 0) {
-            console.log(1)
             this.showSentence(this.pendingTTSList.shift())
             setTimeout(() => {
                 this.muteNext()

@@ -10,7 +10,6 @@ import { ref } from 'vue';
 import MdiSendVariant from '~icons/mdi/send-variant?width=1.5em&height=1.5em';
 import LineMdLoadingTwotoneLoop from '~icons/line-md/loading-twotone-loop?width=1.8em&height=1.8em';
 import LyricfulResponse from './LyricfulResponse.vue';
-import { ContentLoader } from 'vue-content-loader';
 import QuestionsTipDisplayer from './QuestionsTipDisplayer.vue';
 import { InteropPortalV2 } from '@/interopv2';
 
@@ -50,11 +49,6 @@ typingNext()
         <ModelColumn />
         <div :class="iswelcome ? 'app_container' : 'app_container app_container_justified'">
             <div class="result_container">
-                <ContentLoader viewBox="0 0 250 60" v-if="false">
-                    <rect x="0" y="0" rx="3" ry="3" width="170" height="10" />
-                    <rect x="0" y="20" rx="3" ry="3" width="220" height="10" />
-                    <rect x="0" y="40" rx="3" ry="3" width="250" height="10" />
-                </ContentLoader>
                 <LyricfulResponse ref="lyricful" :isloading="isloading" @loadingFinish="loadingFinished"
                     @readFinished="readFinished" />
             </div>
@@ -308,7 +302,7 @@ export default {
     animation: textarea_focusOut .5s ease-in-out;
 }
 </style>
-<style>
+<style scoped>
 .selector_result_icon {
     padding-right: 4px;
 }
@@ -316,6 +310,11 @@ export default {
 .selector_result {
     display: flex;
     padding-bottom: 8px;
+}
+
+.result_container {
+    max-height: 80vh;
+    margin-bottom: 5px;
 }
 
 .selector_leftpart {
@@ -383,7 +382,7 @@ export default {
 }
 
 .app_container_justified {
-    justify-content: end;
+    justify-content: flex-end;
 }
 
 .main_container {

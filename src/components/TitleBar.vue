@@ -7,12 +7,13 @@ import { ref } from "vue";
 import "../assets/fonts/font.css"
 import MdiTts from '~icons/mdi/tts?&width=30px&height=30px';
 import MdiTtsOff from '~icons/mdi/tts-off?&width=30px&height=30px';
+import pkginfo from '../../package.json'
 
 const isSilent = ref(false)
 if (localStorage.getItem('silent') == null) {
     localStorage.setItem('silent', false)
 } else {
-    isSilent.value = localStorage.getItem('silent') == 'true'
+    isSilent.value = localStorage.getItem('silent') === 'true'
 }
 function changeSilent() {
     isSilent.value = !isSilent.value
@@ -25,7 +26,7 @@ function changeSilent() {
         <div class="topbar_title">
             Sagaciousist
             <div class="topbar_version">
-                v1.5
+                v{{ pkginfo.version }}
             </div>
         </div>
         <div class="silent_button" @click="changeSilent">

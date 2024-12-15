@@ -9,7 +9,7 @@ import TitleBar from './components/TitleBar.vue';
 
 <template>
     <TitleBar />
-    <div style="margin: 24px">
+    <div style="margin: 12px 18px;">
         <InteractiveColumn />
     </div>
 </template>
