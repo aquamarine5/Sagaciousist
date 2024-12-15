@@ -8,6 +8,10 @@ import { nextTick, ref } from 'vue';
 import { ContentLoader } from 'vue-content-loader';
 import LucideSquareUserRound from '~icons/lucide/square-user-round?width=24px&height=24px';
 import LucideBot from '~icons/lucide/bot?width=24px&height=24px';
+import LucideThumbsUp from '~icons/lucide/thumbs-up?width=18px&height=18px';
+import LucideThumbsDown from '~icons/lucide/thumbs-down?width=18px&height=18px';
+import LucideRefreshCw from '~icons/lucide/refresh-cw?width=18px&height=18px';
+import LucideEdit from '~icons/lucide/edit?width=18px&height=18px';
 
 const sentenceStatus = [
     'lyricful_before_read',
@@ -33,6 +37,9 @@ const speech = new SpeechControllerV3(() => {
 })
 speech.readFinishCallback = () => {
     emit('readFinished')
+    if (lyricful_data.value && lyricful_data.value.length > 0) {
+        lyricful_data.value[lyricful_data.value.length - 1].isfinish = true
+    }
 }
 speech.bindShowCallback(() => {
     emit('loadingFinish')
@@ -66,7 +73,8 @@ function createQAStructure(questionstr) {
     lyricful_data.value.push({
         question: questionstr,
         answer: answerref,
-        isloading: isloadingref
+        isloading: isloadingref,
+        isfinish: false
     })
     return lyricful_data.value[lyricful_data.value.length - 1]
 }
@@ -117,7 +125,7 @@ defineExpose({
             </div>
             <div class="lyricful_answer">
                 <div class="lyricful_loading" v-if="data.isloading">
-                    <ContentLoader :width="50" :height="20" :speed="3" primaryColor="#eee" secondaryColor="#ccc">
+                    <ContentLoader :width="50" :height="20" :speed="1" primaryColor="#eee" secondaryColor="#ccc">
                     </ContentLoader>
                 </div>
                 <div :class="'lyricful_sentence'" v-for="(sentence, aindex) in data.answer" v-else :key="aindex">
@@ -126,13 +134,19 @@ defineExpose({
                         {{ textpart.text }}
                     </span>
                 </div>
+                <div class="lyricful_buttons" v-if="data.isfinish">
+                    <LucideThumbsUp class="lyricful_button" />
+                    <LucideThumbsDown class="lyricful_button" />
+                    <LucideRefreshCw class="lyricful_button" />
+                    <LucideEdit class="lyricful_button" />
+                </div>
             </div>
 
         </div>
     </div>
 </template>
 
-<style>
+<style scoped>
 @keyframes fadeIn {
     0% {
         opacity: 0;
@@ -141,6 +155,18 @@ defineExpose({
     100% {
         opacity: 1;
     }
+}
+
+.lyricful_button {
+    cursor: pointer;
+}
+
+.lyricful_buttons {
+    padding: 5px 3px;
+    color: #333;
+    display: flex;
+    gap: 6px;
+    animation: fadeIn .3s ease-in-out;
 }
 
 .lyricful_answer_icon {

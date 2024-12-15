@@ -170,7 +170,9 @@ export default class SpeechControllerV3 {
             if (ttsnode.isend) {
                 if (this.readFinishCallback != null) {
                     this.readFinishCallback()
+                    this.scrollFunction()
                 }
+                console.log("readFinishCallback")
             }
             this.ttsPlay(ttsnode)
         } else {
@@ -203,6 +205,10 @@ export default class SpeechControllerV3 {
             return false
         }
         else {
+            if (this.readFinishCallback) {
+                this.readFinishCallback()
+                this.scrollFunction()
+            }
             return true
         }
     }
