@@ -82,6 +82,9 @@ typingNext()
                     </ElButton>
                 </div>
             </div>
+            <div class="tips_ai">
+                国学人工智能也会出错，请检查重要信息。
+            </div>
         </div>
     </div>
 </template>
@@ -316,6 +319,13 @@ export default {
 }
 </style>
 <style scoped>
+.tips_ai {
+    color: gray;
+    font-size: small;
+    text-align: center;
+    padding-top: 2px;
+}
+
 .selector_result_icon {
     padding-right: 4px;
 }
