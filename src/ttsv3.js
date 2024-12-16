@@ -5,8 +5,23 @@
 import { ref } from "vue";
 import axios from "axios";
 
+const MUTE_DELAY = 100
+
+/**
+ * @typedef {Object} Audiodata
+ * @property {string} text
+ * @property {string} base64str
+ * @property {boolean} isend
+ * @property {boolean} issplit
+ * @property {number} index
+ */
+
 export default class SpeechControllerV3 {
-    constructor() {
+    /**
+     * 
+     * @param {function} scrollFunction 
+     */
+    constructor(scrollFunction) {
         this.refsentence = null
         this._audioContext = null
         this.pendingTTSList = []
@@ -18,6 +33,7 @@ export default class SpeechControllerV3 {
         this.readFinishCallback = null
         this.firstSentenceShowCallback = null
         this.ismute = localStorage.getItem('silent') === 'true'
+        this.scrollFunction = scrollFunction
     }
 
     /**
@@ -52,7 +68,7 @@ export default class SpeechControllerV3 {
     }
 
     /**
-     * @param {*} audiodata
+     * @param {Audiodata} audiodata
      */
     ttsPlay(audiodata) {
         /**
@@ -100,7 +116,7 @@ export default class SpeechControllerV3 {
         });
     }
     /** 
-     * @param {*} audiodata 
+     * @param {Audiodata} audiodata 
      * @returns {[number, number]}
      */
     showSentence(audiodata) {
@@ -114,9 +130,18 @@ export default class SpeechControllerV3 {
             text: audiodata.text,
             status: this.ismute ? ref(2) : ref(1)
         })
+        if (this.scrollFunction) {
+            this.scrollFunction()
+        }
         console.log(this._currentIndex, this.refsentence[this._currentIndex].length - 1)
         return [this._currentIndex, this.refsentence[this._currentIndex].length - 1]
     }
+
+    /**
+     * 
+     * @param {Audiodata} audiodata 
+     * @returns 
+     */
     ttsRequest(audiodata) {
         if (audiodata.text == "\n") {
             console.warn("?")
@@ -139,19 +164,23 @@ export default class SpeechControllerV3 {
             this.isTTSPlaying = false
         })
     }
+
     ttsNext() {
         if (this.pendingTTSList.length > 0 && this.pendingTTSList[0].base64str != null) {
             let ttsnode = this.pendingTTSList.shift()
             if (ttsnode.isend) {
                 if (this.readFinishCallback != null) {
                     this.readFinishCallback()
+                    this.scrollFunction()
                 }
+                console.log("readFinishCallback")
             }
             this.ttsPlay(ttsnode)
         } else {
             this.isTTSPlaying = false
         }
     }
+
     ttsClear() {
         //this.refsentence.value = [[]]
         this._currentIndex = 0
@@ -177,9 +206,14 @@ export default class SpeechControllerV3 {
             return false
         }
         else {
+            if (this.readFinishCallback) {
+                this.readFinishCallback()
+                this.scrollFunction()
+            }
             return true
         }
     }
+
     setSplitMark() {
         if (this.pendingTTSList.length > 0)
             this.pendingTTSList[this.pendingTTSList.length - 1].issplit = true
@@ -189,6 +223,7 @@ export default class SpeechControllerV3 {
             console.log("audiodata.forcesplit")
         }
     }
+
     /**
      * @param {import('vue').Ref} answerref 
      * @param {string} sentence 
@@ -203,7 +238,6 @@ export default class SpeechControllerV3 {
         } else {
             this.isPreviousSplit = false
         }
-        console.log(issplit)
         this.pendingTTSList.push({
             isend: false,
             text: sentence,
@@ -218,19 +252,20 @@ export default class SpeechControllerV3 {
             this.ttsRequest(this.pendingTTSList[this.pendingTTSList.length - 1])
         }
     }
+
     muteDisplay() {
         if (!this.isMuteDisplaying) {
             this.isMuteDisplaying = true
             this.muteNext()
         }
     }
+
     muteNext() {
         if (this.pendingTTSList.length > 0) {
-            console.log(1)
             this.showSentence(this.pendingTTSList.shift())
             setTimeout(() => {
                 this.muteNext()
-            }, 200)
+            }, MUTE_DELAY)
         } else {
             this.isMuteDisplaying = false
         }
