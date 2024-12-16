@@ -76,6 +76,7 @@ export default {
     border-color: gray;
     border-width: 2px;
     cursor: pointer;
+    background-color: #fafafa;
 }
 
 .tips_forcontainer {

@@ -6,8 +6,8 @@
 import SpeechControllerV3 from '@/ttsv3';
 import { nextTick, ref } from 'vue';
 import { ContentLoader } from 'vue-content-loader';
-import LucideSquareUserRound from '~icons/lucide/square-user-round?width=24px&height=24px';
-import LucideBot from '~icons/lucide/bot?width=24px&height=24px';
+import LucideSquareUserRound from '~icons/lucide/square-user-round?width=28px&height=28px';
+import LucideBot from '~icons/lucide/bot?width=28px&height=28px';
 import LucideThumbsUp from '~icons/lucide/thumbs-up?width=18px&height=18px';
 import LucideThumbsDown from '~icons/lucide/thumbs-down?width=18px&height=18px';
 import LucideRefreshCw from '~icons/lucide/refresh-cw?width=18px&height=18px';
@@ -78,6 +78,7 @@ function createQAStructure(questionstr) {
         isfinish: false,
         messageIndexes: null
     })
+    speech.scrollFunction()
     return lyricful_data.value[index - 1]
 }
 
@@ -114,35 +115,38 @@ defineExpose({
 <template>
     <div class="lyricful_container" ref="containerRef">
         <div class="lyricful_qastructure" v-for="(data, index) in lyricful_data" :key="index">
-            <div class="lyricful_question_icon">
-                用户
-                <LucideSquareUserRound />
-            </div>
-            <div class="lyricful_question">
-                {{ data.question }}
-            </div>
-            <div class="lyricful_answer_icon">
-                <LucideBot />
-                国学人工智能
-            </div>
-            <div class="lyricful_answer">
-                <div class="lyricful_loading" v-if="data.isloading">
-                    <ContentLoader :width="50" :height="20" :speed="1" primaryColor="#eee" secondaryColor="#ccc">
-                    </ContentLoader>
+            <div class="lyricful_question_container">
+                <div class="lyricful_question">
+                    {{ data.question }}
                 </div>
-                <div :class="'lyricful_sentence'" v-for="(sentence, aindex) in data.answer" v-else :key="aindex">
-                    <span :class="'lyricful_part ' + sentenceStatus[textpart.status]"
-                        v-for="(textpart, taindex) in sentence" :key="taindex">
-                        {{ textpart.text }}
-                    </span>
-                </div>
-                <div class="lyricful_buttons" v-if="data.isfinish">
-                    <LucideThumbsUp class="lyricful_button" />
-                    <LucideThumbsDown class="lyricful_button" />
-                    <LucideRefreshCw class="lyricful_button" />
-                    <LucideEdit class="lyricful_button" />
+                <div class="lyricful_question_icon">
+                    <LucideSquareUserRound />
                 </div>
             </div>
+            <div class="lyricful_answer_container">
+                <div class="lyricful_answer_icon">
+                    <LucideBot />
+                </div>
+                <div class="lyricful_answer">
+                    <div class="lyricful_loading" v-if="data.isloading">
+                        <ContentLoader :width="50" :height="20" :speed="0.8" primaryColor="#eee" secondaryColor="#ccc">
+                        </ContentLoader>
+                    </div>
+                    <div :class="'lyricful_sentence'" v-for="(sentence, aindex) in data.answer" v-else :key="aindex">
+                        <span :class="'lyricful_part ' + sentenceStatus[textpart.status]"
+                            v-for="(textpart, taindex) in sentence" :key="taindex">
+                            {{ textpart.text }}
+                        </span>
+                    </div>
+                    <div class="lyricful_buttons" v-if="data.isfinish">
+                        <LucideThumbsUp class="lyricful_button" />
+                        <LucideThumbsDown class="lyricful_button" />
+                        <LucideRefreshCw class="lyricful_button" />
+                        <LucideEdit class="lyricful_button" />
+                    </div>
+                </div>
+            </div>
+
 
         </div>
     </div>
@@ -159,6 +163,19 @@ defineExpose({
     }
 }
 
+.lyricful_question_container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+}
+
+.lyricful_answer_container {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
 .lyricful_button {
     cursor: pointer;
 }
@@ -172,21 +189,13 @@ defineExpose({
 }
 
 .lyricful_answer_icon {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-    font-family: "SourceHanSansBold";
-    font-size: smaller;
-    margin-bottom: 5px;
+    padding-right: 6px;
+    padding-top: 3px;
 }
 
 .lyricful_question_icon {
-    display: flex;
-    align-items: center;
-    font-size: smaller;
-    font-family: "SourceHanSansBold";
-    gap: 5px;
-    justify-content: flex-end;
+    padding-left: 6px;
+    padding-top: 1px;
 }
 
 .lyricful_loading {
@@ -201,6 +210,7 @@ defineExpose({
 }
 
 .lyricful_answer {
+    margin-right: 32px;
     padding: 8px 13px;
     border-radius: 20px;
     width: fit-content;
@@ -209,19 +219,19 @@ defineExpose({
     background-origin: padding-box, border-box;
     background-image: linear-gradient(to right, #fff, #fff), linear-gradient(315deg, #04d4fd, #0989f4, #284fab);
     border-style: solid;
-    border-width: 2px;
+    border-width: 3px;
 }
 
 .lyricful_question {
-    margin-left: auto;
-    margin-block: 5px;
+    margin-left: 32px;
     width: fit-content;
     padding: 6px 13px;
     text-align: right;
+    min-width: 10px;
     border-style: solid;
     border-color: #888;
     border-width: 2px;
-    border-radius: 20px;
+    border-radius: 18px;
     background-color: #fff;
 }
 

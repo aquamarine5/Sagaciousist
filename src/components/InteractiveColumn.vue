@@ -409,12 +409,15 @@ export default {
     transition: justify-content 0.3s ease;
     flex-direction: column;
     justify-content: center;
+    margin: 0 auto;
+    max-width: 1000px;
 }
 
 .main_container {
     height: 87vh;
     display: flex;
     width: 100%;
+    justify-content: center;
     transition: justify-content 0.3s ease;
 }
 
