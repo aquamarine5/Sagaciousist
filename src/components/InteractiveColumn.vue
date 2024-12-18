@@ -205,7 +205,8 @@ export default {
                     isRunning.value = false
                 }
                 let messageIndex = interopPortalV2.storageMessage(itext, allResponse)
-                qastruct.messageindex = messageIndex
+                console.log(messageIndex)
+                qastruct.messageIndexes = messageIndex
             }
             setTimeout(function () {
                 responseStatus = false

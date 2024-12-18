@@ -31,11 +31,11 @@ export class InteropPortalV2 {
     storageMessage(question, answer) {
         let userindex = this.storagedMessage.push({
             role: 'user',
-            content: question
+            content: question.replace(/\n\n/g, '\n')
         })
         let answerindex = this.storagedMessage.push({
             role: 'assistant',
-            content: answer
+            content: answer.replace(/\n\n/g, '\n')
         })
         return {
             userindex: userindex - 1,
@@ -47,8 +47,10 @@ export class InteropPortalV2 {
      * @param {StoragedMessageIndexes} indexes
      */
     forgiveMessage(indexes) {
-        this.storagedMessage.splice(indexes.userindex, 1)
-        this.storagedMessage.splice(indexes.answerindex, 1)
+
+        console.log(this.storagedMessage)
+        this.storagedMessage.splice(indexes.userindex, 2)
+        console.log(this.storagedMessage)
     }
 
     /**

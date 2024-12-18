@@ -55,7 +55,6 @@ speech.readFinishCallback = () => {
 }
 speech.bindShowCallback(() => {
     emit('loadingFinish')
-    console.log(11)
     if (lyricful_data.value && lyricful_data.value.length > 0) {
         lyricful_data.value[lyricful_data.value.length - 1].isloading = false
     }
@@ -68,7 +67,7 @@ speech.bindShowCallback(() => {
 function addSentence(answerref, text, issplit = false) {
     console.log(text)
     if (text == "" || text == "\n" || text == " ") {
-        speech.setSplitMark()
+        //speech.setSplitMark()
     } else {
         speech.addSentence(answerref, text, issplit)
     }
@@ -115,8 +114,52 @@ function ttsEndMark() {
     return speech.ttsEndMark()
 }
 
-function regenerateResponse() {
-
+/**
+ * @param {QAStructure} qastructure 
+ * @returns {Promise<void>}
+ */
+async function regenerateResponse(qastructure) {
+    console.log(qastructure)
+    props.interop.forgiveMessage(qastructure.messageIndexes)
+    speech.ttsClear()
+    const splitPatterns = ['。', "！", "？", "，", "：", "；"]
+    qastructure.isloading = true
+    qastructure.isfinish = false
+    let answerRef = ref([[]])
+    qastructure.answer = answerRef.value
+    qastructure.btnclicked = [false, false, false, false, false]
+    qastructure.messageIndexes = null
+    speech.scrollFunction()
+    const response = await props.interop.generateGenerateRequest(qastructure.question)
+    var lastSentence = ''
+    var allResponse = ''
+    console.log(qastructure)
+    for await (const part of response) {
+        let content = part.response
+        allResponse += content
+        for (let index = 0; index < content.length; index++) {
+            const char = content[index];
+            if (char == '\n') {
+                addSentence(qastructure.answer, lastSentence, true)
+                console.log("issplit: true")
+                lastSentence = ''
+            }
+            lastSentence += char
+            if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
+                continue
+            }
+            if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
+                continue
+            if (splitPatterns.indexOf(char) != -1) {
+                addSentence(qastructure.answer, lastSentence, false)
+                lastSentence = ''
+            }
+        }
+    }
+    console.log("last content: " + lastSentence)
+    ttsEndMark()
+    let messageIndex = props.interop.storageMessage(qastructure.question, allResponse)
+    qastructure.messageIndexes = messageIndex
 }
 
 /**
@@ -156,8 +199,13 @@ function buttonThumbDown(qastructure) {
 
 }
 
-function buttonRefresh() {
-    regenerateResponse()
+/**
+ * @param {QAStructure} qastructure 
+ */
+function buttonRefresh(qastructure) {
+    regenerateResponse(qastructure).then(() => {
+        console.log("refreshed generated response")
+    })
 }
 
 /**
@@ -198,8 +246,10 @@ defineExpose({
                         <ContentLoader :width="50" :height="20" :speed="0.8" primaryColor="#eee" secondaryColor="#ccc">
                         </ContentLoader>
                     </div>
-                    <div :class="'lyricful_sentence'" v-for="(sentence, aindex) in qastructure.answer" v-else
+                    <div class="lyricful_sentence" v-for="(sentence, aindex) in qastructure.answer" v-else
                         :key="aindex">
+                        {{ aindex }}
+                        {{ sentence }}
                         <span :class="'lyricful_part ' + sentenceStatus[textpart.status]"
                             v-for="(textpart, taindex) in sentence" :key="taindex">
                             {{ textpart.text }}
@@ -212,7 +262,7 @@ defineExpose({
                         <LucideThumbsDown
                             :class="qastructure.btnclicked[1] ? ' lyricful_button_filled' : 'lyricful_button'"
                             @click="buttonThumbDown(qastructure)" />
-                        <LucideRefreshCw class="lyricful_button_nofill" @click="buttonRefresh" />
+                        <LucideRefreshCw class="lyricful_button_nofill" @click="buttonRefresh(qastructure)" />
                         <Transition name="fade" mode="out-in">
                             <LucideClipboardCheck class="lyricful_button_nofill" v-if="qastructure.btnclicked[4]"
                                 @click="buttonClipboard(qastructure)" key="check" />

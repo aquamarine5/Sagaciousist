@@ -127,6 +127,7 @@ export default class SpeechControllerV3 {
         if (audiodata.issplit) {
             this._currentIndex += 1;
             this.refsentence.push([])
+            console.log(this.refsentence)
             console.log("audiodata.issplit")
         }
         this.setFirstSentenceShow()
@@ -188,9 +189,12 @@ export default class SpeechControllerV3 {
     ttsClear() {
         //this.refsentence.value = [[]]
         this._currentIndex = 0
+        /**
+         * @type {Audiodata[]}
+         */
         this.pendingTTSList = []
         this.isfirstSentenceShow = true
-        this.ismute = localStorage.getItem('silent') == 'true'
+        this.ismute = localStorage.getItem('silent') === 'true'
         this.isPreviousSplit = false
     }
     /**
@@ -200,7 +204,7 @@ export default class SpeechControllerV3 {
         this.ismute = status
         localStorage.setItem('silent', status.toString())
     }
-    
+
     /**
      * 
      * @returns {boolean}
@@ -225,6 +229,7 @@ export default class SpeechControllerV3 {
         else {
             this._currentIndex += 1;
             this.refsentence.push([])
+            console.log(this.refsentence)
             console.log("audiodata.forcesplit")
         }
     }
@@ -234,7 +239,7 @@ export default class SpeechControllerV3 {
      * @param {string} sentence 
      * @param {boolean} issplit
      */
-    addSentence(answerref, sentence, issplit = false) {
+    addSentence(answerref, sentence, issplit) {
         if (issplit && this.isPreviousSplit) {
             return
         }
@@ -250,6 +255,7 @@ export default class SpeechControllerV3 {
             issplit: issplit,
             index: this.pendingTTSList.length
         })
+        console.log(JSON.parse(JSON.stringify(this.pendingTTSList)))
         this.refsentence = answerref
         if (this.ismute) {
             this.muteNext()

@@ -1,5 +1,7 @@
 # Sagaciousist
 
+[![wakatime](https://wakatime.com/badge/github/aquamarine5/Sagaciousist.svg)](https://wakatime.com/badge/github/aquamarine5/Sagaciousist)
+
 ![readme_image](README.png)
 
 - 首先，当用户访问时会判断为手机端还是电脑端并渲染不同的页面，然后连接必要的服务，例如进行响应的Ollama模型和检索问答文档的ElasticSearch后端，之后渲染人物模型，并做出欢迎动作来初始化。
