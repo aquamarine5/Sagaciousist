@@ -9,6 +9,7 @@ import ModelColumn from './ModelColumn.vue';
 import { ref } from 'vue';
 import MdiSendVariant from '~icons/mdi/send-variant?width=1.5em&height=1.5em';
 import LineMdLoadingTwotoneLoop from '~icons/line-md/loading-twotone-loop?width=1.8em&height=1.8em';
+import LucideCircleCheckBig from '~icons/lucide/circle-check-big?width=1.5em&height=1.5em';
 import LyricfulResponse from './LyricfulResponse.vue';
 import QuestionsTipDisplayer from './QuestionsTipDisplayer.vue';
 import { InteropPortalV2 } from '@/interopv2';
@@ -47,10 +48,10 @@ typingNext()
 <template>
     <div class="main_container">
         <ModelColumn />
-        <div :class="iswelcome ? 'app_container' : 'app_container app_container_justified'">
+        <div class="app_container">
             <div class="result_container">
-                <LyricfulResponse ref="lyricful" :isloading="isloading" @loadingFinish="loadingFinished"
-                    @readFinished="readFinished" />
+                <LyricfulResponse ref="lyricful" @loadingFinish="loadingFinished" @readFinished="readFinished"
+                    :interop="interopPortalV2" @switchEditMode="onSwitchEditMode" />
             </div>
             <!-- <div class="selector_result" v-if="!isselecting && iswelcome">
                 <div class="selector_leftpart" @click="reselectMode">
@@ -77,7 +78,8 @@ typingNext()
                     placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
                 <div :class="!isRunning ? 'container_btn_send' : 'container_btn_send btn_send_gradient'">
                     <ElButton v-wave :type="'primary'" @click="onsend" circle>
-                        <MdiSendVariant v-if="!isRunning" />
+                        <LucideCircleCheckBig v-if="isediting" />
+                        <MdiSendVariant v-else-if="!isRunning" />
                         <LineMdLoadingTwotoneLoop v-else />
                     </ElButton>
                 </div>
@@ -91,6 +93,8 @@ typingNext()
 
 <script>
 // const isselecting = ref(true)
+const isediting = ref(false)
+var editingQAStructure = null
 const iswelcome = ref(true)
 const isRunning = ref(false)
 const splitPatterns = ['。', "！", "？", "，", "：", "；"]
@@ -115,6 +119,14 @@ export default {
         loadingFinished() {
             isloading.value = false
         },
+        /**
+         * @param {QAStructure} qastructure
+         */
+        onSwitchEditMode(qastructure) {
+            isediting.value = true
+            this.inputText = qastructure.question
+            editingQAStructure = qastructure
+        },
         async onsend() {
             /**
              * @type {LyricfulResponse}
@@ -126,6 +138,12 @@ export default {
                     title: "内容不能为空！",
                     message: "内容不能为空！",
                 })
+                return
+            }
+            if (isediting.value) {
+                isediting.value = false
+                editingQAStructure.question = this.inputText
+                lyricfulRef.regenerateResponse(editingQAStructure)
                 return
             }
             if (isRunning.value) {
@@ -205,7 +223,8 @@ export default {
                     isRunning.value = false
                 }
                 let messageIndex = interopPortalV2.storageMessage(itext, allResponse)
-                qastruct.messageindex = messageIndex
+                console.log(messageIndex)
+                qastruct.messageIndexes = messageIndex
             }
             setTimeout(function () {
                 responseStatus = false

@@ -5,8 +5,14 @@ interface StoragedMessageIndexes{
 
 interface QAStructure{
     question: string;
-    answer: import("vue").Ref;
+    answer: SentenceResponse[][];
     isloading: boolean;
     isfinish: boolean;
-    messageindex: StoragedMessageIndexes;
+    messageIndexes: StoragedMessageIndexes;
+    btnclicked: boolean[];
+}
+
+interface SentenceResponse{
+    text: string;
+    status: import("vue").Ref<number>;
 }

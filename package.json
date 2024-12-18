@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/package",
   "name": "sagaciousist",
-  "version": "1.6beta",
+  "version": "1.7",
   "private": true,
   "type": "module",
   "scripts": {
@@ -32,6 +32,7 @@
     "@iconify-json/mdi": "^1.2.1",
     "@iconify/vue": "^4.1.2",
     "@types/crypto-js": "^4.2.2",
+    "@types/three": "^0.171.0",
     "@vitejs/plugin-vue": "^5.2.0",
     "@vue/compiler-sfc": "^3.5.13",
     "eslint": "^9.15.0",

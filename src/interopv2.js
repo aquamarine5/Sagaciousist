@@ -14,6 +14,9 @@ export class InteropPortalV2 {
      * @param {import('ollama').Ollama} ollamaInstance 
      */
     constructor(ollamaInstance, esUrl) {
+        /**
+         * @type {import('ollama').Message[]}
+         */
         this.storagedMessage = []
         this.ollama = ollamaInstance
         this.esUrl = esUrl
@@ -28,17 +31,25 @@ export class InteropPortalV2 {
     storageMessage(question, answer) {
         let userindex = this.storagedMessage.push({
             role: 'user',
-            content: question
+            content: question.replace(/\n\n/g, '\n')
         })
         let answerindex = this.storagedMessage.push({
             role: 'assistant',
-            content: answer
+            content: answer.replace(/\n\n/g, '\n')
         })
         return {
             userindex: userindex - 1,
             answerindex: answerindex - 1
         }
     }
+
+    /** 
+     * @param {StoragedMessageIndexes} indexes
+     */
+    forgiveMessage(indexes) {
+        this.storagedMessage.splice(indexes.userindex, 2)
+    }
+
     /**
      * 
      * @param {string} text 

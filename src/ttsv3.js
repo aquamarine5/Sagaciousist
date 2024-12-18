@@ -22,6 +22,9 @@ export default class SpeechControllerV3 {
      * @param {function} scrollFunction 
      */
     constructor(scrollFunction) {
+        /**
+         * @type {SentenceResponse[][]}
+         */
         this.refsentence = null
         this._audioContext = null
         this.pendingTTSList = []
@@ -115,6 +118,7 @@ export default class SpeechControllerV3 {
             this.ttsNext()
         });
     }
+
     /** 
      * @param {Audiodata} audiodata 
      * @returns {[number, number]}
@@ -123,6 +127,7 @@ export default class SpeechControllerV3 {
         if (audiodata.issplit) {
             this._currentIndex += 1;
             this.refsentence.push([])
+            console.log(this.refsentence)
             console.log("audiodata.issplit")
         }
         this.setFirstSentenceShow()
@@ -138,13 +143,12 @@ export default class SpeechControllerV3 {
     }
 
     /**
-     * 
      * @param {Audiodata} audiodata 
      * @returns 
      */
     ttsRequest(audiodata) {
         if (audiodata.text == "\n") {
-            console.warn("?")
+            console.warn("audiodata.text==\"\\n\"")
             return
         }
         axios.post("http://localhost:1114/tts", { text: audiodata.text }).then((response) => {
@@ -184,9 +188,12 @@ export default class SpeechControllerV3 {
     ttsClear() {
         //this.refsentence.value = [[]]
         this._currentIndex = 0
+        /**
+         * @type {Audiodata[]}
+         */
         this.pendingTTSList = []
         this.isfirstSentenceShow = true
-        this.ismute = localStorage.getItem('silent') == 'true'
+        this.ismute = localStorage.getItem('silent') === 'true'
         this.isPreviousSplit = false
     }
     /**
@@ -196,6 +203,7 @@ export default class SpeechControllerV3 {
         this.ismute = status
         localStorage.setItem('silent', status.toString())
     }
+
     /**
      * 
      * @returns {boolean}
@@ -229,7 +237,7 @@ export default class SpeechControllerV3 {
      * @param {string} sentence 
      * @param {boolean} issplit
      */
-    addSentence(answerref, sentence, issplit = false) {
+    addSentence(answerref, sentence, issplit) {
         if (issplit && this.isPreviousSplit) {
             return
         }
