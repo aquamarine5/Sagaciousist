@@ -85,7 +85,7 @@ function checkTTSStatus() {
  * @returns {QAStructure}
  */
 function createQAStructure(questionstr) {
-    let questionRef=ref(questionstr)
+    let questionRef = ref(questionstr)
     let answerref = ref([[]])
     let isloadingref = ref(true)
     let index = lyricful_data.value.push({
@@ -274,8 +274,9 @@ defineExpose({
                         <Transition name="fade" mode="out-in">
                             <LucideClipboardCheck class="lyricful_button_nofill" v-if="qastructure.btnclicked[4]"
                                 @click="buttonClipboard(qastructure)" key="check" />
-                            <LucideClipboardCopy class="lyricful_button_nofill" v-else key="copy"
-                                @click="buttonClipboard(qastructure)" />
+                            <LucideClipboardCopy
+                                :class="qastructure.btnclicked[3] ? ' lyricful_button_filled' : 'lyricful_button'"
+                                v-else key="copy" @click="buttonClipboard(qastructure)" />
                         </Transition>
                         <LucideEdit :class="qastructure.btnclicked[3] ? ' lyricful_button_filled' : 'lyricful_button'"
                             @click="buttonEdit(qastructure)" />
