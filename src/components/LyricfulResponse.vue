@@ -21,7 +21,7 @@ const sentenceStatus = [
     'lyricful_reading',
     'lyricful_after_read'
 ]
-const emit = defineEmits(['loadingFinish', "readFinished"])
+const emit = defineEmits(['loadingFinish', "readFinished", "switchEditMode"])
 const props = defineProps({
     interop: {
         type: InteropPortalV2
@@ -85,10 +85,11 @@ function checkTTSStatus() {
  * @returns {QAStructure}
  */
 function createQAStructure(questionstr) {
+    let questionRef=ref(questionstr)
     let answerref = ref([[]])
     let isloadingref = ref(true)
     let index = lyricful_data.value.push({
-        question: questionstr,
+        question: questionRef,
         answer: answerref,
         isloading: isloadingref,
         isfinish: false,
@@ -218,6 +219,7 @@ function buttonRefresh(qastructure) {
  */
 function buttonEdit(qastructure) {
     qastructure.btnclicked[3] = true
+    emit('switchEditMode', qastructure)
 
 }
 
@@ -227,7 +229,8 @@ defineExpose({
     createQAStructure,
     clearAllLyrics,
     addSentence,
-    switchTTSStatus
+    switchTTSStatus,
+    regenerateResponse
 })
 </script>
 
