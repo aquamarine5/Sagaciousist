@@ -22,6 +22,9 @@ export default class SpeechControllerV3 {
      * @param {function} scrollFunction 
      */
     constructor(scrollFunction) {
+        /**
+         * @type {SentenceResponse[][]}
+         */
         this.refsentence = null
         this._audioContext = null
         this.pendingTTSList = []
@@ -115,6 +118,7 @@ export default class SpeechControllerV3 {
             this.ttsNext()
         });
     }
+
     /** 
      * @param {Audiodata} audiodata 
      * @returns {[number, number]}
@@ -196,6 +200,7 @@ export default class SpeechControllerV3 {
         this.ismute = status
         localStorage.setItem('silent', status.toString())
     }
+    
     /**
      * 
      * @returns {boolean}

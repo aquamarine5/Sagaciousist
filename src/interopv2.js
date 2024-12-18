@@ -14,6 +14,9 @@ export class InteropPortalV2 {
      * @param {import('ollama').Ollama} ollamaInstance 
      */
     constructor(ollamaInstance, esUrl) {
+        /**
+         * @type {import('ollama').Message[]}
+         */
         this.storagedMessage = []
         this.ollama = ollamaInstance
         this.esUrl = esUrl
@@ -39,6 +42,15 @@ export class InteropPortalV2 {
             answerindex: answerindex - 1
         }
     }
+
+    /** 
+     * @param {StoragedMessageIndexes} indexes
+     */
+    forgiveMessage(indexes) {
+        this.storagedMessage.splice(indexes.userindex, 1)
+        this.storagedMessage.splice(indexes.answerindex, 1)
+    }
+
     /**
      * 
      * @param {string} text 

@@ -47,10 +47,10 @@ typingNext()
 <template>
     <div class="main_container">
         <ModelColumn />
-        <div :class="iswelcome ? 'app_container' : 'app_container app_container_justified'">
+        <div class="app_container">
             <div class="result_container">
-                <LyricfulResponse ref="lyricful" :isloading="isloading" @loadingFinish="loadingFinished"
-                    @readFinished="readFinished" />
+                <LyricfulResponse ref="lyricful" @loadingFinish="loadingFinished" @readFinished="readFinished"
+                    :interop="interopPortalV2" />
             </div>
             <!-- <div class="selector_result" v-if="!isselecting && iswelcome">
                 <div class="selector_leftpart" @click="reselectMode">
