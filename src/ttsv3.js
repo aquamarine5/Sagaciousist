@@ -143,13 +143,12 @@ export default class SpeechControllerV3 {
     }
 
     /**
-     * 
      * @param {Audiodata} audiodata 
      * @returns 
      */
     ttsRequest(audiodata) {
         if (audiodata.text == "\n") {
-            console.warn("?")
+            console.warn("audiodata.text==\"\\n\"")
             return
         }
         axios.post("http://localhost:1114/tts", { text: audiodata.text }).then((response) => {
@@ -229,7 +228,6 @@ export default class SpeechControllerV3 {
         else {
             this._currentIndex += 1;
             this.refsentence.push([])
-            console.log(this.refsentence)
             console.log("audiodata.forcesplit")
         }
     }
@@ -255,7 +253,6 @@ export default class SpeechControllerV3 {
             issplit: issplit,
             index: this.pendingTTSList.length
         })
-        console.log(JSON.parse(JSON.stringify(this.pendingTTSList)))
         this.refsentence = answerref
         if (this.ismute) {
             this.muteNext()

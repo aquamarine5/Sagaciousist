@@ -47,10 +47,7 @@ export class InteropPortalV2 {
      * @param {StoragedMessageIndexes} indexes
      */
     forgiveMessage(indexes) {
-
-        console.log(this.storagedMessage)
         this.storagedMessage.splice(indexes.userindex, 2)
-        console.log(this.storagedMessage)
     }
 
     /**

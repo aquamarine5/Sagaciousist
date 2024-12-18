@@ -4,7 +4,7 @@
 -->
 <script setup>
 import SpeechControllerV3 from '@/ttsv3';
-import { nextTick, ref } from 'vue';
+import { nextTick, ref, computed } from 'vue';
 import { ContentLoader } from 'vue-content-loader';
 import LucideSquareUserRound from '~icons/lucide/square-user-round?width=28px&height=28px';
 import LucideBot from '~icons/lucide/bot?width=28px&height=28px';
@@ -16,7 +16,6 @@ import LucideClipboardCopy from '~icons/lucide/clipboard-copy?width=18px&height=
 import LucideClipboardCheck from '~icons/lucide/clipboard-check?width=18px&height=18px';
 import { InteropPortalV2 } from '@/interopv2';
 import { ElMessageBox } from 'element-plus';
-
 const sentenceStatus = [
     'lyricful_before_read',
     'lyricful_reading',
@@ -28,11 +27,17 @@ const props = defineProps({
         type: InteropPortalV2
     }
 })
+
 /**
  * @type {import('vue').Ref<QAStructure[]>}
  */
 const lyricful_data = ref([]);
 const containerRef = ref(null)
+const filteredAnswers = computed(() => {
+    return lyricful_data.value.map(qastructure => {
+        return qastructure.answer.filter(sentence => sentence.length > 0)
+    })
+})
 const speech = new SpeechControllerV3(() => {
     nextTick(() => {
         const container = containerRef.value
@@ -67,7 +72,7 @@ speech.bindShowCallback(() => {
 function addSentence(answerref, text, issplit = false) {
     console.log(text)
     if (text == "" || text == "\n" || text == " ") {
-        //speech.setSplitMark()
+        speech.setSplitMark()
     } else {
         speech.addSentence(answerref, text, issplit)
     }
@@ -246,14 +251,14 @@ defineExpose({
                         <ContentLoader :width="50" :height="20" :speed="0.8" primaryColor="#eee" secondaryColor="#ccc">
                         </ContentLoader>
                     </div>
-                    <div class="lyricful_sentence" v-for="(sentence, aindex) in qastructure.answer" v-else
-                        :key="aindex">
-                        {{ aindex }}
-                        {{ sentence }}
-                        <span :class="'lyricful_part ' + sentenceStatus[textpart.status]"
-                            v-for="(textpart, taindex) in sentence" :key="taindex">
-                            {{ textpart.text }}
-                        </span>
+                    <div v-else>
+                        <div class="lyricful_sentence" v-for="(sentence, aindex) in filteredAnswers[index]"
+                            :key="aindex">
+                            <span :class="'lyricful_part ' + sentenceStatus[textpart.status]"
+                                v-for="(textpart, taindex) in sentence" :key="taindex">
+                                {{ textpart.text }}
+                            </span>
+                        </div>
                     </div>
                     <div class="lyricful_buttons" v-if="qastructure.isfinish">
                         <LucideThumbsUp
