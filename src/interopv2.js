@@ -2,9 +2,10 @@
  * @Author: aquamarine5 && aquamarine5_@outlook.com
  * Copyright (c) 2024 by @aquamarine5, RC. All Rights Reversed.
  */
+import baseinfo from './baseinfo'
 import wnetwork from './wnetwork'
 
-const BASE_LIBRARY = "国学经典"
+const BASE_LIBRARY = baseinfo.baseLibrary
 const MODEL_NAME = 'llama3.1'
 const ES_REQUEST_PATH = "/bookSearch?query="
 

@@ -9,6 +9,7 @@ import MdiTts from '~icons/mdi/tts?&width=30px&height=30px';
 import MdiTtsOff from '~icons/mdi/tts-off?&width=30px&height=30px';
 import LucideBotMessageSquare from '~icons/lucide/bot-message-square?width=30px&height=30px';
 import pkginfo from '../../package.json'
+import baseinfo from "@/baseinfo";
 
 const isSilent = ref(false)
 if (localStorage.getItem('silent') == null) {
@@ -27,7 +28,7 @@ function changeSilent() {
         <div class="topbar_title">
             <div class="topbar_center">
                 <LucideBotMessageSquare class="topbar_logo" />
-                国学人工智能
+                {{ baseinfo.baseLibrary + "人工智能" }}
             </div>
             <div class="topbar_version">
                 v{{ pkginfo.version }}
