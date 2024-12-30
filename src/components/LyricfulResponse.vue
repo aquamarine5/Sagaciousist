@@ -192,8 +192,6 @@ function buttonClipboard(qastructure) {
  */
 function buttonThumbUp(qastructure) {
     qastructure.btnclicked[0] = true
-    console.log(qastructure)
-
 }
 
 /**
@@ -202,7 +200,6 @@ function buttonThumbUp(qastructure) {
 function buttonThumbDown(qastructure) {
     qastructure.btnclicked[1] = true
     props.interop.forgiveMessage(qastructure.messageIndexes)
-
 }
 
 /**

@@ -13,6 +13,7 @@ import LucideCircleCheckBig from '~icons/lucide/circle-check-big?width=1.5em&hei
 import LyricfulResponse from './LyricfulResponse.vue';
 import QuestionsTipDisplayer from './QuestionsTipDisplayer.vue';
 import { InteropPortalV2 } from '@/interopv2';
+import baseinfo from '@/baseinfo';
 // import SelectorDisplayer from './SelectorDisplayer.vue';
 
 let nowtime = new Date().getHours()
@@ -85,7 +86,7 @@ typingNext()
                 </div>
             </div>
             <div class="tips_ai">
-                国学人工智能也会出错，请检查重要信息。
+                {{ baseinfo.baseLibrary }}人工智能也会出错，请检查重要信息。
             </div>
         </div>
     </div>
@@ -195,7 +196,7 @@ export default {
                     for (let index = 0; index < content.length; index++) {
                         const char = content[index];
                         if (char == '\n') {
-                            lyricfulRef.addSentence(qastruct.answer, lastSentence, true)
+                            lyricfulRef.addSentence(qastruct.answer, lastSentence, false)
                             console.log("issplit: true")
                             lastSentence = ''
                         }

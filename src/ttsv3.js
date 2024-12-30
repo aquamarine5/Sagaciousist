@@ -110,9 +110,7 @@ export default class SpeechControllerV3 {
             return
         }
         let [index1, index2] = this.showSentence(audiodata)
-        if (audiodata.issplit) {
-            return
-        }
+        console.log(audiodata)
         playBase64Audio(audiodata.base64str, this.audioContext, () => {
             this.refsentence[index1][index2].status = 2
             this.ttsNext()
@@ -127,7 +125,6 @@ export default class SpeechControllerV3 {
         if (audiodata.issplit) {
             this._currentIndex += 1;
             this.refsentence.push([])
-            console.log(this.refsentence)
             console.log("audiodata.issplit")
         }
         this.setFirstSentenceShow()
