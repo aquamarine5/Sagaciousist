@@ -9,6 +9,9 @@ const BASE_LIBRARY = baseinfo.baseLibrary
 const MODEL_NAME = 'llama3.1'
 const ES_REQUEST_PATH = "/bookSearch?query="
 
+/**
+ * @deprecated
+ */
 export class InteropPortalV2 {
     /**
      * @param {string} esUrl 

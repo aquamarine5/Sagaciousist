@@ -14,8 +14,9 @@ import LucideRefreshCw from '~icons/lucide/refresh-cw?width=18px&height=18px';
 import LucideEdit from '~icons/lucide/edit?width=18px&height=18px';
 import LucideClipboardCopy from '~icons/lucide/clipboard-copy?width=18px&height=18px';
 import LucideClipboardCheck from '~icons/lucide/clipboard-check?width=18px&height=18px';
-import { InteropPortalV2 } from '@/interopv2';
 import { ElMessageBox } from 'element-plus';
+import { InteropPortalV3 } from '@/interopv3';
+import { marked } from 'marked';
 const sentenceStatus = [
     'lyricful_before_read',
     'lyricful_reading',
@@ -24,7 +25,7 @@ const sentenceStatus = [
 const emit = defineEmits(['loadingFinish', "readFinished", "switchEditMode"])
 const props = defineProps({
     interop: {
-        type: InteropPortalV2
+        type: InteropPortalV3
     }
 })
 
@@ -123,10 +124,11 @@ function ttsEndMark() {
 /**
  * @param {QAStructure} qastructure 
  * @returns {Promise<void>}
+ * @deprecated
  */
 async function regenerateResponse(qastructure) {
     console.log(qastructure)
-    props.interop.forgiveMessage(qastructure.messageIndexes)
+    //props.interop.forgiveMessage(qastructure.messageIndexes)
     speech.ttsClear()
     const splitPatterns = ['。', "！", "？", "，", "：", "；"]
     qastructure.isloading = true
@@ -164,8 +166,8 @@ async function regenerateResponse(qastructure) {
     }
     console.log("last content: " + lastSentence)
     ttsEndMark()
-    let messageIndex = props.interop.storageMessage(qastructure.question, allResponse)
-    qastructure.messageIndexes = messageIndex
+    //let messageIndex = props.interop.storageMessage(qastructure.question, allResponse)
+    //qastructure.messageIndexes = messageIndex
 }
 
 /**
@@ -187,6 +189,7 @@ function buttonClipboard(qastructure) {
     })
 }
 
+
 /**
  * @param {QAStructure} qastructure 
  */
@@ -199,11 +202,12 @@ function buttonThumbUp(qastructure) {
  */
 function buttonThumbDown(qastructure) {
     qastructure.btnclicked[1] = true
-    props.interop.forgiveMessage(qastructure.messageIndexes)
+    //props.interop.forgiveMessage(qastructure.messageIndexes)
 }
 
 /**
  * @param {QAStructure} qastructure 
+ * @deprecated
  */
 function buttonRefresh(qastructure) {
     regenerateResponse(qastructure).then(() => {
@@ -213,6 +217,7 @@ function buttonRefresh(qastructure) {
 
 /**
  * @param {QAStructure} qastructure 
+ * @deprecated
  */
 function buttonEdit(qastructure) {
     qastructure.btnclicked[3] = true
@@ -227,7 +232,7 @@ defineExpose({
     clearAllLyrics,
     addSentence,
     switchTTSStatus,
-    regenerateResponse
+    //regenerateResponse
 })
 </script>
 
@@ -255,8 +260,8 @@ defineExpose({
                         <div class="lyricful_sentence" v-for="(sentence, aindex) in filteredAnswers[index]"
                             :key="aindex">
                             <span :class="'lyricful_part ' + sentenceStatus[textpart.status]"
-                                v-for="(textpart, taindex) in sentence" :key="taindex">
-                                {{ textpart.text }}
+                                v-for="(textpart, taindex) in sentence" :key="taindex"
+                                v-html="marked(textpart.text).replace(/<p>/g, '').replace(/<\/p>/g, '')">
                             </span>
                         </div>
                     </div>
@@ -267,7 +272,8 @@ defineExpose({
                         <LucideThumbsDown
                             :class="qastructure.btnclicked[1] ? ' lyricful_button_filled' : 'lyricful_button'"
                             @click="buttonThumbDown(qastructure)" />
-                        <LucideRefreshCw class="lyricful_button_nofill" @click="buttonRefresh(qastructure)" />
+                        <LucideRefreshCw class="lyricful_button_nofill" @click="buttonRefresh(qastructure)"
+                            v-if="false" />
                         <Transition name="fade" mode="out-in">
                             <LucideClipboardCheck class="lyricful_button_nofill" v-if="qastructure.btnclicked[4]"
                                 @click="buttonClipboard(qastructure)" key="check" />
@@ -276,7 +282,7 @@ defineExpose({
                                 v-else key="copy" @click="buttonClipboard(qastructure)" />
                         </Transition>
                         <LucideEdit :class="qastructure.btnclicked[3] ? ' lyricful_button_filled' : 'lyricful_button'"
-                            @click="buttonEdit(qastructure)" />
+                            @click="buttonEdit(qastructure)" v-if="false" />
                     </div>
                 </div>
             </div>

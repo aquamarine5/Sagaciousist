@@ -12,8 +12,8 @@ import LineMdLoadingTwotoneLoop from '~icons/line-md/loading-twotone-loop?width=
 import LucideCircleCheckBig from '~icons/lucide/circle-check-big?width=1.5em&height=1.5em';
 import LyricfulResponse from './LyricfulResponse.vue';
 import QuestionsTipDisplayer from './QuestionsTipDisplayer.vue';
-import { InteropPortalV2 } from '@/interopv2';
 import baseinfo from '@/baseinfo';
+import { InteropPortalV3 } from '@/interopv3';
 // import SelectorDisplayer from './SelectorDisplayer.vue';
 
 let nowtime = new Date().getHours()
@@ -102,9 +102,10 @@ const splitPatterns = ['。', "！", "？", "，", "：", "；"]
 const showPendingTips = ref(false)
 var responseStatus = undefined
 const isloading = ref(false)
+var conversation_id = null
 // const interopPortal = new InteropPortal("http://localhost:8080")
-const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
-const interopPortalV2 = new InteropPortalV2(ollama, "http://localhost:8080")
+//const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
+const interopPortalV3 = new InteropPortalV3()
 export default {
     components: {
         LyricfulResponse
@@ -185,14 +186,20 @@ export default {
                 let qastruct = lyricfulRef.createQAStructure(itext)
                 this.inputText = ""
                 //const response = await interopPortalV2.generateChatRequest(itext)
-                const response = await interopPortalV2.generateGenerateRequest(itext)
+                const response = await interopPortalV3.chat(itext, conversation_id)
                 var lastSentence = ''
                 var allResponse = ''
                 console.log(qastruct)
                 for await (const part of response) {
+                    if (!conversation_id) {
+                        conversation_id = part.conversation_id
+                    }
                     //let content = part.message.content
-                    let content = part.response
+                    let content = part.answer
+                    if (!content) break;
                     allResponse += content
+                    console.log(content)
+
                     for (let index = 0; index < content.length; index++) {
                         const char = content[index];
                         if (char == '\n') {
@@ -223,9 +230,9 @@ export default {
                 if (lyricfulRef.ttsEndMark()) {
                     isRunning.value = false
                 }
-                let messageIndex = interopPortalV2.storageMessage(itext, allResponse)
-                console.log(messageIndex)
-                qastruct.messageIndexes = messageIndex
+                //let messageIndex = interopPortalV2.storageMessage(itext, allResponse)
+                //console.log(messageIndex)
+                //qastruct.messageIndexes = messageIndex
             }
             setTimeout(function () {
                 responseStatus = false
