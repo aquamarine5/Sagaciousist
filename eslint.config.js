@@ -1,12 +1,12 @@
-import { defineConfig } from "eslint/config";
 import globals from "globals";
-import js from "@eslint/js";
+import pluginJs from "@eslint/js";
 import pluginVue from "eslint-plugin-vue";
 
 
-export default defineConfig([
+/** @type {import('eslint').Linter.Config[]} */
+export default [
   { files: ["**/*.{js,mjs,cjs,vue}"] },
-  { files: ["**/*.{js,mjs,cjs,vue}"], languageOptions: { globals: globals.browser } },
-  { files: ["**/*.{js,mjs,cjs,vue}"], plugins: { js }, extends: ["js/recommended"] },
-  pluginVue.configs["flat/essential"],
-]);
+  { languageOptions: { globals: globals.browser } },
+  pluginJs.configs.recommended,
+  ...pluginVue.configs["flat/essential"],
+];
