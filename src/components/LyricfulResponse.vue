@@ -21,6 +21,12 @@ const sentenceStatus = [
     'lyricful_reading',
     'lyricful_after_read'
 ]
+const thinkingStatus = [
+    '',
+    'lyricful_thinking_mark_start',
+    'lyricful_thinking_part',
+    'lyricful_thinking_mark_end'
+]
 const emit = defineEmits(['loadingFinish', "readFinished", "switchEditMode"])
 const props = defineProps({
     interop: {
@@ -68,13 +74,14 @@ speech.bindShowCallback(() => {
  * @param {import('vue').Ref} answerref
  * @param {string} text
  * @param {boolean} issplit
+ * @param {number} thinkingValue 
  */
-function addSentence(answerref, text, issplit = false) {
+function addSentence(answerref, text, issplit = false, thinkingValue) {
     console.log(text)
     if (text == "" || text == "\n" || text == " ") {
         speech.setSplitMark()
     } else {
-        speech.addSentence(answerref, text, issplit)
+        speech.addSentence(answerref, text, issplit, thinkingValue)
     }
 }
 function checkTTSStatus() {
@@ -139,14 +146,26 @@ async function regenerateResponse(qastructure) {
     const response = await props.interop.generateGenerateRequest(qastructure.question)
     var lastSentence = ''
     var allResponse = ''
+    var isThinking = false
     console.log(qastructure)
     for await (const part of response) {
         let content = part.response
+        var thinkingValue = isThinking ? 2 : 0
+        console.log("content:", content)
+        if (content.indexOf("<think>") != -1) {
+            content = "正在深度思考："
+            thinkingValue = 1
+        }
+        if (content.indexOf("</think>") != -1) {
+            content = "深度思考完毕。"
+            thinkingValue = 3
+        }
+        console.log("========================", thinkingValue)
         allResponse += content
         for (let index = 0; index < content.length; index++) {
             const char = content[index];
             if (char == '\n') {
-                addSentence(qastructure.answer, lastSentence, true)
+                addSentence(qastructure.answer, lastSentence, true, thinkingValue)
                 console.log("issplit: true")
                 lastSentence = ''
             }
@@ -157,7 +176,7 @@ async function regenerateResponse(qastructure) {
             if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
                 continue
             if (splitPatterns.indexOf(char) != -1) {
-                addSentence(qastructure.answer, lastSentence, false)
+                addSentence(qastructure.answer, lastSentence, false, thinkingValue)
                 lastSentence = ''
             }
         }
@@ -254,7 +273,8 @@ defineExpose({
                     <div v-else>
                         <div class="lyricful_sentence" v-for="(sentence, aindex) in filteredAnswers[index]"
                             :key="aindex">
-                            <span :class="'lyricful_part ' + sentenceStatus[textpart.status]"
+                            <span
+                                :class="thinkingStatus[textpart.thinkingValue] + ' lyricful_part ' + sentenceStatus[textpart.status]"
                                 v-for="(textpart, taindex) in sentence" :key="taindex">
                                 {{ textpart.text }}
                             </span>
@@ -476,5 +496,24 @@ defineExpose({
     display: none;
     font-weight: 500;
     color: rgb(130, 130, 130);
+}
+
+.lyricful_thinking_mark_start {
+    padding-block: 12px;
+    color: #0989f4;
+    font-size: larger;
+    font-weight: 700;
+}
+
+.lyricful_thinking_part {
+    color: #888;
+    font-size: small;
+}
+
+.lyricful_thinking_mark_end {
+    padding-block: 12px;
+    color: #0989f4;
+    font-size: larger;
+    font-weight: 700;
 }
 </style>

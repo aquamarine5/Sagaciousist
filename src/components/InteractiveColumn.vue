@@ -184,25 +184,38 @@ export default {
                  */
                 let qastruct = lyricfulRef.createQAStructure(itext)
                 this.inputText = ""
-                //const response = await interopPortalV2.generateChatRequest(itext)
-                const response = await interopPortalV2.generateGenerateRequest(itext)
+                const response = await interopPortalV2.generateChatRequest(itext)
+                //const response = await interopPortalV2.generateGenerateRequest(itext)
                 var lastSentence = ''
                 var allResponse = ''
+                var isThinking = false
                 console.log(qastruct)
                 for await (const part of response) {
-                    //let content = part.message.content
-                    let content = part.response
+                    let content = part.message.content
+                    //let content = part.response
+                    var thinkingValue = isThinking ? 2 : 0
+                    if (content.indexOf("<think>") != -1) {
+                        content = "正在深度思考：\n"
+                        isThinking = true
+                        thinkingValue = 1
+                    }
+                    if (content.indexOf("</think>") != -1) {
+                        content = "深度思考完毕。"
+                        isThinking = false
+                        thinkingValue = 3
+                    }
+                    content = content.replace(/\*\*/g, "").replace(/#/g, "")
                     allResponse += content
                     for (let index = 0; index < content.length; index++) {
                         const char = content[index];
                         if (char == '\n') {
-                            lyricfulRef.addSentence(qastruct.answer, lastSentence, false)
+                            lyricfulRef.addSentence(qastruct.answer, lastSentence, false, thinkingValue)
                             console.log("issplit: true")
                             lastSentence = ''
                         }
                         lastSentence += char
                         if (!isRunning.value) {
-                            lyricfulRef.addSentence(qastruct.answer, lastSentence, false)
+                            lyricfulRef.addSentence(qastruct.answer, lastSentence, false, thinkingValue)
                             break
                         }
                         if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
@@ -211,7 +224,7 @@ export default {
                         if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
                             continue
                         if (splitPatterns.indexOf(char) != -1) {
-                            lyricfulRef.addSentence(qastruct.answer, lastSentence, false)
+                            lyricfulRef.addSentence(qastruct.answer, lastSentence, false, thinkingValue)
                             lastSentence = ''
                         }
                     }

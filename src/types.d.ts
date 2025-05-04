@@ -1,9 +1,9 @@
-interface StoragedMessageIndexes{
+interface StoragedMessageIndexes {
     userindex: number;
     answerindex: number;
 }
 
-interface QAStructure{
+interface QAStructure {
     question: string;
     answer: SentenceResponse[][];
     isloading: boolean;
@@ -12,7 +12,8 @@ interface QAStructure{
     btnclicked: boolean[];
 }
 
-interface SentenceResponse{
+interface SentenceResponse {
     text: string;
     status: import("vue").Ref<number>;
+    thinkingValue: number;
 }
