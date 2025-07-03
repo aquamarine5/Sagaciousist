@@ -1,3 +1,3 @@
 export default {
-    baseLibrary: "国学经典"
+    baseLibrary: "资治通鉴"
 }

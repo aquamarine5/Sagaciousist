@@ -28,9 +28,9 @@ function changeSilent() {
         <div class="topbar_title">
             <div class="topbar_center">
                 <LucideBotMessageSquare class="topbar_logo" />
-                {{ baseinfo.baseLibrary + "人工智能" }}
+                {{ baseinfo.baseLibrary + "大模型辅助教学系统" }}
             </div>
-            <div class="topbar_version">
+            <div class="topbar_version" v-if="false">
                 v{{ pkginfo.version }}
             </div>
         </div>

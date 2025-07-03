@@ -151,7 +151,6 @@ async function regenerateResponse(qastructure) {
     for await (const part of response) {
         let content = part.response
         var thinkingValue = isThinking ? 2 : 0
-        console.log("content:", content)
         if (content.indexOf("<think>") != -1) {
             content = "正在深度思考："
             thinkingValue = 1
@@ -160,8 +159,7 @@ async function regenerateResponse(qastructure) {
             content = "深度思考完毕。"
             thinkingValue = 3
         }
-        console.log("========================", thinkingValue)
-        allResponse += content
+        allResponse += content.replace(/\*\*/g,"")
         for (let index = 0; index < content.length; index++) {
             const char = content[index];
             if (char == '\n') {
