@@ -69,7 +69,7 @@ typingNext()
 
             <!-- <SelectorDisplayer v-if="isselecting" @modeSelected="handleModeSelected" /> -->
             <div class="center_tips">
-                <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="iswelcome">
+                <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="false">
                     {{ typingText }}
                 </div>
                 <QuestionsTipDisplayer class="question_tips" v-if="iswelcome" @askQuestion="handleAskQuestion" />
@@ -377,7 +377,7 @@ export default {
     flex: 1;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     flex-direction: column;
 }
 
