@@ -31,3 +31,4 @@ coverage
 *.ckpt
 *.pth
 Sagaciousist.zip
+*.zip

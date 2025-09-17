@@ -317,7 +317,7 @@ export default {
     animation-fill-mode: forwards;
     background-size: 300%;
     background-position: 0% 0%;
-    background-image: linear-gradient(to right, #eea2a2 0%, #bbc1bf 19%, #57c6e1 42%, #b49fda 79%, #7ac5d8 100%);
+    background-image: linear-gradient(to right, #8c6b4f 0%, #a08c7d 50%, #8c6b4f 100%);
 
 }
 
@@ -338,7 +338,7 @@ export default {
     background-origin: padding-box, border-box;
     background-size: 200%;
     background-position: 0% 50%;
-    background-image: linear-gradient(to right, #fff, #fff), linear-gradient(135deg, #c3cfe2 0%, #e0e1e2 40%, #e0c3fc 55%, #8ec5fc 100%);
+    background-image: linear-gradient(to right, #fff, #fff), linear-gradient(135deg, #a1887f 0%, #d7ccc8 50%, #a1887f 100%);
 }
 
 :deep(.is-focus) {

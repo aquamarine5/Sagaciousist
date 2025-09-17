@@ -73,7 +73,7 @@ export default {
     align-items: center;
     border-style: solid;
     width: fit-content;
-    border-color: gray;
+    border-color: #a1887f;
     border-width: 2px;
     cursor: pointer;
     background-color: #fafafa;
@@ -81,7 +81,8 @@ export default {
 
 .tips_forcontainer {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: row;
+    flex-wrap: nowrap;
     justify-content: center;
 }
 </style>

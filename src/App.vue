@@ -24,8 +24,7 @@ span {
 }
 
 .background {
-
-    background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url("./image.png");
+    background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url("./image.jpg");
     background-size: cover;
     background-repeat: no-repeat;
 }

@@ -159,7 +159,7 @@ async function regenerateResponse(qastructure) {
             content = "深度思考完毕。"
             thinkingValue = 3
         }
-        allResponse += content.replace(/\*\*/g,"")
+        allResponse += content.replace(/\*\*/g, "")
         for (let index = 0; index < content.length; index++) {
             const char = content[index];
             if (char == '\n') {
@@ -406,14 +406,15 @@ defineExpose({
 .lyricful_answer {
     margin-right: 32px;
     padding: 8px 13px;
-    border-radius: 20px;
+    border-radius: 10px;
     width: fit-content;
     border-color: transparent;
     background-clip: padding-box, border-box;
     background-origin: padding-box, border-box;
-    background-image: linear-gradient(to right, #fff, #fff), linear-gradient(315deg, #04d4fd, #0989f4, #284fab);
+    background-image: linear-gradient(to right, #fdfdfd, #fdfdfd), linear-gradient(315deg, #a1887f, #d7ccc8, #a1887f);
     border-style: solid;
-    border-width: 3px;
+    border-width: 2px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .lyricful_question {
@@ -423,10 +424,11 @@ defineExpose({
     text-align: right;
     min-width: 10px;
     border-style: solid;
-    border-color: #888;
+    border-color: #a1887f;
     border-width: 2px;
-    border-radius: 18px;
+    border-radius: 10px;
     background-color: #fff;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .lyricful_part {
@@ -498,7 +500,7 @@ defineExpose({
 
 .lyricful_thinking_mark_start {
     padding-block: 12px;
-    color: #0989f4;
+    color: #8d6e63;
     font-size: larger;
     font-weight: 700;
 }
@@ -510,7 +512,7 @@ defineExpose({
 
 .lyricful_thinking_mark_end {
     padding-block: 12px;
-    color: #0989f4;
+    color: #8d6e63;
     font-size: larger;
     font-weight: 700;
 }
