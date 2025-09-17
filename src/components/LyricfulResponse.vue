@@ -478,7 +478,7 @@ defineExpose({
 .lyricful_reading {
     animation: fadeIn .3s ease-in-out;
     transition: color .4s ease-in-out;
-    font-family: "SourceHanSansBold";
+    font-family: "SourceHanSansRegular";
     color: #000;
 }
 

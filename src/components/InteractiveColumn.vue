@@ -68,23 +68,26 @@ typingNext()
             </div> -->
 
             <!-- <SelectorDisplayer v-if="isselecting" @modeSelected="handleModeSelected" /> -->
-            <div class="center_tips">
-                <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="false">
-                    {{ typingText }}
+            <div class="center_container">
+                <div class="center_tips">
+                    <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="false">
+                        {{ typingText }}
+                    </div>
+                    <QuestionsTipDisplayer class="question_tips" v-if="iswelcome" @askQuestion="handleAskQuestion" />
                 </div>
-                <QuestionsTipDisplayer class="question_tips" v-if="iswelcome" @askQuestion="handleAskQuestion" />
-            </div>
-            <div class="input_container">
-                <ElInput :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputText" type="textarea"
-                    placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
-                <div :class="!isRunning ? 'container_btn_send' : 'container_btn_send btn_send_gradient'">
-                    <ElButton v-wave :type="'primary'" @click="onsend" circle>
-                        <LucideCircleCheckBig v-if="isediting" />
-                        <MdiSendVariant v-else-if="!isRunning" />
-                        <LineMdLoadingTwotoneLoop v-else />
-                    </ElButton>
+                <div class="input_container">
+                    <ElInput :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputText" type="textarea"
+                        placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
+                    <div :class="!isRunning ? 'container_btn_send' : 'container_btn_send btn_send_gradient'">
+                        <ElButton v-wave :type="'primary'" @click="onsend" circle>
+                            <LucideCircleCheckBig v-if="isediting" />
+                            <MdiSendVariant v-else-if="!isRunning" />
+                            <LineMdLoadingTwotoneLoop v-else />
+                        </ElButton>
+                    </div>
                 </div>
             </div>
+
             <div class="tips_ai">
                 {{ baseinfo.baseLibrary }}人工智能也会出错，请检查重要信息。
             </div>
@@ -373,11 +376,17 @@ export default {
     margin-bottom: 5px;
 }
 
+.center_container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
 .center_tips {
     flex: 1;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    /* justify-content: flex-end; */
     flex-direction: column;
 }
 
@@ -411,14 +420,14 @@ export default {
     justify-content: center;
     font-size: 30px;
     align-self: center;
-    font-family: "SourceHanSansBold";
+    font-family: "SourceHanSansRegular";
 }
 
 .welcome_tips {
     align-items: center;
     display: flex;
     white-space: nowrap;
-    font-family: "Gilroy";
+    font-family: "SourceHanSansRegular";
     font-size: 30px;
     justify-content: center;
     align-self: center;

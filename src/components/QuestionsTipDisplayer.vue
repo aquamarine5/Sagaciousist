@@ -60,7 +60,7 @@ export default {
 
 .tips_title {
     text-align: center;
-    font-family: "SourceHanSansBold";
+    font-family: "SourceHanSansRegular";
     padding-block: 8px;
 }
 

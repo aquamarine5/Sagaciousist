@@ -5,15 +5,15 @@
 
 @font-face {
     font-family: "SourceHanSansRegular";
-    src: url("SourceHanSansSC-Regular.otf");
+    src: url("SIMLI.TTF");
 }
 
 @font-face {
     font-family: "SourceHanSansBold";
-    src: url("SourceHanSansSC-Bold.otf");
+    src: url("YanZhenQingDuoBaoTaBei-2.ttf");
 }
 
 @font-face {
     font-family: "SourceCodeProBold";
-    src: url("SourceCodePro-Bold.otf");
+    src: url("YanZhenQingDuoBaoTaBei-2.ttf");
 }
