@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/package",
   "name": "sagaciousist",
-  "version": "1.9",
+  "version": "2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -15,33 +15,33 @@
     "debug": "vite --mode debug"
   },
   "dependencies": {
-    "axios": "^1.8.2",
+    "axios": "^1.12.2",
     "crypto-js": "^4.2.0",
-    "element-plus": "^2.8.8",
-    "ollama": "^0.5.10",
+    "element-plus": "^2.11.3",
+    "ollama": "^0.5.18",
     "three": "^0.170.0",
-    "v-wave": "^3.0.2",
-    "vue": "^3.5.13",
+    "v-wave": "^3.0.4",
+    "vue": "^3.5.21",
     "vue-content-loader": "^2.0.1",
-    "ws": "^8.18.0"
+    "ws": "^8.18.3"
   },
   "devDependencies": {
-    "@eslint/js": "^9.15.0",
-    "@iconify-json/line-md": "^1.2.2",
-    "@iconify-json/lucide": "^1.2.18",
-    "@iconify-json/mdi": "^1.2.1",
-    "@iconify/vue": "^4.1.2",
+    "@eslint/js": "^9.36.0",
+    "@iconify-json/line-md": "^1.2.11",
+    "@iconify-json/lucide": "^1.2.68",
+    "@iconify-json/mdi": "^1.2.3",
+    "@iconify/vue": "^4.3.0",
     "@types/crypto-js": "^4.2.2",
     "@types/three": "^0.171.0",
-    "@vitejs/plugin-vue": "^5.2.0",
-    "@vue/compiler-sfc": "^3.5.13",
-    "eslint": "^9.15.0",
-    "eslint-plugin-vue": "^9.31.0",
-    "globals": "^15.12.0",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "@vue/compiler-sfc": "^3.5.21",
+    "eslint": "^9.36.0",
+    "eslint-plugin-vue": "^9.33.0",
+    "globals": "^15.15.0",
     "unplugin-icons": "^0.20.2",
-    "vite": "^5.4.19"
+    "vite": "^5.4.20"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.27.4"
+    "@rollup/rollup-linux-x64-gnu": "^4.52.2"
   }
 }
