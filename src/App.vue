@@ -20,7 +20,7 @@ p {
 
 div,
 span {
-    font-family: "SourceHanSansRegular";
+    font-family: "SourceHanSansBold";
 }
 
 .background {

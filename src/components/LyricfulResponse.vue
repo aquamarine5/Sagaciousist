@@ -6,8 +6,8 @@
 import SpeechControllerV3 from '@/ttsv3';
 import { nextTick, ref, computed } from 'vue';
 import { ContentLoader } from 'vue-content-loader';
-import LucideSquareUserRound from '~icons/lucide/square-user-round?width=28px&height=28px';
-import LucideBot from '~icons/lucide/bot?width=28px&height=28px';
+import LucideUser from '~icons/lucide/user?width=28px&height=28px';
+import LucideScroll from '~icons/lucide/scroll?width=28px&height=28px';
 import LucideThumbsUp from '~icons/lucide/thumbs-up?width=18px&height=18px';
 import LucideThumbsDown from '~icons/lucide/thumbs-down?width=18px&height=18px';
 import LucideRefreshCw from '~icons/lucide/refresh-cw?width=18px&height=18px';
@@ -250,27 +250,41 @@ defineExpose({
 
 <template>
     <div class="lyricful_container" ref="containerRef">
-        <div class="lyricful_qastructure" v-for="(qastructure, index) in lyricful_data" :key="index">
-            <div class="lyricful_question_container">
-                <div class="lyricful_question">
-                    {{ qastructure.question }}
+        <!-- 欢迎消息 -->
+        <div class="flex items-start" v-if="lyricful_data.length === 0">
+            <div class="flex-shrink-0 bg-amber-100 text-amber-800 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                <LucideScroll />
+            </div>
+            <div class="message-card bg-amber-50 rounded-xl px-4 py-3 max-w-[80%]">
+                <p class="text-amber-900">你好，有什么可以帮你的吗？</p>
+            </div>
+        </div>
+
+        <!-- 对话内容 -->
+        <div v-for="(qastructure, index) in lyricful_data" :key="index">
+            <!-- 用户消息 -->
+            <div class="flex items-start justify-end mb-4">
+                <div class="message-card bg-blue-50 rounded-xl px-4 py-3 max-w-[80%]">
+                    <p class="text-blue-900">{{ qastructure.question }}</p>
                 </div>
-                <div class="lyricful_question_icon">
-                    <LucideSquareUserRound />
+                <div class="flex-shrink-0 bg-blue-50 text-blue-700 rounded-full w-8 h-8 flex items-center justify-center ml-3">
+                    <LucideUser />
                 </div>
             </div>
-            <div class="lyricful_answer_container">
-                <div class="lyricful_answer_icon">
-                    <LucideBot />
+
+            <!-- AI回答 -->
+            <div class="flex items-start mb-4">
+                <div class="flex-shrink-0 bg-amber-100 text-amber-800 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                    <LucideScroll />
                 </div>
-                <div class="lyricful_answer">
-                    <div class="lyricful_loading" v-if="qastructure.isloading">
-                        <ContentLoader :width="50" :height="20" :speed="0.8" primaryColor="#eee" secondaryColor="#ccc">
-                        </ContentLoader>
+                <div class="message-card bg-amber-50 rounded-xl px-4 py-3 max-w-[80%]">
+                    <div v-if="qastructure.isloading" class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
                     </div>
                     <div v-else>
-                        <div class="lyricful_sentence" v-for="(sentence, aindex) in filteredAnswers[index]"
-                            :key="aindex">
+                        <div v-for="(sentence, aindex) in filteredAnswers[index]" :key="aindex">
                             <span
                                 :class="thinkingStatus[textpart.thinkingValue] + ' lyricful_part ' + sentenceStatus[textpart.status]"
                                 v-for="(textpart, taindex) in sentence" :key="taindex">
@@ -303,13 +317,30 @@ defineExpose({
 </template>
 
 <style scoped>
+/* 全局样式重置与字体设置 */
+* {
+    font-family: "SourceHanSansBold", "SourceHanSansRegular", "SimSun", serif;
+}
+
+/* 动画效果 */
 @keyframes fadeIn {
     0% {
         opacity: 0;
+        transform: translateY(8px);
     }
 
     100% {
         opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-5px);
     }
 }
 
@@ -320,12 +351,12 @@ defineExpose({
 
 .fade-enter-from {
     opacity: 0;
-    transform: scale(0.8);
+    transform: scale(0.95);
 }
 
 .fade-leave-to {
     opacity: 0;
-    transform: scale(1.2);
+    transform: scale(1.05);
 }
 
 .fade-enter-to,
@@ -334,186 +365,300 @@ defineExpose({
     transform: scale(1);
 }
 
-.lyricful_button_nofill {
-    cursor: pointer;
-}
-
-:deep(.lyricful_button_filled path) {
-    fill: #888;
-    transition: fill .2s ease-in-out;
-}
-
-:deep(.lyricful_button path) {
-    fill: transparent;
-    transition: fill .2s ease-in-out;
-}
-
-:deep(.lyricful_button:hover path) {
-    fill: #b1b1b1;
-    transition: fill .2s ease-in-out;
-}
-
-.lyricful_question_container {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
-    margin-bottom: 8px;
-}
-
-.lyricful_answer_container {
-    display: flex;
-    align-items: flex-start;
-    margin-bottom: 8px;
-}
-
-.lyricful_button {
-    cursor: pointer;
-}
-
-.lyricful_button_filled {
-    cursor: pointer;
-}
-
-.lyricful_buttons {
-    padding: 5px 3px;
-    color: #333;
-    display: flex;
-    gap: 6px;
-    animation: fadeIn .3s ease-in-out;
-}
-
-.lyricful_answer_icon {
-    padding-right: 6px;
-    padding-top: 3px;
-}
-
-.lyricful_question_icon {
-    padding-left: 6px;
-    padding-top: 1px;
-}
-
-.lyricful_loading {
-    display: flex;
-    align-items: center;
-}
-
-.lyricful_qastructure {
-    margin-block: 6px;
-    display: flex;
-    flex-direction: column;
-}
-
-.lyricful_answer {
-    margin-right: 32px;
-    padding: 8px 13px;
-    border-radius: 10px;
-    width: fit-content;
-    border-color: transparent;
-    background-clip: padding-box, border-box;
-    background-origin: padding-box, border-box;
-    background-image: linear-gradient(to right, #fdfdfd, #fdfdfd), linear-gradient(315deg, #a1887f, #d7ccc8, #a1887f);
-    border-style: solid;
-    border-width: 2px;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.lyricful_question {
-    margin-left: 32px;
-    width: fit-content;
-    padding: 6px 13px;
-    text-align: right;
-    min-width: 10px;
-    border-style: solid;
-    border-color: #a1887f;
-    border-width: 2px;
-    border-radius: 10px;
-    background-color: #fff;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.lyricful_part {
-    font-size: medium;
-}
-
-.lyricful_container::-webkit-scrollbar-button {
-    display: none;
-}
-
+/* 消息容器样式 */
 .lyricful_container {
-    max-height: 80vh;
+    max-height: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    margin-bottom: 8px;
-    padding-right: 0.8px;
     overflow-y: overlay;
     overflow-x: hidden;
     scrollbar-gutter: stable;
     scroll-behavior: smooth;
-    scrollbar-color: #888 transparent;
+    scrollbar-color: rgba(217, 119, 6, 0.5) transparent;
 }
 
 .lyricful_container::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 
 .lyricful_container::-webkit-scrollbar-track {
-    background: transparent;
+    background: rgba(251, 191, 36, 0.1);
+    border-radius: 3px;
 }
 
 .lyricful_container::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
+    background: rgba(217, 119, 6, 0.5);
+    border-radius: 3px;
 }
 
-.lyricful_container::-webkit-scrollbar-button:vertical:start:decrement,
-.lyricful_container::-webkit-scrollbar-button:vertical:end:increment {
-    display: none;
+.lyricful_container::-webkit-scrollbar-thumb:hover {
+    background: rgba(217, 119, 6, 0.7);
+}
+
+/* 打字动画效果 */
+.typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #fefce8;
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    padding: 12px 16px;
+    border-radius: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.typing-indicator span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #d97706;
+    animation: typing 1.4s infinite both;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+/* 按钮样式 */
+.lyricful_button_nofill,
+.lyricful_button,
+.lyricful_button_filled {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.lyricful_button_nofill:hover,
+.lyricful_button:hover,
+.lyricful_button_filled:hover {
+    transform: scale(1.1);
+}
+
+:deep(.lyricful_button_filled path) {
+    fill: #92400e;
+    transition: fill 0.2s ease-in-out;
+}
+
+:deep(.lyricful_button path) {
+    fill: transparent;
+    stroke: #92400e;
+    transition: fill 0.2s ease-in-out, stroke 0.2s ease-in-out;
+}
+
+:deep(.lyricful_button:hover path) {
+    fill: rgba(146, 64, 14, 0.1);
+    stroke: #92400e;
+    transition: fill 0.2s ease-in-out, stroke 0.2s ease-in-out;
+}
+
+/* 消息按钮组 */
+.lyricful_buttons {
+    padding: 8px 5px;
+    display: flex;
+    gap: 10px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* 消息卡片样式 */
+.message-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.message-card:hover {
+    box-shadow: 0 4px 16px rgba(146, 64, 14, 0.1);
+}
+
+/* 用户消息样式 */
+.flex.justify-end .message-card {
+    background-color: #f0f9ff;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 16px;
+}
+
+/* AI消息样式 */
+.flex.items-start:not(.justify-end) .message-card {
+    background-color: #fefce8;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 16px;
+}
+
+/* 头像样式 */
+.flex-shrink-0 {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border: 1px solid rgba(217, 119, 6, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+/* AI头像特殊样式 */
+.flex-shrink-0.bg-amber-100 {
+    background-color: #fffbeb !important;
+    border-color: rgba(251, 191, 36, 0.3);
+}
+
+.flex-shrink-0.bg-blue-50 {
+    background-color: #f0f9ff !important;
+    border-color: rgba(37, 99, 235, 0.2);
+}
+
+/* 用户头像装饰效果 */
+.flex-shrink-0.bg-blue-50::before {
+    background-color: #dbeafe;
+    border-color: #f0f9ff;
+}
+
+/* 头像装饰效果 */
+.flex-shrink-0::before {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background-color: #fef3c7;
+    border-radius: 50%;
+    top: -2px;
+    right: -2px;
+    border: 2px solid #fff;
+}
+
+/* 消息内容样式 */
+.lyricful_part {
+    font-size: medium;
+    color: #4a4a4a;
 }
 
 .lyricful_sentence {
-    animation: fadeIn .3s ease-in-out;
-    transition: color .4s ease-in-out;
+    animation: fadeIn 0.3s ease-in-out;
+    transition: color 0.4s ease-in-out;
 }
 
 .lyricful_reading {
-    animation: fadeIn .3s ease-in-out;
-    transition: color .4s ease-in-out;
-    font-family: "SourceHanSansRegular";
-    color: #000;
+    animation: fadeIn 0.3s ease-in-out;
+    transition: color 0.4s ease-in-out;
+    font-family: "SourceHanSansRegular", "SimSun", serif;
+    color: #78350f;
+    font-weight: 500;
 }
 
 .lyricful_after_read {
-
-    animation: fadeIn .3s ease-in-out;
-    transition: color .4s ease-in-out;
+    animation: fadeIn 0.3s ease-in-out;
+    transition: color 0.4s ease-in-out;
     font-weight: 500;
-    color: #000;
+    color: #4a4a4a;
 }
 
 .lyricful_before_read {
-    animation: fadeIn .3s ease-in-out;
-    transition: color .4s ease-in-out;
+    animation: fadeIn 0.3s ease-in-out;
+    transition: color 0.4s ease-in-out;
     display: none;
     font-weight: 500;
     color: rgb(130, 130, 130);
 }
 
+/* 思考状态样式 */
 .lyricful_thinking_mark_start {
     padding-block: 12px;
-    color: #8d6e63;
+    color: #92400e;
     font-size: larger;
     font-weight: 700;
 }
 
 .lyricful_thinking_part {
-    color: #888;
+    color: #92400e;
     font-size: small;
+    font-style: italic;
 }
 
 .lyricful_thinking_mark_end {
     padding-block: 12px;
-    color: #8d6e63;
+    color: #92400e;
     font-size: larger;
     font-weight: 700;
+}
+
+/* 文本样式 */
+.text-gray-800 {
+    color: #4a4a4a !important;
+    font-family: "SourceHanSansBold", "SourceHanSansRegular", "SimSun", serif !important;
+}
+
+.text-amber-900 {
+    color: #78350f !important;
+    font-family: "SourceHanSansBold", "SourceHanSansRegular", "SimSun", serif !important;
+}
+
+.text-blue-900 {
+    color: #1e40af !important;
+    font-family: "SourceHanSansBold", "SourceHanSansRegular", "SimSun", serif !important;
+}
+
+/* 对话间距调整 */
+.flex.items-start {
+    margin-bottom: 16px;
+}
+
+/* 消息内引用样式 */
+.message-card blockquote {
+    border-left: 3px solid #d97706;
+    padding-left: 12px;
+    margin: 12px 0;
+    font-style: italic;
+    color: #92400e;
+}
+
+/* 欢迎消息样式 */
+.flex.items-start:first-child .message-card {
+    background-color: rgba(251, 191, 36, 0.05);
+    border: 1px solid rgba(217, 119, 6, 0.1);
+    padding: 16px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .lyricful_container {
+        padding: 0 8px;
+    }
+    
+    .message-card {
+        padding: 12px 14px !important;
+        max-width: 85% !important;
+    }
+    
+    .flex-shrink-0 {
+        width: 32px;
+        height: 32px;
+        margin: 0 6px !important;
+    }
+    
+    .typing-indicator {
+        padding: 10px 14px;
+    }
+    
+    .typing-indicator span {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .lyricful_buttons {
+        gap: 8px;
+        padding: 6px 3px;
+    }
+    
+    .lyricful_buttons svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
 }
 </style>

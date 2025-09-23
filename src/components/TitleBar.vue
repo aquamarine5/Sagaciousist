@@ -48,7 +48,7 @@ function changeSilent() {
 
 .topbar_version {
     font-size: medium;
-    font-family: "SourceHanSansRegular", sans-serif;
+    font-family: "SourceHanSansBold";
     padding-top: 3px;
     padding-left: 2px;
 }
@@ -70,7 +70,7 @@ function changeSilent() {
 
 .topbar_title {
     display: flex;
-    font-family: 'SourceHanSansRegular';
+    font-family: 'SourceHanSansBold';
     font-weight: 600;
     font-size: 28px;
     color: #f5f5f5;

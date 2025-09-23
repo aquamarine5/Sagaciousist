@@ -5,7 +5,6 @@
 <script setup>
 import { ElButton, ElInput, ElNotification } from 'element-plus';
 import { Ollama } from 'ollama/src/browser';
-import ModelColumn from './ModelColumn.vue';
 import { ref } from 'vue';
 import MdiSendVariant from '~icons/mdi/send-variant?width=1.5em&height=1.5em';
 import LineMdLoadingTwotoneLoop from '~icons/line-md/loading-twotone-loop?width=1.8em&height=1.8em';
@@ -14,20 +13,21 @@ import LyricfulResponse from './LyricfulResponse.vue';
 import QuestionsTipDisplayer from './QuestionsTipDisplayer.vue';
 import { InteropPortalV2 } from '@/interopv2';
 import baseinfo from '@/baseinfo';
-// import SelectorDisplayer from './SelectorDisplayer.vue';
+import LucideBookOpen from '~icons/lucide/book-open?width=24px&height=24px';
+import LucideMessageSquare from '~icons/lucide/message-square?width=16px&height=16px';
+import LucidePaperclip from '~icons/lucide/paperclip?width=16px&height=16px';
 
 let nowtime = new Date().getHours()
 var text = ""
 if (0 <= nowtime && nowtime < 4)
-    text = "深夜啦😉"
+    text = "深夜时分，正是研读经典的好时光"
 else if (4 <= nowtime && nowtime <= 11)
-    text = "早上好😉"
+    text = "晨读经典，开启智慧的一天"
 else if (12 <= nowtime && nowtime <= 17)
-    text = "下午好😉"
+    text = "午后时光，不妨与经典对话"
 else if (18 <= nowtime && nowtime <= 24)
-    text = "晚上好😉"
-const iswelcomecn = Math.round(Math.random()) == 1
-const finalText = iswelcomecn ? text : "Hello!😙"
+    text = "晚间宁静，正是思考的好时机"
+const finalText = text
 
 const typingText = ref("")
 var index = 0
@@ -44,58 +44,17 @@ function typingNext() {
     }
 }
 typingNext()
-</script>
 
-<template>
-    <div class="main_container">
-        <ModelColumn />
-        <div class="app_container">
-            <div class="result_container">
-                <LyricfulResponse ref="lyricful" @loadingFinish="loadingFinished" @readFinished="readFinished"
-                    :interop="interopPortalV2" @switchEditMode="onSwitchEditMode" />
-            </div>
-            <!-- <div class="selector_result" v-if="!isselecting && iswelcome">
-                <div class="selector_leftpart" @click="reselectMode">
-                    <LineMdArrowSmallLeft class="selector_result_icon" />
-                    重新选择
-                </div>
-                <div class="selector_rightpart">
-                    <LineMdTextBoxMultipleTwotone class="selector_result_icon" v-if="model === 'book'" />
-                    <LineMdFileSearchTwotone class="selector_result_icon" v-else-if="model === 'history'" />
-                    <span class="selector_result_icon" v-else></span>
-                    {{ model === 'book' ? '书籍相关提问模式' : model === 'history' ? '历史事件提问模式' : "?" }}
-                </div>
-            </div> -->
+// 示例问题发送函数，这里的问题是静态的，可以使用问答文档中的问题，然后直接返回答案
+function sendExampleQuestion(question) {
+    inputText.value = question
+    onsend()
+}
 
-            <!-- <SelectorDisplayer v-if="isselecting" @modeSelected="handleModeSelected" /> -->
-            <div class="center_container">
-                <div class="center_tips">
-                    <div :class="iswelcomecn ? 'welcome_tips_cn' : 'welcome_tips'" v-if="false">
-                        {{ typingText }}
-                    </div>
-                    <QuestionsTipDisplayer class="question_tips" v-if="iswelcome" @askQuestion="handleAskQuestion" />
-                </div>
-                <div class="input_container">
-                    <ElInput :autosize="{ minRows: 1, maxRows: 6 }" v-model="inputText" type="textarea"
-                        placeholder="向我提出一个问题吧" class="input_el" ref="elInput" />
-                    <div :class="!isRunning ? 'container_btn_send' : 'container_btn_send btn_send_gradient'">
-                        <ElButton v-wave :type="'primary'" @click="onsend" circle>
-                            <LucideCircleCheckBig v-if="isediting" />
-                            <MdiSendVariant v-else-if="!isRunning" />
-                            <LineMdLoadingTwotoneLoop v-else />
-                        </ElButton>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tips_ai">
-                {{ baseinfo.baseLibrary }}人工智能也会出错，请检查重要信息。
-            </div>
-        </div>
-    </div>
-</template>
-
-<script>
+// 响应式数据
+const lyricful = ref(null)
+const lyricful_data = ref([])
+const inputText = ref('')
 // const isselecting = ref(true)
 const isediting = ref(false)
 var editingQAStructure = null
@@ -107,395 +66,444 @@ var responseStatus = undefined
 const isloading = ref(false)
 // const interopPortal = new InteropPortal("http://localhost:8080")
 const ollama = new Ollama({ host: 'http://127.0.0.1:11434' })
-const interopPortalV2 = new InteropPortalV2(ollama, "http://localhost:8080")
-export default {
-    components: {
-        LyricfulResponse
-    },
-    methods: {
-        async handleAskQuestion(question) {
-            this.inputText = question;
-            await this.onsend()
-        },
-        readFinished() {
-            isRunning.value = false
-        },
-        loadingFinished() {
-            isloading.value = false
-        },
+const interopPortalV2 = ref(new InteropPortalV2(ollama, "http://localhost:8080"))
+
+// 处理提问的方法
+async function handleAskQuestion(question) {
+    inputText.value = question;
+    await onsend()
+}
+
+function readFinished() {
+    isRunning.value = false
+}
+
+function loadingFinished() {
+    isloading.value = false
+}
+/**
+ * @param {QAStructure} qastructure
+ */
+function onSwitchEditMode(qastructure) {
+    isediting.value = true
+    inputText.value = qastructure.question
+    editingQAStructure = qastructure
+}
+
+async function onsend() {
+    if (inputText.value == '') {
+        ElNotification({
+            type: 'warning',
+            title: "内容不能为空！",
+            message: "内容不能为空！",
+        })
+        return
+    }
+    if (isediting.value) {
+        isediting.value = false
+        editingQAStructure.question = inputText.value
+        lyricful.value.regenerateResponse(editingQAStructure)
+        return
+    }
+    if (isRunning.value) {
+        lyricful.value.ttsStop()
+        isRunning.value = false
+        return
+    }
+    iswelcome.value = false
+    isloading.value = true
+    isRunning.value = true
+    responseStatus = true
+    lyricful.value.clearAllLyrics()
+    speechSynthesis.cancel()
+    // const seg = new Intl.Segmenter("zh", { granularity: "sentence" })
+    setTimeout(function () {
+        if (responseStatus) {
+            showPendingTips.value = true
+        }
+    }, 1000)
+    if (import.meta.env.MODE == "pages") {
+        [
+            // hhh，来自开发者的恶趣味~~
+            "抱歉，由于当前环境限制，基于Github Pages的 Sagaciousist 无法使用此功能。",
+            "请在本地运行项目以使用此功能。",
+            "但是，我可以给你唱歌哦！",
+            "笨笨的我，傻傻的活",
+            "容易感动没有心机",
+            "吃了亏还不知道长记性",
+            "一路走来我不优秀",
+            "但我善良不虚伪",
+            "———— 那艺娜《笨笨的我傻傻的活》"
+        ].forEach((v) => lyricful.value.addSentence(v))
+    } else {
+        lyricful.value.checkTTSStatus()
+        let itext = inputText.value
         /**
-         * @param {QAStructure} qastructure
+         * @type {QAStructure}
          */
-        onSwitchEditMode(qastructure) {
-            isediting.value = true
-            this.inputText = qastructure.question
-            editingQAStructure = qastructure
-        },
-        async onsend() {
-            /**
-             * @type {LyricfulResponse}
-             */
-            let lyricfulRef = this.$refs.lyricful
-            if (this.inputText == '') {
-                ElNotification({
-                    type: 'warning',
-                    title: "内容不能为空！",
-                    message: "内容不能为空！",
-                })
-                return
+        let qastruct = lyricful.value.createQAStructure(itext)
+        inputText.value = ""
+        const response = await interopPortalV2.value.generateChatRequest(itext)
+        //const response = await interopPortalV2.generateGenerateRequest(itext)
+        var lastSentence = ''
+        var allResponse = ''
+        var isThinking = false
+        console.log(qastruct)
+        for await (const part of response) {
+            let content = part.message.content
+            //let content = part.response
+            var thinkingValue = isThinking ? 2 : 0
+            if (content.indexOf("<think>") != -1) {
+                content = "正在深度思考：\n"
+                isThinking = true
+                thinkingValue = 1
             }
-            if (isediting.value) {
-                isediting.value = false
-                editingQAStructure.question = this.inputText
-                lyricfulRef.regenerateResponse(editingQAStructure)
-                return
+            if (content.indexOf("</think>") != -1) {
+                content = "深度思考完毕。"
+                isThinking = false
+                thinkingValue = 3
             }
-            if (isRunning.value) {
-                lyricfulRef.ttsStop()
-                isRunning.value = false
-                return
-            }
-            iswelcome.value = false
-            isloading.value = true
-            isRunning.value = true
-            responseStatus = true
-            lyricfulRef.clearAllLyrics()
-            speechSynthesis.cancel()
-            //const seg = new Intl.Segmenter("zh", { granularity: "sentence" })
-            setTimeout(function () {
-                if (responseStatus) {
-                    showPendingTips.value = true
+            content = content.replace(/\*\*/g, "").replace(/#/g, "")
+            allResponse += content
+            for (let index = 0; index < content.length; index++) {
+                const char = content[index];
+                if (char == '\n') {
+                    lyricful.value.addSentence(qastruct.answer, lastSentence, false, thinkingValue)
+                    console.log("issplit: true")
+                    lastSentence = ''
                 }
-            }, 1000)
-            if (import.meta.env.MODE == "pages") {
-                [
-                    "抱歉，由于当前环境限制，基于Github Pages的 Sagaciousist 无法使用此功能。",
-                    "请在本地运行项目以使用此功能。",
-                    "但是，我可以给你唱歌哦！",
-                    "笨笨的我，傻傻的活",
-                    "容易感动没有心机",
-                    "吃了亏还不知道长记性",
-                    "一路走来我不优秀",
-                    "但我善良不虚伪",
-                    "———— 那艺娜《笨笨的我傻傻的活》"
-                ].forEach((v) => lyricfulRef.addSentence(v))
-            } else {
-                lyricfulRef.checkTTSStatus()
-                let itext = this.inputText
-                /**
-                 * @type {QAStructure}
-                 */
-                let qastruct = lyricfulRef.createQAStructure(itext)
-                this.inputText = ""
-                const response = await interopPortalV2.generateChatRequest(itext)
-                //const response = await interopPortalV2.generateGenerateRequest(itext)
-                var lastSentence = ''
-                var allResponse = ''
-                var isThinking = false
-                console.log(qastruct)
-                for await (const part of response) {
-                    let content = part.message.content
-                    //let content = part.response
-                    var thinkingValue = isThinking ? 2 : 0
-                    if (content.indexOf("<think>") != -1) {
-                        content = "正在深度思考：\n"
-                        isThinking = true
-                        thinkingValue = 1
-                    }
-                    if (content.indexOf("</think>") != -1) {
-                        content = "深度思考完毕。"
-                        isThinking = false
-                        thinkingValue = 3
-                    }
-                    content = content.replace(/\*\*/g, "").replace(/#/g, "")
-                    allResponse += content
-                    for (let index = 0; index < content.length; index++) {
-                        const char = content[index];
-                        if (char == '\n') {
-                            lyricfulRef.addSentence(qastruct.answer, lastSentence, false, thinkingValue)
-                            console.log("issplit: true")
-                            lastSentence = ''
-                        }
-                        lastSentence += char
-                        if (!isRunning.value) {
-                            lyricfulRef.addSentence(qastruct.answer, lastSentence, false, thinkingValue)
-                            break
-                        }
-                        if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
-                            continue
-                        }
-                        if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
-                            continue
-                        if (splitPatterns.indexOf(char) != -1) {
-                            lyricfulRef.addSentence(qastruct.answer, lastSentence, false, thinkingValue)
-                            lastSentence = ''
-                        }
-                    }
-                    if (!isRunning.value) {
-                        break
-                    }
+                lastSentence += char
+                if (!isRunning.value) {
+                    lyricful.value.addSentence(qastruct.answer, lastSentence, false, thinkingValue)
+                    break
                 }
-                console.log("last content: " + lastSentence)
-                if (lyricfulRef.ttsEndMark()) {
-                    isRunning.value = false
+                if ((char == '.' || char == ':') && /[0-9]/.test(lastSentence[lastSentence.length - 2])) {
+                    continue
                 }
-                let messageIndex = interopPortalV2.storageMessage(itext, allResponse)
-                console.log(messageIndex)
-                qastruct.messageIndexes = messageIndex
+                if (char == '.' && lastSentence[lastSentence.length - 2] == ".")
+                    continue
+                if (splitPatterns.indexOf(char) != -1) {
+                    lyricful.value.addSentence(qastruct.answer, lastSentence, false, thinkingValue)
+                    lastSentence = ''
+                }
             }
-            setTimeout(function () {
-                responseStatus = false
-                showPendingTips.value = false
-            }, 100)
+            if (!isRunning.value) {
+                break
+            }
         }
-    },
-    data() {
-        return {
-            inputText: ref(''),
-            renderFinish: () => {
-                isloading.value = false
-            },
-            lyricfulResponse: undefined
+        console.log("last content: " + lastSentence)
+        if (lyricful.value.ttsEndMark()) {
+            isRunning.value = false
         }
+        let messageIndex = interopPortalV2.value.storageMessage(itext, allResponse)
+        console.log(messageIndex)
+        qastruct.messageIndexes = messageIndex
     }
+    setTimeout(function () {
+        responseStatus = false
+        showPendingTips.value = false
+    }, 100)
 }
+
+// 提供给模板使用的渲染完成回调函数
+function renderFinish() {
+    isloading.value = false
+}
+
+// 暴露函数给父组件使用
 </script>
+
+<template>
+    <div class="main_container">
+        <!-- 经典引言装饰 -->
+        <div class="quote-decoration relative">
+            <div
+                class="quote-text absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-amber-800 text-amber-100 px-6 py-2 rounded-lg shadow-md text-center">
+                <p class="text-sm md:text-base italic">"博学之，审问之，慎思之，明辨之，笃行之"</p>
+                <p class="text-xs mt-1">——《礼记·中庸》</p>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 pt-8 pb-12 max-w-4xl">
+            <!-- 对话卡片容器 -->
+            <div class="chat-card rounded-xl shadow-md overflow-hidden border border-amber-200">
+                <!-- 卡片装饰条 -->
+                <div class="card-decoration"></div>
+
+                <!-- 聊天消息区域 -->
+                <div class="chat-container overflow-y-auto p-6 space-y-6" id="chatMessages">
+                    <!-- 欢迎语区域 -->
+                    <div v-if="iswelcome && lyricful_data.length === 0" class="welcome-area text-center py-8">
+                        <div class="text-amber-800 mb-4">
+                            <LucideBookOpen class="text-4xl mx-auto" />
+                        </div>
+                        <p class="typing-welcome mb-6">{{ typingText }}</p>
+                        <!-- 示例问题 -->
+                        <div class="example-questions mt-8 grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <button
+                                class="example-btn px-4 py-2 text-left bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg border border-amber-200 transition-colors"
+                                @click="sendExampleQuestion('《论语》中关于\'仁\'的核心思想是什么？')">
+                                <LucideMessageSquare class="inline mr-2" width="16" height="16" />
+                                《论语》中关于"仁"的核心思想是什么？
+                            </button>
+                            <button
+                                class="example-btn px-4 py-2 text-left bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg border border-amber-200 transition-colors"
+                                @click="sendExampleQuestion('《道德经》的主要哲学观点有哪些？')">
+                                <LucideMessageSquare class="inline mr-2" width="16" height="16" />
+                                《道德经》的主要哲学观点有哪些？
+                            </button>
+                            <button
+                                class="example-btn px-4 py-2 text-left bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg border border-amber-200 transition-colors"
+                                @click="sendExampleQuestion('儒家和道家思想的主要区别是什么？')">
+                                <LucideMessageSquare class="inline mr-2" width="16" height="16" />
+                                儒家和道家思想的主要区别是什么？
+                            </button>
+                            <button
+                                class="example-btn px-4 py-2 text-left bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg border border-amber-200 transition-colors"
+                                @click="sendExampleQuestion('请解释\'天人合一\'的思想内涵。')">
+                                <LucideMessageSquare class="inline mr-2" width="16" height="16" />
+                                请解释"天人合一"的思想内涵。
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 聊天内容 -->
+                    <LyricfulResponse ref="lyricful" @loadingFinish="loadingFinished" @readFinished="readFinished"
+                        :interop="interopPortalV2" @switchEditMode="onSwitchEditMode" />
+                </div>
+
+                <!-- 输入区域 -->
+                <div class="border-t border-amber-200 p-4">
+                    <form class="flex gap-3" id="messageForm">
+                        <div class="flex-1 relative">
+                            <ElInput :autosize="{ minRows: 1, maxRows: 4 }" v-model="inputText" type="textarea"
+                                placeholder="请输入您关于国学经典的问题..."
+                                class="input-focus w-full px-4 py-3 rounded-lg border border-amber-200/60 bg-amber-50/30 text-gray-700 focus:outline-none focus:ring-1 focus:ring-amber-300/40 focus:border-amber-400/60 transition-all duration-300 resize-none shadow-inner"
+                                ref="elInput" />
+                            <button type="button"
+                                class="absolute right-3 top-3 text-amber-700/70 hover:text-amber-800 transition-all hover:scale-110 p-2 rounded-md hover:bg-amber-100/50 attachment-button"
+                                title="上传附件">
+                                <LucidePaperclip class="w-5 h-5" />
+                            </button>
+                        </div>
+                        <button type="button"
+                            class="px-4 py-3 bg-amber-700 hover:bg-amber-800 text-white rounded-lg transition-all transform hover:scale-105"
+                            @click="onsend">
+                            <MdiSendVariant v-if="!isRunning" />
+                            <LineMdLoadingTwotoneLoop v-else />
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="text-center py-6 text-gray-600 text-sm border-t border-amber-200 bg-amber-50">
+            <p class="mb-1">{{ baseinfo.baseLibrary }}大模型 · 智慧传承</p>
+            <p class="text-xs opacity-80">数据仅供参考，如有学术研究需求，请查阅原典</p>
+        </footer>
+    </div>
+</template>
+
 <style scoped>
-@keyframes textarea_focusIn {
-    0% {
-        background-position: 0% 50%;
-        border-width: 3px;
-    }
-
-    100% {
-        background-position: 90% 50%;
-        border-width: 5px;
-    }
-}
-
-@keyframes textarea_focusOut {
-    0% {
-        background-position: 90% 50%;
-        border-width: 5px;
-    }
-
-    100% {
-        background-position: 0% 50%;
-        border-width: 3px;
-    }
-}
-
-@keyframes animation_loading {
-    0% {
-        background-position: 0% 0%;
-    }
-
-    25% {
-        background-position: 33% 66%;
-    }
-
-    50% {
-        background-position: 100% 100%;
-    }
-
-    75% {
-        background-position: 66% 33%;
-    }
-
-    100% {
-        background-position: 0% 0%;
-    }
-}
-
-:deep(.el-button) {
-    width: 40px;
-    height: 40px;
-    border-color: transparent;
-}
-
-:deep(.btn_send_gradient .el-button) {
-    animation: animation_loading 5s;
-    animation-iteration-count: infinite;
-    animation-direction: normal;
-    animation-fill-mode: forwards;
-    background-size: 300%;
-    background-position: 0% 0%;
-    background-image: linear-gradient(to right, #8c6b4f 0%, #a08c7d 50%, #8c6b4f 100%);
-
-}
-
-:deep(.el-textarea__inner) {
-    overflow: auto;
-    overflow-x: hidden;
-    scrollbar-color: #888 transparent;
-    scrollbar-gutter: stable;
-    scroll-behavior: smooth;
-    resize: none;
-    font-size: 16px;
-    padding: 9px 11px;
-    animation-fill-mode: forwards;
-    animation: textarea_focusOut .3s cubic-bezier(0.85, 0.01, 0.58, 1);
-    border: 3px solid transparent;
-    border-radius: 24px;
-    background-clip: padding-box, border-box;
-    background-origin: padding-box, border-box;
-    background-size: 200%;
-    background-position: 0% 50%;
-    background-image: linear-gradient(to right, #fff, #fff), linear-gradient(135deg, #a1887f 0%, #d7ccc8 50%, #a1887f 100%);
-}
-
-:deep(.is-focus) {
-    animation: textarea_focusIn .3s cubic-bezier(0.85, 0.01, 0.58, 1);
-    animation-fill-mode: forwards;
-}
-
-:deep(.input_el_focusOut) {
-    animation-fill-mode: forwards;
-    animation: textarea_focusOut .5s ease-in-out;
-}
-</style>
-<style scoped>
-.tips_ai {
-    color: gray;
-    font-size: small;
-    text-align: center;
-    padding-top: 2px;
-}
-
-.selector_result_icon {
-    padding-right: 4px;
-}
-
-.selector_result {
-    display: flex;
-    padding-bottom: 8px;
-}
-
-.result_container {
-    max-height: 80vh;
-    margin-bottom: 5px;
-}
-
-.center_container {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-}
-
-.center_tips {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    /* justify-content: flex-end; */
-    flex-direction: column;
-}
-
-.selector_leftpart {
-    border-radius: 6px 0px 0px 6px;
-    border-color: gray;
-    border-width: 2px;
-    border-style: solid;
-    padding: 3px;
-    display: flex;
-    align-items: center;
-    font-size: 12px;
-    cursor: pointer;
-}
-
-.selector_rightpart {
-    border-radius: 0px 6px 6px 0px;
-    border-color: gray;
-    border-width: 2px 2px 2px 0px;
-    border-style: solid;
-    padding: 3px;
-    display: flex;
-    align-items: center;
-    font-size: 12px;
-}
-
-.welcome_tips_cn {
-    align-items: center;
-    display: flex;
-    white-space: nowrap;
-    justify-content: center;
-    font-size: 30px;
-    align-self: center;
-    font-family: "SourceHanSansRegular";
-}
-
-.welcome_tips {
-    align-items: center;
-    display: flex;
-    white-space: nowrap;
-    font-family: "SourceHanSansRegular";
-    font-size: 30px;
-    justify-content: center;
-    align-self: center;
-}
-
-.container_btn_send {
-    margin-left: 12px;
-    justify-self: end;
-}
-
-.input_container {
-    display: flex;
-    margin-top: auto;
-    align-items: center;
-}
-
-.app_container {
-    width: 100%;
-    display: flex;
-    padding: 10px;
-    transition: justify-content 0.3s ease;
-    flex-direction: column;
-    justify-content: center;
-    margin: 0 auto;
-    max-width: 1000px;
-}
-
+/* 主容器样式 */
 .main_container {
-    height: 87vh;
     display: flex;
+    flex-direction: column;
     width: 100%;
-    justify-content: center;
-    transition: justify-content 0.3s ease;
+    min-height: 100vh;
 }
 
-code {
-    font-style: oblique 2deg;
-    font-size: large;
+/* 经典引言装饰 */
+.quote-decoration {
+    position: relative;
+    height: 16px;
+    margin-top: 40px;
 }
 
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.3s ease;
+/* 附件上传按钮优化 */
+.attachment-button {
+    transition: all 0.2s ease;
+    border-radius: 50%;
 }
 
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
+.attachment-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.2);
+    background-color: rgba(254, 243, 199, 0.8);
 }
 
-.result_pending {
-    color: gray;
-    font-size: small;
-    padding-block: 3px;
+.attachment-button:active {
+    transform: scale(0.95);
 }
 
-.result_tips {
-    align-items: center;
-    display: flex;
-    color: gray;
-    font-weight: 400;
-    font-size: small;
+/* 输入框自适应优化 */
+.input-focus {
+    resize: none;
+    font-size: 14px;
+    line-height: 1.5;
 }
 
-.btn_send {
-    margin-top: 1px;
-    margin-left: 12px;
-    justify-self: end;
-    transition: background-color .2s ease-in-out;
+/* 引言文字样式 */
+.quote-text {
+    font-family: "SourceHanSansBold", "SimSun", serif;
+    box-shadow: 0 4px 12px rgba(146, 64, 14, 0.15);
+}
+
+/* 对话卡片样式 */
+.chat-card {
+    background-color: #fff;
+}
+
+/* 卡片装饰条 */
+.card-decoration {
+    height: 4px;
+    background: linear-gradient(90deg,
+            rgba(217, 119, 6, 0) 0%,
+            rgba(217, 119, 6, 0.7) 50%,
+            rgba(217, 119, 6, 0) 100%);
+}
+
+/* 聊天容器样式 */
+.chat-container {
+    min-height: 600px;
+    max-height: calc(100vh - 280px);
+    font-family: "SourceHanSansBold";
+}
+
+/* 欢迎区域样式 */
+.welcome-area {
+    background-color: rgba(251, 191, 36, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(217, 119, 6, 0.1);
+}
+
+/* 欢迎区域标题样式 */
+.welcome-area h2 {
+    font-family: "SourceHanSansBold" 、;
+    letter-spacing: 1px;
+}
+
+/* 打字效果文本 */
+.typing-welcome {
+    font-size: 14px;
+    color: #8d6e63;
+    font-style: italic;
+    font-family: "SourceHanSansBold";
+}
+
+/* 示例问题按钮 */
+.example-questions {
+    max-width: 80%;
+    margin: 0 auto;
+}
+
+/* 示例问题按钮样式 */
+.example-btn {
+    font-size: 13px;
+    font-family: "SourceHanSansBold";
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.example-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(217, 119, 6, 0.1);
+}
+
+/* 输入区域样式 - 基本属性 */
+.input-focus {
+    font-family: "SourceHanSansBold";
+    border-radius: 8px !important;
+    transition: all 0.3s ease;
+}
+
+/* 输入区域样式 - 聚焦效果 */
+.input-focus:focus {
+    box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2) !important;
+}
+
+.input-focus:focus {
+    box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.2) !important;
+}
+
+/* 发送按钮样式 */
+button[type="button"] {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button[type="button"]:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgba(146, 64, 14, 0.3);
+}
+
+button[type="button"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 页脚样式 */
+footer {
+    font-family: "SourceHanSansBold";
+    margin-top: auto;
+}
+
+footer a {
+    font-family: "SourceHanSansBold";
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.welcome-area,
+.example-btn,
+.chat-card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .quote-decoration {
+        margin-top: 70px;
+    }
+
+    .quote-text p:first-child {
+        font-size: 12px;
+    }
+
+    .quote-text p:last-child {
+        font-size: 10px;
+    }
+
+    .container {
+        padding: 0 12px;
+    }
+
+    .chat-container {
+        padding: 16px !important;
+    }
+
+    .welcome-area {
+        padding: 20px 16px !important;
+    }
+
+    .example-questions {
+        max-width: 100%;
+    }
+
+    .input-focus {
+        font-size: 14px;
+    }
 }
 </style>
