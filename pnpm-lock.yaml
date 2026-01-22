@@ -35,10 +35,6 @@ importers:
       ws:
         specifier: ^8.18.3
         version: 8.18.3(bufferutil@4.0.8)
-    optionalDependencies:
-      '@rollup/rollup-linux-x64-gnu':
-        specifier: ^4.52.2
-        version: 4.52.2
     devDependencies:
       '@eslint/js':
         specifier: ^9.36.0
@@ -82,6 +78,10 @@ importers:
       vite:
         specifier: ^5.4.20
         version: 5.4.20(@types/node@22.10.2)
+    optionalDependencies:
+      '@rollup/rollup-linux-x64-gnu':
+        specifier: ^4.52.2
+        version: 4.52.2
 
 packages:
 
