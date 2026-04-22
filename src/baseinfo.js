@@ -1,3 +1,3 @@
 export default {
-    baseLibrary: "国学经典"
+    baseLibrary: "马克思主义基本原理"
 }

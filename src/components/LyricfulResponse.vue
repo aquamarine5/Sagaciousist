@@ -34,6 +34,9 @@ const props = defineProps({
     }
 })
 
+const isThinking = ref(false)
+const thinkingText = ref("")
+
 /**
  * @type {import('vue').Ref<QAStructure[]>}
  */
@@ -83,6 +86,16 @@ function addSentence(answerref, text, issplit = false, thinkingValue) {
     } else {
         speech.addSentence(answerref, text, issplit, thinkingValue)
     }
+}
+
+function addThinking(text) {
+    thinkingText.value += text
+    nextTick(() => {
+        const containers = document.querySelectorAll('.thinking_container')
+        containers.forEach(c => {
+            c.scrollTop = c.scrollHeight
+        })
+    })
 }
 function checkTTSStatus() {
     speech.ttsCheckStatus()
@@ -150,20 +163,12 @@ async function regenerateResponse(qastructure) {
     console.log(qastructure)
     for await (const part of response) {
         let content = part.response
-        var thinkingValue = isThinking ? 2 : 0
-        if (content.indexOf("<think>") != -1) {
-            content = "正在深度思考："
-            thinkingValue = 1
-        }
-        if (content.indexOf("</think>") != -1) {
-            content = "深度思考完毕。"
-            thinkingValue = 3
-        }
-        allResponse += content.replace(/\*\*/g, "")
+        console.log(part)
+        allResponse += content
         for (let index = 0; index < content.length; index++) {
             const char = content[index];
             if (char == '\n') {
-                addSentence(qastructure.answer, lastSentence, true, thinkingValue)
+                addSentence(qastructure.answer, lastSentence, false)
                 console.log("issplit: true")
                 lastSentence = ''
             }
@@ -243,6 +248,7 @@ defineExpose({
     createQAStructure,
     clearAllLyrics,
     addSentence,
+    addThinking,
     switchTTSStatus,
     regenerateResponse
 })
@@ -277,11 +283,16 @@ defineExpose({
                 <div class="flex-shrink-0 bg-amber-100 text-amber-800 rounded-full w-8 h-8 flex items-center justify-center mr-3">
                     <LucideScroll />
                 </div>
-                <div class="message-card bg-amber-50 rounded-xl px-4 py-3 max-w-[80%]">
-                    <div v-if="qastructure.isloading" class="typing-indicator">
-                        <span></span>
-                        <span></span>
-                        <span></span>
+                <div class="lyricful_answer">
+                    <div class="thinking_wrapper" v-if="qastructure.isloading && thinkingText">
+                        <div class="thinking_title">正在思考中</div>
+                        <div class="thinking_container">
+                            {{ thinkingText }}
+                        </div>
+                    </div>
+                    <div class="lyricful_loading" v-if="qastructure.isloading">
+                        <ContentLoader :width="50" :height="20" :speed="0.8" primaryColor="#eee" secondaryColor="#ccc">
+                        </ContentLoader>
                     </div>
                     <div v-else>
                         <div v-for="(sentence, aindex) in filteredAnswers[index]" :key="aindex">
@@ -439,15 +450,38 @@ defineExpose({
     transform: scale(1.1);
 }
 
-:deep(.lyricful_button_filled path) {
-    fill: #92400e;
-    transition: fill 0.2s ease-in-out;
+.lyricful_answer_icon {
+    padding-right: 6px;
+    padding-top: 4px;
 }
 
-:deep(.lyricful_button path) {
-    fill: transparent;
-    stroke: #92400e;
-    transition: fill 0.2s ease-in-out, stroke 0.2s ease-in-out;
+.lyricful_question_icon {
+    padding-left: 6px;
+    padding-top: 2px;
+}
+
+.thinking_wrapper {
+    margin-bottom: 8px;
+    background-color: #f7f7f8;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.thinking_title {
+    font-size: 15px;
+    color: #0989f4;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.thinking_container {
+    white-space: pre-wrap;
+    max-height: 80px;
+    overflow-y: hidden;
+    font-size: 14px;
+    color: #666;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 40%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 40%);
 }
 
 :deep(.lyricful_button:hover path) {

@@ -6,7 +6,7 @@ import baseinfo from './baseinfo'
 import wnetwork from './wnetwork'
 
 const BASE_LIBRARY = baseinfo.baseLibrary
-const MODEL_NAME = 'deepseek-r1:8b'
+const MODEL_NAME = 'qwen3.5:9b'
 const ES_REQUEST_PATH = "/bookSearch?query="
 
 export class InteropPortalV2 {
@@ -93,7 +93,8 @@ export class InteropPortalV2 {
         return this.ollama.generate({
             model: MODEL_NAME,
             prompt: await this.generateGeneratePrompt(text),
-            stream: true
+            stream: true,
+            think: "medium"
         })
     }
 
@@ -152,10 +153,10 @@ export class InteropPortalV2 {
     createBaseSystemPrompt() {
         return [{
             role: 'system',
-            content: '除非提前指明，否则请使用中文回答。请不要使用Markdown的任何语法，用纯文本输出。'
+            content: '除非提前指明，否则深度思考内容和最终回答请使用中文。请不要使用Markdown的列表、**号进行文本强调粗体或斜体、*号来进行分条列点输出，1. 2.之类的进行分点，用汉字的第一第二代替。'
         }, {
             role: 'system',
-            content: `请不要使用Markdown的任何语法，用纯文本输出。假设你是一位研究${BASE_LIBRARY}方面的专家，你需要为青年大学生解决有关在阅读${BASE_LIBRARY}的过程中遇到的问题和困惑。`
+            content: `假设你是马克思，你需要为青年大学生解决有关在阅读${BASE_LIBRARY}的过程中遇到的问题和困惑。`
         }]
     }
 

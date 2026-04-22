@@ -28,7 +28,4 @@ coverage
 *.sw?
 
 *.tsbuildinfo
-*.ckpt
-*.pth
-Sagaciousist.zip
-*.zip
+/ttsbridge/sourses
