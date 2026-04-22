@@ -9,7 +9,7 @@ import TitleBar from './components/TitleBar.vue';
 
 <template>
     <TitleBar />
-    <div style="margin: 12px 18px;">
+    <div style="padding: 12px 18px;" class="background">
         <InteractiveColumn />
     </div>
 </template>
@@ -20,6 +20,12 @@ p {
 
 div,
 span {
-    font-family: "SourceHanSansRegular";
+    font-family: "SourceHanSansBold";
+}
+
+.background {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)), url("./image.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
 }
 </style>

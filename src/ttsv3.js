@@ -14,6 +14,7 @@ const MUTE_DELAY = 100
  * @property {boolean} isend
  * @property {boolean} issplit
  * @property {number} index
+ * @property {number} thinkingValue 
  */
 
 export default class SpeechControllerV3 {
@@ -128,7 +129,9 @@ export default class SpeechControllerV3 {
             console.log("audiodata.issplit")
         }
         this.setFirstSentenceShow()
+        console.log("thinkingValue: audiodata.thinkingValue,", audiodata.thinkingValue)
         this.refsentence[this._currentIndex].push({
+            thinkingValue: audiodata.thinkingValue,
             text: audiodata.text,
             status: this.ismute ? ref(2) : ref(1)
         })
@@ -233,8 +236,9 @@ export default class SpeechControllerV3 {
      * @param {import('vue').Ref} answerref 
      * @param {string} sentence 
      * @param {boolean} issplit
+     * @param {number} thinkingValue 
      */
-    addSentence(answerref, sentence, issplit) {
+    addSentence(answerref, sentence, issplit, thinkingValue) {
         if (issplit && this.isPreviousSplit) {
             return
         }
@@ -248,7 +252,8 @@ export default class SpeechControllerV3 {
             text: sentence,
             base64str: null,
             issplit: issplit,
-            index: this.pendingTTSList.length
+            index: this.pendingTTSList.length,
+            thinkingValue: thinkingValue
         })
         this.refsentence = answerref
         if (this.ismute) {

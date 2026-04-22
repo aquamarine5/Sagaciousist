@@ -84,7 +84,7 @@ export default {
     background-origin: padding-box, border-box;
     background-size: 300%;
     background-position: 0% 0%;
-    background-image: linear-gradient(to right, #f0f0f0, #f0f0f0), linear-gradient(135deg, #76e4f4, #9e6fcd, #c777a9);
+    background-image: linear-gradient(to right, #f0f0f0, #f0f0f0), linear-gradient(135deg, #a1887f, #d7ccc8, #a1887f);
 }
 
 .selector_btn:hover {

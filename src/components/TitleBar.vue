@@ -28,9 +28,9 @@ function changeSilent() {
         <div class="topbar_title">
             <div class="topbar_center">
                 <LucideBotMessageSquare class="topbar_logo" />
-                {{ baseinfo.baseLibrary + "人工智能" }}
+                {{ baseinfo.baseLibrary + "大模型辅助教学系统" }}
             </div>
-            <div class="topbar_version">
+            <div class="topbar_version" v-if="false">
                 v{{ pkginfo.version }}
             </div>
         </div>
@@ -48,13 +48,13 @@ function changeSilent() {
 
 .topbar_version {
     font-size: medium;
-    font-family: "Gilroy", sans-serif;
+    font-family: "SourceHanSansBold";
     padding-top: 3px;
     padding-left: 2px;
 }
 
 .topbar_container {
-    background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+    background-image: linear-gradient(to right, #8c6b4f 0%, #a08c7d 50%, #8c6b4f 100%);
     border-radius: 0px 0px 16px 16px;
     height: 70px;
     display: flex;
@@ -72,8 +72,9 @@ function changeSilent() {
     display: flex;
     font-family: 'SourceHanSansBold';
     font-weight: 600;
-    font-size: 24px;
-    color: white;
+    font-size: 28px;
+    color: #f5f5f5;
+    text-shadow: 2px 2px 4px #333;
     cursor: pointer;
 }
 
