@@ -192,11 +192,16 @@ export default {
                 for await (const part of response) {
                     //let content = part.message.content
                     let content = part.response
+                    if (part.thinking != undefined && part.thinking != "") {
+                        lyricfulRef.addThinking(part.thinking)
+                        continue
+                    }
+                    console.log(part)
                     allResponse += content
                     for (let index = 0; index < content.length; index++) {
                         const char = content[index];
                         if (char == '\n') {
-                            lyricfulRef.addSentence(qastruct.answer, lastSentence, false)
+                            lyricfulRef.addSentence(qastruct.answer, lastSentence, true)
                             console.log("issplit: true")
                             lastSentence = ''
                         }

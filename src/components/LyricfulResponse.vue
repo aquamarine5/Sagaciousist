@@ -28,6 +28,9 @@ const props = defineProps({
     }
 })
 
+const isThinking = ref(false)
+const thinkingText = ref("")
+
 /**
  * @type {import('vue').Ref<QAStructure[]>}
  */
@@ -76,6 +79,16 @@ function addSentence(answerref, text, issplit = false) {
     } else {
         speech.addSentence(answerref, text, issplit)
     }
+}
+
+function addThinking(text) {
+    thinkingText.value += text
+    nextTick(() => {
+        const containers = document.querySelectorAll('.thinking_container')
+        containers.forEach(c => {
+            c.scrollTop = c.scrollHeight
+        })
+    })
 }
 function checkTTSStatus() {
     speech.ttsCheckStatus()
@@ -142,11 +155,12 @@ async function regenerateResponse(qastructure) {
     console.log(qastructure)
     for await (const part of response) {
         let content = part.response
+        console.log(part)
         allResponse += content
         for (let index = 0; index < content.length; index++) {
             const char = content[index];
             if (char == '\n') {
-                addSentence(qastructure.answer, lastSentence, true)
+                addSentence(qastructure.answer, lastSentence, false)
                 console.log("issplit: true")
                 lastSentence = ''
             }
@@ -226,6 +240,7 @@ defineExpose({
     createQAStructure,
     clearAllLyrics,
     addSentence,
+    addThinking,
     switchTTSStatus,
     regenerateResponse
 })
@@ -247,6 +262,12 @@ defineExpose({
                     <LucideBot />
                 </div>
                 <div class="lyricful_answer">
+                    <div class="thinking_wrapper" v-if="qastructure.isloading && thinkingText">
+                        <div class="thinking_title">正在思考中</div>
+                        <div class="thinking_container">
+                            {{ thinkingText }}
+                        </div>
+                    </div>
                     <div class="lyricful_loading" v-if="qastructure.isloading">
                         <ContentLoader :width="50" :height="20" :speed="0.8" primaryColor="#eee" secondaryColor="#ccc">
                         </ContentLoader>
@@ -366,12 +387,36 @@ defineExpose({
 
 .lyricful_answer_icon {
     padding-right: 6px;
-    padding-top: 3px;
+    padding-top: 4px;
 }
 
 .lyricful_question_icon {
     padding-left: 6px;
-    padding-top: 1px;
+    padding-top: 2px;
+}
+
+.thinking_wrapper {
+    margin-bottom: 8px;
+    background-color: #f7f7f8;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.thinking_title {
+    font-size: 15px;
+    color: #0989f4;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.thinking_container {
+    white-space: pre-wrap;
+    max-height: 80px;
+    overflow-y: hidden;
+    font-size: 14px;
+    color: #666;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 40%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 40%);
 }
 
 .lyricful_loading {
